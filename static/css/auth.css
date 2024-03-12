@@ -1,0 +1,98 @@
+body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth {
+    width: 35%;
+    padding: 15px 35px;
+    border: var(--color-text) 2px solid;
+    border-radius: 4px;
+}
+
+.register {
+
+}
+
+.register__title {
+    margin-bottom: 25px;
+}
+
+.register__input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 25px;
+}
+
+.register__label {
+    font-weight: 500;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.register__input {
+    font-size: 20px;
+    background: var(--color-background);
+    border: 0;
+    border-bottom: 2px var(--color-text) solid;
+    padding-bottom: 2px;
+    color: var(--color-text);
+    font-weight: 700;
+    font-family: "Montserrat", sans-serif;
+}
+
+.register__input::placeholder {
+    color: var(--color-text);
+    opacity: 0.75;
+    font-weight: 400;
+    font-family: "Montserrat", sans-serif;
+}
+
+.register__input:focus {
+    outline: 0;
+}
+
+.register__button {
+    user-select: none;
+    display: inline-block;
+
+    padding: 10px;
+    border-radius: 20px;
+    border: var(--color-text) 2px solid;
+
+    color: var(--color-text);
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    margin-right: 15px;
+
+    transition: 0.25s;
+}
+
+.register__button:hover {
+    color: var(--color-background);
+    background: var(--color-text);
+}
+
+.register__button__container {
+    display: flex;
+    align-items: center;
+}
+
+.register__login {
+    font-weight: 700;
+    user-select: none;
+    cursor: pointer;
+}
+
+.register__login:hover {
+    border-bottom: 2px solid
+}
+
+.password__match {
+    color: var(--color-error);
+    margin-bottom: 25px;
+    font-weight: 700;
+}

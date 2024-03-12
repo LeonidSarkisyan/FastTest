@@ -1,0 +1,141 @@
+.question__form {
+    padding: 15px;
+
+    border-radius: 10px;
+    border: 2px solid var(--color-text);
+
+    margin-bottom: 16px;
+}
+
+.question__form__title {
+    font-size: 24px;
+    font-weight: 700;
+
+    margin-bottom: 16px;
+}
+
+.list {
+    display: flex;
+    flex-wrap: wrap;
+
+    padding: 15px 15px 0 15px;
+}
+
+.question__list__point {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ffc3a2;
+
+    border: 2px solid var(--color-text);
+    border-radius: 4px;
+
+    width: 40px;
+    height: 40px;
+
+    font-weight: 700;
+    font-size: 20px;
+
+    margin-right: 16px;
+    margin-bottom: 16px;
+
+    user-select: none;
+    cursor: pointer;
+}
+
+.question__list__point:hover {
+    background: #ffd9c2;
+}
+
+.plus {
+    background: #ffe4d2;
+    font-size: 26px;
+}
+
+.question__list__point__active {
+    background: #ff7c32;
+    color: whitesmoke;
+    cursor: default;
+}
+
+.question__list__point__active:hover {
+    background: #ff7c32;
+    color: whitesmoke;
+}
+
+.text {
+    width: calc(100% - 15px);
+}
+
+.answer__point {
+    display: flex;
+    margin-bottom: 16px;
+}
+
+.answer__point__checkbox {
+    width: 44px;
+    height: 44px;
+
+    margin-right: 16px;
+
+    cursor: pointer;
+}
+
+.answer__point__delete {
+    margin-left: 16px;
+
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 36px;
+    font-weight: 700;
+
+    line-height: 44px;
+
+    cursor: pointer;
+    user-select: none;
+}
+
+.answer__point__delete:hover {
+    color: var(--color-text-howered);
+}
+
+.answer__point__delete__disable {
+    color: var(--color-text-howered);
+
+    cursor: default;
+}
+
+.tests__form {
+    width: 780px;
+}
+
+.tests__form__title {
+    padding: 16px;
+
+    font-size: 26px;
+    font-weight: 700;
+
+    border-bottom: 2px var(--color-text) solid;
+}
+
+.tests__form__body {
+    padding: 16px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.test__title__label {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+
+.create {
+    margin-bottom: 16px;
+}

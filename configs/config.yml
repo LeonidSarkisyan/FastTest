@@ -1,0 +1,18 @@
+address: "localhost"
+port: "8080"
+
+debug: true
+
+test_db:
+  host: "localhost"
+  port: "5432"
+  user: "postgres"
+  pass: "postgres"
+  name: "MakeTest"
+
+prod_db:
+  host: "82.97.244.195"
+  port: "5432"
+  user: "postgres"
+  pass: "postgres"
+  name: "FinanceTodo"

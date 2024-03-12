@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/../static/css/main.css">
+    <link rel="icon" href="/../static/img/logo.png">
+    <link rel="stylesheet" href="/../static/css/one_test.css">
+    <link rel="stylesheet" href="/../static/css/modal.css">
+    <script src="https://cdn.jsdelivr.net/gh/ryangjchandler/spruce@0.6.0/dist/spruce.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <title>{{ .title }}</title>
+</head>
+<body>
+    <embed src="/p/header" width="100%" height="100"/>
+    <div class="container" x-data x-subscribe>
+        <h1 class="title">{{ .title }}
+            <span class="sub__title" @click="$store.methods.showModal()">
+                изменить название
+            </span>
+        </h1>
+        <div id="myModal" class="modal" x-show="$store.data.showModal">
+            <div class="modal-content">
+                <div class="tests__form">
+                    <div class="tests__form__title">Изменить название</div>
+                    <div class="tests__form__body">
+                        <label for="test__title" class="test__title__label">Название теста:</label>
+                        <input
+                                @keydown.enter="$store.methods.updateTitleTest()"
+                                placeholder="Например, Windows формы"
+                                type="text"
+                                id="test__title"
+                                class="base__input create"
+                                x-model="$store.data.title"
+                        >
+                        <div class="base__button" @click="$store.methods.createTest()">
+                            Изменить название
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+<!--        <template x-if="$store.data.questions.length">-->
+<!--            <div class="question__form">-->
+<!--                <div class="question__form__title">Критерии оценивания:</div>-->
+<!--                <div x-text="`Максимальное количество баллов - ${$store.data.questions.length}`">-->
+<!--    -->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </template>-->
+        <div class="question__form list">
+            <template x-for="(question, index) in $store.data.questions" :key="question.id">
+                <div
+                    @contextmenu.prevent="$store.methods.deleteQuestion(index, question.id)"
+                    :title="question.text"
+                    @click="$store.methods.chooseIndex(index)"
+                    :class="{ 'question__list__point__active': $store.data.currentIndex === index }"
+                    class="question__list__point"
+                    x-text="index + 1"
+                >
+                </div>
+            </template>
+            <div class="question__list__point plus" @click="$store.methods.addQuestion()">
+                +
+            </div>
+        </div>
+        <template x-if="$store.data.questions.length">
+            <div class="question__form">
+                <div class="question__form__title">Текст вопроса:</div>
+                <input
+                        @keydown.enter="$store.methods.focusAnswer(-1)"
+                        @change="$store.methods.updateTextQuestion()"
+                        id="input"
+                        class="base__input text"
+                        x-model="$store.data.questions[$store.data.currentIndex].text"
+                >
+            </div>
+        </template>
+        <div class="question__form">
+            <div class="question__form__title">Варианты ответов:</div>
+            <template x-for="(answer, index) in $store.data.answers">
+                <div class="answer__point">
+                    <input
+                            @change="$store.methods.updateAnswer(index)"
+                            class="answer__point__checkbox"
+                            type="checkbox"
+                            x-model="answer.is_correct"
+                    >
+                    <input
+                            @keydown.up.prevent="console.log('weeewqe')"
+                            @keydown.enter="$store.methods.focusAnswer(index)"
+                            @change="$store.methods.updateAnswer(index)"
+                            class="base__input text answer__input"
+                            x-model="answer.text"
+                    >
+                    <div
+                            @click="$store.methods.deleteAnswer(answer.id)"
+                            class="answer__point__delete"
+                            :class="{ 'answer__point__delete__disable': $store.data.answers.length < 3}"
+                    >
+                        &#10006;
+                    </div>
+                </div>
+            </template>
+            <div class="base__button" @click="$store.methods.addAnswer()">
+                Добавить вариант ответа
+            </div>
+        </div>
+    </div>
+    <script type="module" src="/../static/js/one_test.js">
+
+    </script>
+</body>
+</html>

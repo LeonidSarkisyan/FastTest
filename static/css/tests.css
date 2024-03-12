@@ -1,0 +1,139 @@
+.tests {
+    display: flex;
+    justify-content: space-between;
+}
+
+.tests__list__container {
+    width: calc(70% - 14px);
+}
+
+.tests__search__input {
+    width: 100%;
+    height: 40px;
+
+    font-size: 20px;
+    font-weight: 700;
+
+    border: 2px var(--color-text) solid;
+    border-radius: 10px;
+
+    color: var(--color-text);
+    background: var(--color-background);
+
+    padding-left: 10px;
+
+    margin-bottom: 16px;
+}
+
+.tests__search__input::placeholder {
+    color: var(--color-text-placeholder);
+}
+
+.tests__search__input:focus {
+    outline: 0;
+}
+
+.tests__navbar {
+    width: 25%;
+}
+
+.tests__navbar__create {
+    height: 40px;
+
+    border: 2px var(--color-text) solid;
+    border-radius: 10px;
+
+    font-size: 20px;
+    font-weight: 700;
+
+    color: var(--color-text);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    user-select: none;
+    cursor: pointer;
+
+    transition: 0.25s;
+}
+
+.tests__navbar__create:hover {
+    color: var(--color-background);
+    background: var(--color-text);
+}
+
+.tests__item {
+    width: calc(100% - 20px);
+    padding: 15px;
+
+    border: 2px var(--color-text) solid;
+    border-radius: 10px;
+
+    margin-bottom: 16px;
+}
+
+.tests__item__title {
+    font-size: 22px;
+    font-weight: 700;
+
+    margin-bottom: 16px;
+}
+
+.tests__item__buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.edit {
+    color: var(--color-background);
+    background: var(--color-text);
+
+    padding: 0 16px;
+
+    font-size: 16px;
+
+    text-decoration: none;
+}
+
+.edit:hover {
+    color: var(--color-text);
+    background: var(--color-background);
+}
+
+.tests__form {
+    width: 780px;
+}
+
+.tests__form__title {
+    padding: 16px;
+
+    font-size: 26px;
+    font-weight: 700;
+
+    border-bottom: 2px var(--color-text) solid;
+}
+
+.tests__form__body {
+    padding: 16px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.test__title__label {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+
+.create {
+    margin-bottom: 16px;
+}
+
+.tests__list_none {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+}
