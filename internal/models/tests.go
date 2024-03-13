@@ -14,3 +14,7 @@ type TestOut struct {
 	Title          string `json:"title"`
 	DateTimeCreate int64  `json:"date_time_create"`
 }
+
+type TestUpdate struct {
+	Title string `json:"title"`
+}

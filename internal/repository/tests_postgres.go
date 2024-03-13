@@ -82,3 +82,22 @@ func (r *TestPostgres) GetAll(userID int) ([]models.TestOut, error) {
 
 	return tests, nil
 }
+
+func (r *TestPostgres) UpdateTitle(testID, userID int, title string) error {
+	query := "UPDATE tests SET title = $1 WHERE id = $2 AND user_id = $3"
+
+	result, err := r.conn.Exec(query, title, testID, userID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	if count, err := result.RowsAffected(); count == 0 || err != nil {
+		log.Error().Msg("Rows affected: " + string(count))
+		log.Err(err).Send()
+		return err
+	}
+
+	return nil
+}

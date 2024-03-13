@@ -139,3 +139,9 @@
 .create {
     margin-bottom: 16px;
 }
+
+.title__span {
+    display: inline-block;
+
+    margin-right: 16px;
+}

@@ -9,12 +9,14 @@ import (
 var (
 	TestCreateError = errors.New("ошибка при создании теста")
 	TestGetError    = errors.New("ошибка при получении теста")
+	TestUpdateError = errors.New("ошибка при обновлении теста")
 )
 
 type TestRepository interface {
 	Create(test models.Test) (int, error)
 	Get(testID, userID int) (models.TestOut, error)
 	GetAll(userID int) ([]models.TestOut, error)
+	UpdateTitle(testID, userID int, title string) error
 }
 
 type TestService struct {
@@ -69,4 +71,15 @@ func (s *TestService) GetAll(userID int) ([]models.TestOut, error) {
 	}
 
 	return tests, nil
+}
+
+func (s *TestService) UpdateTitle(userID, testID int, title string) error {
+	err := s.TestRepository.UpdateTitle(testID, userID, title)
+
+	if err != nil {
+		log.Err(err).Send()
+		return TestUpdateError
+	}
+
+	return nil
 }

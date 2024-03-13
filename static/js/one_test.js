@@ -16,6 +16,7 @@ Spruce.store("data", {
     showModal: false,
     inputElement: null,
 
+    mainTitle: "",
     title: "",
     currentIndex: GetIndex(TEST_ID),
 
@@ -23,7 +24,11 @@ Spruce.store("data", {
     answers: []
 })
 
-let response = await axios.get(QUESTION_URL)
+let response = await axios.get("/tests/" + TEST_ID)
+$store.data.title = response.data.title
+$store.data.mainTitle = response.data.title
+
+response = await axios.get(QUESTION_URL)
 $store.data.questions = response.data
 
 response = await axios.get(QUESTION_WITH_ID_URL($store.data.questions[$store.data.currentIndex].id))
@@ -158,8 +163,25 @@ Spruce.store("methods", {
     },
 
     showModal() {
+        $store.data.mainTitle = $store.data.title
         $store.data.showModal = true
     },
+
+    async UpdateTitleTest() {
+        const body = {
+            title: $store.data.mainTitle
+        }
+
+        try {
+            const response = await axios.patch("/tests/" + TEST_ID, body)
+            console.log(response)
+
+            $store.data.title = $store.data.mainTitle
+            $store.data.showModal = false
+        } catch (e) {
+            console.log(e)
+        }
+    }
 })
 
 let modal = document.getElementById("myModal");

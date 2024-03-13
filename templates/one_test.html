@@ -14,11 +14,10 @@
 <body>
     <embed src="/p/header" width="100%" height="100"/>
     <div class="container" x-data x-subscribe>
-        <h1 class="title">{{ .title }}
-            <span class="sub__title" @click="$store.methods.showModal()">
-                изменить название
-            </span>
-        </h1>
+        <h1 class="title title__span" x-text="$store.data.title"></h1>
+        <span class="sub__title" @click="$store.methods.showModal()">
+            изменить название
+        </span>
         <div id="myModal" class="modal" x-show="$store.data.showModal">
             <div class="modal-content">
                 <div class="tests__form">
@@ -26,14 +25,14 @@
                     <div class="tests__form__body">
                         <label for="test__title" class="test__title__label">Название теста:</label>
                         <input
-                                @keydown.enter="$store.methods.updateTitleTest()"
+                                @keydown.enter="$store.methods.UpdateTitleTest()"
                                 placeholder="Например, Windows формы"
                                 type="text"
                                 id="test__title"
                                 class="base__input create"
-                                x-model="$store.data.title"
+                                x-model="$store.data.mainTitle"
                         >
-                        <div class="base__button" @click="$store.methods.createTest()">
+                        <div class="base__button" @click="$store.methods.UpdateTitleTest()">
                             Изменить название
                         </div>
                     </div>

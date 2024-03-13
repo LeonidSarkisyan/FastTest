@@ -25,6 +25,7 @@ type TestService interface {
 	Create(title string, userID int) (int, error)
 	Get(testID, userID int) (models.TestOut, error)
 	GetAll(userID int) ([]models.TestOut, error)
+	UpdateTitle(userID, testID int, title string) error
 }
 
 type UserService interface {
@@ -79,6 +80,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		tests.POST("", h.CreateTest)
 		tests.GET("", h.GetAll)
+		tests.GET("/:test_id", h.GetTest)
+		tests.PATCH("/:test_id", h.UpdateTestTitle)
 
 		questions := tests.Group("/:test_id/questions")
 		{
