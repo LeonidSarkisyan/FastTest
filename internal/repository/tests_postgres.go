@@ -2,6 +2,7 @@ package repository
 
 import (
 	"App/internal/models"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
 )
@@ -130,4 +131,27 @@ func (r *TestPostgres) CreateAccess(userID, testID, groupID int, accessIn models
 	}
 
 	return id, nil
+}
+
+func (r *TestPostgres) CreateManyPasses(accessID int, passes []models.PassesIn) error {
+	stmt := "INSERT INTO passes (code, access_id, student_id) VALUES "
+
+	for i, p := range passes {
+		stmt += fmt.Sprintf("(%d, %d, %d)", p.Code, accessID, p.StudentID)
+
+		if i != len(passes)-1 {
+			stmt += ","
+		}
+	}
+
+	log.Info().Str("stmt", stmt).Send()
+
+	_, err := r.conn.Exec(stmt)
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	return nil
 }

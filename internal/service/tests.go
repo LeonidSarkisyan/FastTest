@@ -17,6 +17,8 @@ var (
 
 	InCorrectCriteria   = errors.New("некорректная структура критерия")
 	GeneratePassesError = errors.New("ошибка при генерации пропусков")
+
+	NotStudentError = errors.New("вы выбрали группу, где нет студентов")
 )
 
 type TestRepository interface {
@@ -26,6 +28,8 @@ type TestRepository interface {
 	UpdateTitle(testID, userID int, title string) error
 
 	CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error)
+
+	CreateManyPasses(accessID int, passes []models.PassesIn) error
 }
 
 type TestService struct {
@@ -118,6 +122,16 @@ func (s *TestService) CreateAccess(userID, testID, groupID int, accessIn models.
 
 	accessIn.CriteriaJson = criteriaJson
 
+	students, err := s.StudentRepository.GetAll(groupID)
+
+	if err != nil {
+		return 0, StudentGetError
+	}
+
+	if len(students) == 0 {
+		return 0, NotStudentError
+	}
+
 	id, err := s.TestRepository.CreateAccess(userID, testID, groupID, accessIn)
 
 	if err != nil {
@@ -125,7 +139,7 @@ func (s *TestService) CreateAccess(userID, testID, groupID int, accessIn models.
 		return 0, TestAccessCreateError
 	}
 
-	err := s.CreatePasses(groupID, id)
+	err = s.CreatePasses(groupID, id)
 
 	if err != nil {
 		log.Err(err).Send()
@@ -146,7 +160,16 @@ func (s *TestService) CreatePasses(groupID, accessID int) error {
 	passes := make([]models.PassesIn, len(students))
 
 	for i, student := range students {
-		passes[i].Code = utils.RandomBigNumber()
+		passes[i].Code = utils.GenerateSixDigitNumber()
 		passes[i].StudentID = student.ID
 	}
+
+	err = s.TestRepository.CreateManyPasses(accessID, passes)
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	return nil
 }

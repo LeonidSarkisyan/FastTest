@@ -133,8 +133,12 @@ Spruce.store("methods", {
             }
         }
 
-        const response = await axios.post(`/tests/${TEST_ID}/access/${groupID}`, access)
-        console.log(response)
+        try {
+            const response = await axios.post(`/tests/${TEST_ID}/access/${groupID}`, access)
+            console.log(response)
+        } catch (e) {
+            alert(e.response.data)   
+        }
     }
 })
 
