@@ -1,0 +1,78 @@
+.container {
+    min-width: max-content;
+}
+
+th {
+    text-align: left;
+}
+
+th[sortable] {
+    cursor: pointer;
+}
+
+th[sort="ascending"]::after {
+    content: " ▲";
+}
+
+th[sort="descending"]::after {
+    content: " ▼";
+}
+
+.student__table {
+    width: 100%;
+}
+
+.student__table__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.student__table__row {
+
+}
+
+.student__table__head__column {
+    font-size: 20px;
+    font-weight: 500;
+
+    border: 1px solid var(--color-text);
+
+    padding: 8px;
+    text-align: left;
+}
+
+.student__buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.student__buttons div {
+    width: 45%;
+}
+
+.answer__point__delete {
+    border: 1px solid var(--color-text);
+}
+
+.student__table__not {
+    text-align: center;
+
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.excel {
+    font-weight: 500;
+    font-size: 18px;
+    margin-bottom: 16px;
+}
+
+.excel__image {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.students__search {
+    width: calc(100% - 15px);
+}

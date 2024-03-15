@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/../static/css/main.css">
+    <link rel="stylesheet" href="/../static/css/modal.css">
+    <link rel="stylesheet" href="/../static/css/one_test.css">
+    <link rel="icon" href="/../static/img/logo.png">
+    <link rel="stylesheet" href="/../static/css/tests.css">
+    <link rel="stylesheet" href="/../static/css/one_group.css">
+    <script src="https://cdn.jsdelivr.net/gh/ryangjchandler/spruce@0.6.0/dist/spruce.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.3.5/dist/alpine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <title>{{ .name }}</title>
+</head>
+    <body>
+        <embed src="/p/header" width="100%" height="100"/>
+        <div class="container" x-data x-subscribe>
+            <h1 class="title title__span" x-text="$store.data.title"></h1>
+            <span class="sub__title" @click="$store.methods.showModal()">
+                изменить название
+            </span>
+            <div id="myModal" class="modal" x-show="$store.data.showModal">
+                <div class="modal-content">
+                    <div class="tests__form">
+                        <div class="tests__form__title">Изменить название</div>
+                        <div class="tests__form__body">
+                            <label for="test__title" class="test__title__label">Название группы:</label>
+                            <input
+                                    @keydown.enter="$store.methods.UpdateTitleGroup()"
+                                    placeholder="Например, 2ИСИП-722"
+                                    type="text"
+                                    id="test__title"
+                                    class="base__input create"
+                                    x-model="$store.data.mainTitle"
+                            >
+                            <div class="base__button" @click="$store.methods.UpdateTitleGroup()">
+                                Изменить название
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="question__form">
+                <div class="student__buttons">
+                    <div class="base__button edit" @click="$store.methods.ShowExcelModal()">
+                        Загрузить Excel
+                    </div>
+                    <div class="base__button edit" @click="$store.methods.ShowCreateModal()">
+                        Добавить студента
+                    </div>
+                </div>
+            </div>
+            <div class="question__form">
+                <div class="question__form__title">Студенты:</div>
+                <label>
+                    <input
+                            x-model="$store.data.search"
+                            class="tests__search__input students__search"
+                            type="text"
+                            placeholder="Поиск..."
+                    >
+                </label>
+                <table class="student__table" x-show="$store.data.students.length">
+                    <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Имя</th>
+                        <th>Фамилия</th>
+                        <th>Отчество</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <template x-for="(student, index) in $store.data.students">
+                        <tr
+                            x-show="(student.name + student.surname + student.patronymic).trim().toLowerCase().indexOf(
+                            $store.data.search.trim().toLowerCase()
+                            ) !== -1"
+                            class="student__table__row"
+                        >
+                            <td x-text="index + 1" class="student__table__head__column"></td>
+                            <td x-text="student.name" class="student__table__head__column"></td>
+                            <td x-text="student.surname" class="student__table__head__column"></td>
+                            <td x-text="student.patronymic" class="student__table__head__column"></td>
+                            <td class="answer__point__delete" @click="$store.methods.DeleteStudent(student.id)">
+                                &#10006;
+                            </td>
+                        </tr>
+                    </template>
+                    </tbody>
+                </table>
+                <div class="student__table__not" x-show="!$store.data.students.length">
+                    Вы ещё не добавили ни одного студента
+                </div>
+            </div>
+            <div id="myModalExcel" class="modal" x-show="$store.data.showExcelModal">
+                <div class="modal-content">
+                    <div class="tests__form">
+                        <div class="tests__form__title">Загрузить Excel</div>
+                        <div class="tests__form__body">
+                            <div class="excel">
+                                Вы можете загрузить сразу всю группу, если у вас есть такой Excel документ:
+                            </div>
+                            <div>
+                                <img
+                                    class="excel__image"
+                                    src="/../static/img/excel-example.PNG"
+                                    alt="Пример загрузки Excel"
+                                >
+                            </div>
+                            <div class="excel">
+                                Фамилия должна быть в колонке "А", имя в "B", а отчество в "C".
+                                <br><br>
+                                Отчество не обязательно, можно ничего не вписывать.
+                                <br><br>
+                                Лист <strong>обязательно</strong> должен быть первым в книге.
+                            </div>
+                            <input type="file" class="excel" id="excel">
+                            <div class="base__button" @click="$store.methods.UploadExcelFile()">
+                                Загрузить
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="myModalCreate" class="modal" x-show="$store.data.showCreateModal">
+                <div class="modal-content">
+                    <div class="tests__form">
+                        <div class="tests__form__title">Добавить студента</div>
+                        <div class="tests__form__body">
+                            <label for="name" class="test__title__label">Фамилия:</label>
+                            <input
+                                    placeholder="Саркисян"
+                                    type="text"
+                                    id="name"
+                                    class="base__input create"
+                            >
+                            <label for="surname" class="test__title__label">Имя:</label>
+                            <input
+                                    placeholder="Леонид"
+                                    type="text"
+                                    id="surname"
+                                    class="base__input create"
+                            >
+                            <label for="patronymic" class="test__title__label">Отчество (необязательно):</label>
+                            <input
+                                    placeholder="Арсенович"
+                                    type="text"
+                                    id="patronymic"
+                                    class="base__input create"
+                            >
+                            <div class="base__button" @click="$store.methods.AddStudent()">
+                                Добавить
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <script type="module" src="/../static/js/one_group.js">
+
+    </script>
+    </body>
+</html>

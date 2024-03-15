@@ -4,7 +4,22 @@ import (
 	"App/internal/middlewares"
 	"App/internal/models"
 	"github.com/gin-gonic/gin"
+	"io"
 )
+
+type StudentService interface {
+	CreateStudentFromExcel(userID, groupID int, file io.Reader) ([]models.Student, error)
+	GetAll(userID, groupID int) ([]models.Student, error)
+	Delete(userID, groupID, studentID int) error
+	Create(userID, groupID int, student models.Student) (int, error)
+}
+
+type GroupService interface {
+	Create(in models.GroupIn, userID int) (int, error)
+	GetAll(userID int) ([]models.GroupOut, error)
+	Get(groupID, userID int) (models.GroupOut, error)
+	UpdateTitle(userID, groupID int, title string) error
+}
 
 type AnswerService interface {
 	Create(userID, testID, questionID int) (int, error)
@@ -38,10 +53,14 @@ type Handler struct {
 	TestService
 	QuestionService
 	AnswerService
+	GroupService
+	StudentService
 }
 
-func NewHandler(u UserService, t TestService, q QuestionService, a AnswerService) *Handler {
-	return &Handler{u, t, q, a}
+func NewHandler(
+	u UserService, t TestService, q QuestionService, a AnswerService, g GroupService, s StudentService,
+) *Handler {
+	return &Handler{u, t, q, a, g, s}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
@@ -69,11 +88,13 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		auth.POST("/login", h.Login)
 	}
 
-	withAuth := router.Group("/p", middlewares.AuthProtect)
+	pages := router.Group("/p", middlewares.AuthProtect)
 	{
-		withAuth.GET("/header", h.Header)
-		withAuth.GET("/tests", h.TestPage)
-		withAuth.GET("/tests/:test_id", h.OneTestPage)
+		pages.GET("/header", h.Header)
+		pages.GET("/tests", h.TestPage)
+		pages.GET("/tests/:test_id", h.OneTestPage)
+		pages.GET("/groups", h.GroupPage)
+		pages.GET("/groups/:group_id", h.OneGroupPage)
 	}
 
 	tests := router.Group("/tests", middlewares.AuthProtect)
@@ -97,6 +118,22 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				answers.PATCH("/:answer_id", h.UpdateAnswer)
 				answers.DELETE("/:answer_id", h.DeleteAnswer)
 			}
+		}
+	}
+
+	groups := router.Group("/groups", middlewares.AuthProtect)
+	{
+		groups.POST("", h.CreateGroup)
+		groups.GET("", h.GetGroups)
+		groups.GET("/:group_id", h.GetGroup)
+		groups.PATCH("/:group_id", h.UpdateGroupTitle)
+
+		students := groups.Group("/:group_id/students")
+		{
+			students.POST("", h.CreateStudent)
+			students.POST("/excel", h.AddStudentsFromExcel)
+			students.GET("", h.GetAllStudents)
+			students.DELETE("/:student_id", h.DeleteStudent)
 		}
 	}
 

@@ -1,22 +1,22 @@
 import {IsNotEmpty} from "./base/utils.js"
 
-const CREATE_TEST_URL = "/tests"
+const CREATE_GROUP_URL = "/groups"
 
 function GoToTestPage(testID) {
-    window.location.href = "/p/tests/" + testID
+    window.location.href = "/p/groups/" + testID
 }
 
 Spruce.store("data", {
     showModal: false,
     title: "",
 
-    tests: [],
+    groups: [],
 
     search: ""
 })
 
-const response = await axios.get(CREATE_TEST_URL)
-$store.data.tests = response.data
+const response = await axios.get(CREATE_GROUP_URL)
+$store.data.groups = response.data
 
 Spruce.store("methods", {
     showModal() {
@@ -24,16 +24,14 @@ Spruce.store("methods", {
         $store.data.showModal = true
     },
 
-    async createTest() {
+    async createGroup() {
         if (IsNotEmpty($store.data.title)) {
-            console.log("Создаём тест! title = " + $store.data.title)
-
             const newTest = {
                 title: $store.data.title
             }
 
             try {
-                const response = await axios.post(CREATE_TEST_URL, newTest)
+                const response = await axios.post(CREATE_GROUP_URL, newTest)
                 GoToTestPage(response.data.id)
             } catch (e) {
                 console.log(e)

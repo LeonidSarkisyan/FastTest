@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS tests (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
     datetime_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     datetime_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     criteria JSON,

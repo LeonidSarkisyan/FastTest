@@ -39,6 +39,8 @@ func (h *Handler) GetAll(c *gin.Context) {
 		SendErrorResponse(c, 422, err.Error())
 	}
 
+	log.Info().Any("tests", tests).Send()
+
 	c.JSON(200, responses.NewListResponse(tests))
 }
 

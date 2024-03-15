@@ -45,9 +45,11 @@ func (r *TestPostgres) Get(testID, userID int) (models.TestOut, error) {
 
 func (r *TestPostgres) GetAll(userID int) ([]models.TestOut, error) {
 	query := `
-	SELECT id, title, EXTRACT(EPOCH FROM datetime_create)::BIGINT
-	FROM tests
+	SELECT t.id, t.title, EXTRACT(EPOCH FROM t.datetime_create)::BIGINT, COUNT(questions.id)
+	FROM tests t
+	LEFT JOIN questions ON t.id = questions.test_id
 	WHERE user_id = $1
+	GROUP BY t.id, t.title
 	ORDER BY datetime_create DESC;
 	`
 
@@ -66,8 +68,9 @@ func (r *TestPostgres) GetAll(userID int) ([]models.TestOut, error) {
 		var id int
 		var title string
 		var dateTimeCreate int64
+		var count int
 
-		if err := rows.Scan(&id, &title, &dateTimeCreate); err != nil {
+		if err := rows.Scan(&id, &title, &dateTimeCreate, &count); err != nil {
 			log.Err(err).Send()
 			continue
 		}
@@ -76,6 +79,7 @@ func (r *TestPostgres) GetAll(userID int) ([]models.TestOut, error) {
 			ID:             id,
 			Title:          title,
 			DateTimeCreate: dateTimeCreate * 1000,
+			Count:          count,
 		}
 		tests = append(tests, result)
 	}

@@ -13,6 +13,7 @@ type TestOut struct {
 	ID             int    `json:"id"`
 	Title          string `json:"title"`
 	DateTimeCreate int64  `json:"date_time_create"`
+	Count          int    `json:"count"`
 }
 
 type TestUpdate struct {

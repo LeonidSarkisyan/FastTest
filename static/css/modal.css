@@ -12,8 +12,8 @@
 
 .modal-content {
     background-color: #fefefe;
-    margin: 15% auto;
     width: max-content;
+    margin: 125px auto;
 
     border-radius: 16px;
 }
