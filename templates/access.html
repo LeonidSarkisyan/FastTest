@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/../static/css/main.css">
+    <link rel="stylesheet" href="/../static/css/modal.css">
+    <link rel="stylesheet" href="/../static/css/one_test.css">
+    <link rel="stylesheet" href="/../static/css/tests.css">
+    <link rel="stylesheet" href="/../static/css/access.css">
+    <link rel="icon" href="/../static/img/logo.png">
+    <script src="https://cdn.jsdelivr.net/gh/ryangjchandler/spruce@0.6.0/dist/spruce.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.3.5/dist/alpine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Доступ к {{ .title }}</title>
+</head>
+<body>
+    <embed src="/p/header" width="100%" height="100"/>
+    <div class="container" x-data x-subscribe>
+        <h1 class="title title__span">Открыть доступ: <a :href="'{{ .url }}'" class="title__name">{{ .title }}</a></h1>
+        <div class="question__form">
+            <div class="question__form__title">Выберите группу, которую хотите протестировать:</div>
+            <div x-text="$store.data.selectedGroup.name" class="question__form__title choose__group__name"></div>
+            <div class="base__button edit" @click="$store.methods.ShowModal()">
+                Выбрать группу
+            </div>
+        </div>
+        <div class="question__form">
+            <div class="question__form__title">Введите время прохождения теста (в минутах):</div>
+            <label>
+                <input
+                        pattern="[1-9]\d*"
+                        min="1"
+                        placeholder="Например, 90"
+                        type="number"
+                        class="base__input"
+                        x-model="$store.data.minutes"
+                >
+            </label>
+        </div>
+        <div class="question__form">
+            <div class="question__form__title">Выберите отрезок, когда тест будет доступен:</div>
+            <div class="choose_date">
+                <div class="choose_date_text">
+                    C
+                </div>
+                <label>
+                    <input
+                            id="start"
+                            placeholder="Например, 90"
+                            type="date"
+                            class="base__input"
+                            x-model="$store.data.dateStart"
+                    >
+                </label>
+                <div class="choose_date_text">
+                    до
+                </div>
+                <label>
+                    <input
+                            id="end"
+                            placeholder="Например, 90"
+                            type="date"
+                            class="base__input"
+                            x-model="$store.data.dateEnd"
+                    >
+                </label>
+                <div class="choose_date_text">
+                    включительно.
+                </div>
+            </div>
+        </div>
+        <div class="question__form">
+            <div class="question__form__title">Критерии оценивания:</div>
+            <div class="question__form__title mark">
+                5 ставить от <input type="number" class="base__input" placeholder="Например, 21" id="5">
+            </div>
+            <div class="max__count__container">
+                <div class="question__form__title mark">
+                    4 ставить от <input type="number" class="base__input" id="4" placeholder="Например, 14">
+                </div>
+                <div class="max__count">Максимальное количество баллов - <span id="count">{{ .count }}</span></div>
+            </div>
+            <div class="question__form__title mark">
+                3 ставить от <input type="number" class="base__input" id="3" placeholder="Например, 7">
+            </div>
+            <div class="question__form__title mark mark__2">
+                Всё что ниже - будет поставлена 2
+            </div>
+        </div>
+        <div class="base__button edit margin__button" @click="$store.methods.CreateAccess()">
+            Начать тестирование
+        </div>
+        <div id="modal" class="modal" x-show="$store.data.showModal">
+            <div class="modal-content">
+                <div class="tests__form">
+                    <div class="tests__form__title">Выбрать группу</div>
+                    <div class="tests__form__body">
+                        <label>
+                            <input
+                                    x-model="$store.data.search"
+                                    class="tests__search__input group__search"
+                                    type="text"
+                                    placeholder="Поиск..."
+                            >
+                        </label>
+                        <div class="group__list" id="groupList">
+                            <template x-for="(group, index) in $store.data.groups">
+                                <div
+                                        @click="$store.methods.ChooseGroup(index)"
+                                        x-show="group.name.trim().toLowerCase().indexOf(
+                                        $store.data.search.trim().toLowerCase()) !== -1"
+                                        class="question__form group__item"
+                                >
+                                    <h2 x-text="group.name" class="group__name"></h2>
+                                    <h4 class="group__count">Количество студентов: <span x-text="group.count"></span></h4>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="/../static/js/access.js">
+
+    </script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -83,5 +84,26 @@ func (h *Handler) OneTestPage(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "one_test.html", gin.H{
 		"title": test.Title,
+	})
+}
+
+func (h *Handler) OneTestAccessPage(c *gin.Context) {
+	userID := c.GetInt("userID")
+	testID := MustID(c, "test_id")
+
+	test, err := h.TestService.Get(testID, userID)
+
+	if err != nil {
+		c.HTML(404, "error.html", gin.H{
+			"error": "Ошибка 404, такой тест не найден",
+		})
+		c.Abort()
+		return
+	}
+
+	c.HTML(http.StatusOK, "access.html", gin.H{
+		"title": test.Title,
+		"count": test.Count,
+		"url":   fmt.Sprintf("/p/tests/%d", test.ID),
 	})
 }

@@ -1,0 +1,82 @@
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield; /* Firefox */
+}
+
+.choose_date {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.choose_date_text {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-text-other);
+}
+
+.mark {
+    width: 520px;
+    margin-bottom: 16px;
+}
+
+.max__count__container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.max__count {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text-other);
+
+    margin-top: 10px;
+    margin-right: 80px;
+}
+
+.mark__2 {
+    margin-bottom: 0 !important;
+}
+
+.group__search {
+    width: calc(100% - 16px) !important;
+}
+
+.group__list {
+    height: 450px;
+    overflow-y: auto;
+}
+
+.group__item {
+    user-select: none;
+    cursor: pointer;
+}
+
+.group__item:hover {
+    color: var(--color-text);
+    background: var(--color-background-howered);
+}
+
+.group__name {
+    font-size: 20px;
+}
+
+.group__count {
+    margin-top: 8px;
+    color: var(--color-text-other);
+}
+
+.choose__group {
+    display: flex;
+    align-items: center;
+}
+
+.choose__group__name {
+    font-size: 20px;
+    color: var(--color-text-other);
+}

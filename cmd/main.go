@@ -29,8 +29,8 @@ func main() {
 	userService := service.NewUserService(userRepo)
 	answerService := service.NewAnswerService(answerRepo, testRepo, questionRepo)
 	questionService := service.NewQuestionService(questionRepo, testRepo, answerService)
-	testService := service.NewTestService(testRepo, questionService)
 	groupService := service.NewGroupService(groupRepo)
+	testService := service.NewTestService(testRepo, studentRepo, questionService, groupService)
 	studentService := service.NewStudentService(studentRepo, groupRepo)
 
 	handler := handlers.NewHandler(userService, testService, questionService, answerService, groupService, studentService)

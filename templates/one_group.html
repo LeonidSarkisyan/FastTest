@@ -65,8 +65,8 @@
                     <thead>
                     <tr>
                         <th>№</th>
-                        <th>Имя</th>
                         <th>Фамилия</th>
+                        <th>Имя</th>
                         <th>Отчество</th>
                     </tr>
                     </thead>
@@ -79,8 +79,8 @@
                             class="student__table__row"
                         >
                             <td x-text="index + 1" class="student__table__head__column"></td>
-                            <td x-text="student.name" class="student__table__head__column"></td>
                             <td x-text="student.surname" class="student__table__head__column"></td>
+                            <td x-text="student.name" class="student__table__head__column"></td>
                             <td x-text="student.patronymic" class="student__table__head__column"></td>
                             <td class="answer__point__delete" @click="$store.methods.DeleteStudent(student.id)">
                                 &#10006;
@@ -128,18 +128,18 @@
                     <div class="tests__form">
                         <div class="tests__form__title">Добавить студента</div>
                         <div class="tests__form__body">
-                            <label for="name" class="test__title__label">Фамилия:</label>
+                            <label for="surname" class="test__title__label">Фамилия:</label>
                             <input
                                     placeholder="Саркисян"
                                     type="text"
-                                    id="name"
+                                    id="surname"
                                     class="base__input create"
                             >
-                            <label for="surname" class="test__title__label">Имя:</label>
+                            <label for="name" class="test__title__label">Имя:</label>
                             <input
                                     placeholder="Леонид"
                                     type="text"
-                                    id="surname"
+                                    id="name"
                                     class="base__input create"
                             >
                             <label for="patronymic" class="test__title__label">Отчество (необязательно):</label>

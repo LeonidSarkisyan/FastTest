@@ -41,6 +41,9 @@ type TestService interface {
 	Get(testID, userID int) (models.TestOut, error)
 	GetAll(userID int) ([]models.TestOut, error)
 	UpdateTitle(userID, testID int, title string) error
+
+	CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error)
+	CreatePasses(groupID, accessID int) error
 }
 
 type UserService interface {
@@ -92,6 +95,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		pages.GET("/header", h.Header)
 		pages.GET("/tests", h.TestPage)
+		pages.GET("/tests/:test_id/access", h.OneTestAccessPage)
 		pages.GET("/tests/:test_id", h.OneTestPage)
 		pages.GET("/groups", h.GroupPage)
 		pages.GET("/groups/:group_id", h.OneGroupPage)
@@ -101,6 +105,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		tests.POST("", h.CreateTest)
 		tests.GET("", h.GetAll)
+		tests.POST("/:test_id/access/:group_id", h.CreateAccess)
 		tests.GET("/:test_id", h.GetTest)
 		tests.PATCH("/:test_id", h.UpdateTestTitle)
 

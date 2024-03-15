@@ -13,6 +13,7 @@ var (
 	ExcelInCorrectFormatError = errors.New("некоррекный формат в таблице, проверьте структуру")
 
 	StudentCreateManyError = errors.New("ошибка при сохранении студентов")
+	StudentGetError        = errors.New("ошибка при получении студентов")
 	StudentDeleteError     = errors.New("ошибка при удалении студента")
 )
 
@@ -115,7 +116,7 @@ func (s *StudentService) GetAll(userID, groupID int) ([]models.Student, error) {
 
 	if err != nil {
 		log.Err(err).Send()
-		return nil, err
+		return nil, StudentGetError
 	}
 
 	return students, nil

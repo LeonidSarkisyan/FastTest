@@ -29,11 +29,17 @@ func (r *TestPostgres) Create(test models.Test) (int, error) {
 }
 
 func (r *TestPostgres) Get(testID, userID int) (models.TestOut, error) {
-	query := "SELECT id, title FROM tests WHERE id = $1 AND user_id = $2"
+	query := `
+	SELECT t.id, t.title, COALESCE(COUNT(q.id), 0)
+	FROM tests t 
+	LEFT JOIN questions q ON t.id = q.test_id
+	WHERE t.id = $1 AND t.user_id = $2
+	GROUP BY t.id, t.title
+	`
 
 	var testOut models.TestOut
 
-	err := r.conn.QueryRow(query, testID, userID).Scan(&testOut.ID, &testOut.Title)
+	err := r.conn.QueryRow(query, testID, userID).Scan(&testOut.ID, &testOut.Title, &testOut.Count)
 
 	if err != nil {
 		log.Err(err).Send()
@@ -45,7 +51,7 @@ func (r *TestPostgres) Get(testID, userID int) (models.TestOut, error) {
 
 func (r *TestPostgres) GetAll(userID int) ([]models.TestOut, error) {
 	query := `
-	SELECT t.id, t.title, EXTRACT(EPOCH FROM t.datetime_create)::BIGINT, COUNT(questions.id)
+	SELECT t.id, t.title, EXTRACT(EPOCH FROM t.datetime_create)::BIGINT, COALESCE(COUNT(questions.id), 0)
 	FROM tests t
 	LEFT JOIN questions ON t.id = questions.test_id
 	WHERE user_id = $1
@@ -104,4 +110,24 @@ func (r *TestPostgres) UpdateTitle(testID, userID int, title string) error {
 	}
 
 	return nil
+}
+
+func (r *TestPostgres) CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error) {
+	stmt := `
+	INSERT INTO accesses (date_start, date_end, passage_time, criteria, user_id, test_id, group_id)
+	VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;
+	`
+
+	var id int
+
+	err := r.conn.QueryRow(
+		stmt, accessIn.DateStart, accessIn.DateEnd, accessIn.PassageTime, accessIn.CriteriaJson, userID, testID, groupID,
+	).Scan(&id)
+
+	if err != nil {
+		log.Err(err).Send()
+		return 0, err
+	}
+
+	return id, nil
 }

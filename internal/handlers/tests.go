@@ -44,6 +44,30 @@ func (h *Handler) GetAll(c *gin.Context) {
 	c.JSON(200, responses.NewListResponse(tests))
 }
 
+func (h *Handler) CreateAccess(c *gin.Context) {
+	userID := c.GetInt("userID")
+	testID := MustID(c, "test_id")
+	groupID := MustID(c, "group_id")
+
+	var accessIn models.Access
+
+	if err := c.BindJSON(&accessIn); err != nil {
+		SendErrorResponse(c, 422, err.Error())
+		return
+	}
+
+	id, err := h.TestService.CreateAccess(userID, testID, groupID, accessIn)
+
+	if err != nil {
+		SendErrorResponse(c, 400, err.Error())
+		return
+	}
+
+	c.AbortWithStatusJSON(http.StatusCreated, gin.H{
+		"id": id,
+	})
+}
+
 func (h *Handler) GetTest(c *gin.Context) {
 	userID := c.GetInt("userID")
 	testID := MustID(c, "test_id")

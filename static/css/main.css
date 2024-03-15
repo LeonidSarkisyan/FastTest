@@ -10,6 +10,7 @@
     --color-background: #fff5e5;
     --color-background-howered: #ffe7ad;
     --color-text: #ce5912;
+    --color-text-other: #49adf3;
     --color-text-placeholder: rgba(206, 89, 18, 0.6);
     --color-text-howered: #ffd3b5;
     --color-error: #DC143CFF;
@@ -30,6 +31,18 @@ body {
 
 .title {
     margin-bottom: 25px;
+}
+
+.title__name {
+    color: var(--color-text-other);
+
+    text-decoration: none;
+
+    cursor: pointer;
+}
+
+.title__name:hover {
+    text-decoration: underline;
 }
 
 .sub__title {
