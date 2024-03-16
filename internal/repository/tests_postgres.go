@@ -144,8 +144,6 @@ func (r *TestPostgres) CreateManyPasses(accessID int, passes []models.PassesIn) 
 		}
 	}
 
-	log.Info().Str("stmt", stmt).Send()
-
 	_, err := r.conn.Exec(stmt)
 
 	if err != nil {

@@ -159,8 +159,10 @@ func (s *TestService) CreatePasses(groupID, accessID int) error {
 
 	passes := make([]models.PassesIn, len(students))
 
+	codes := utils.GenerateSixDigitNumber(len(students))
+
 	for i, student := range students {
-		passes[i].Code = utils.GenerateSixDigitNumber()
+		passes[i].Code = codes[i]
 		passes[i].StudentID = student.ID
 	}
 
