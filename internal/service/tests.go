@@ -4,6 +4,7 @@ import (
 	"App/internal/models"
 	"App/pkg/utils"
 	"errors"
+	"fmt"
 	"github.com/goccy/go-json"
 	"github.com/rs/zerolog/log"
 )
@@ -19,6 +20,8 @@ var (
 	GeneratePassesError = errors.New("ошибка при генерации пропусков")
 
 	NotStudentError = errors.New("вы выбрали группу, где нет студентов")
+
+	AccessGetError = errors.New("ошибка при получении результатов теста")
 )
 
 type TestRepository interface {
@@ -28,6 +31,7 @@ type TestRepository interface {
 	UpdateTitle(testID, userID int, title string) error
 
 	CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error)
+	GetAccess(userID, accessID int) (models.AccessOut, error)
 
 	CreateManyPasses(accessID int, passes []models.PassesIn) error
 }
@@ -132,6 +136,12 @@ func (s *TestService) CreateAccess(userID, testID, groupID int, accessIn models.
 		return 0, NotStudentError
 	}
 
+	err = s.CheckTest(testID)
+
+	if err != nil {
+		return 0, err
+	}
+
 	id, err := s.TestRepository.CreateAccess(userID, testID, groupID, accessIn)
 
 	if err != nil {
@@ -157,9 +167,11 @@ func (s *TestService) CreatePasses(groupID, accessID int) error {
 		return StudentGetError
 	}
 
-	passes := make([]models.PassesIn, len(students))
+	countStudents := len(students)
 
-	codes := utils.GenerateSixDigitNumber(len(students))
+	passes := make([]models.PassesIn, countStudents)
+
+	codes := utils.GenerateSixDigitNumber(countStudents)
 
 	for i, student := range students {
 		passes[i].Code = codes[i]
@@ -174,4 +186,53 @@ func (s *TestService) CreatePasses(groupID, accessID int) error {
 	}
 
 	return nil
+}
+
+func (s *TestService) CheckTest(testID int) error {
+	questions, err := s.QuestionRepository.GetAllWithAnswers(testID)
+
+	if err != nil {
+		return QuestionGetCreate
+	}
+
+	for i, q := range questions {
+		n := i + 1
+
+		if len(q.Text) == 0 {
+			return fmt.Errorf("у вопроса с номером %d нет текста, проверьте тест", n)
+		}
+
+		if len(q.Answers) < 2 {
+			return fmt.Errorf("у вопроса с номером %d меньше двух вариантов ответа, проверьте тест", n)
+		}
+
+		var isCorrect bool
+
+		for _, a := range q.Answers {
+			if len(a.Text) == 0 {
+				return fmt.Errorf("у варианта ответа под вопросом с номером %d нет текста, проверьте тест", n)
+			}
+
+			if a.IsCorrect {
+				isCorrect = a.IsCorrect
+			}
+		}
+
+		if !isCorrect {
+			return fmt.Errorf("у вопроса с номером %d нет хотя бы одного правильного ответа, проверьте тест", n)
+		}
+	}
+
+	return nil
+}
+
+func (s *TestService) GetAccess(userID, accessID int) (models.AccessOut, error) {
+	a, err := s.TestRepository.GetAccess(userID, accessID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.AccessOut{}, AccessGetError
+	}
+
+	return a, nil
 }

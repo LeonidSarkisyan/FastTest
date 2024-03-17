@@ -130,3 +130,79 @@ func (r *QuestionPostgres) Delete(questionID, testID int) error {
 
 	return nil
 }
+
+func (r *QuestionPostgres) GetAllWithAnswers(testID int) ([]models.QuestionWithAnswers, error) {
+	query := `
+	SELECT q.id, q.text, a.id, a.text, a.is_correct
+	FROM questions q
+	LEFT JOIN answers a ON q.id = a.question_id
+	WHERE q.test_id = $1
+	ORDER BY q.id ASC
+	`
+
+	rows, err := r.conn.Query(query, testID)
+	defer rows.Close()
+	if err != nil {
+		log.Err(err).Send()
+		return nil, err
+	}
+
+	var questions []models.QuestionWithAnswers
+
+	answersMap := make(map[int][]models.Answer)
+
+	for rows.Next() {
+		var questionID int
+		var questionText string
+		var answerID int
+		var answerText string
+		var isCorrect bool
+
+		if err := rows.Scan(&questionID, &questionText, &answerID, &answerText, &isCorrect); err != nil {
+			log.Err(err).Send()
+			continue
+		}
+
+		exists := false
+		var q models.QuestionWithAnswers
+		for _, item := range questions {
+			if item.ID == questionID {
+				q = item
+				exists = true
+				break
+			}
+		}
+
+		if !exists {
+			q = models.QuestionWithAnswers{
+				ID:   questionID,
+				Text: questionText,
+			}
+		}
+
+		q.Answers = append(q.Answers, models.Answer{
+			ID:        answerID,
+			Text:      answerText,
+			IsCorrect: isCorrect,
+		})
+
+		if exists {
+			for i, item := range questions {
+				if item.ID == questionID {
+					questions[i] = q
+					break
+				}
+			}
+		} else {
+			questions = append(questions, q)
+		}
+
+		answersMap[questionID] = append(answersMap[questionID], models.Answer{
+			ID:        answerID,
+			Text:      answerText,
+			IsCorrect: isCorrect,
+		})
+	}
+
+	return questions, nil
+}

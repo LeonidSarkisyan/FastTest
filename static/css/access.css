@@ -11,7 +11,7 @@ input[type=number] {
 .choose_date {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-around;
 }
 
 .choose_date_text {
@@ -79,4 +79,13 @@ input[type=number] {
 .choose__group__name {
     font-size: 20px;
     color: var(--color-text-other);
+}
+
+.align {
+    display: flex;
+    align-items: center;
+}
+
+.mix__answers {
+    margin-right: 16px;
 }

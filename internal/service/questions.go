@@ -22,6 +22,8 @@ type QuestionRepository interface {
 	Update(questionID, testID int, question models.QuestionUpdate) error
 	Get(questionID, testID int) (models.Question, error)
 	Delete(questionID, testID int) error
+
+	GetAllWithAnswers(testID int) ([]models.QuestionWithAnswers, error)
 }
 
 type QuestionService struct {

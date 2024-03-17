@@ -107,3 +107,45 @@ func (h *Handler) OneTestAccessPage(c *gin.Context) {
 		"url":   fmt.Sprintf("/p/tests/%d", test.ID),
 	})
 }
+
+func (h *Handler) OneResultPage(c *gin.Context) {
+	userID := c.GetInt("userID")
+	resultID := MustID(c, "result_id")
+
+	access, err := h.TestService.GetAccess(userID, resultID)
+
+	if err != nil {
+		c.HTML(404, "error.html", gin.H{
+			"error": "Ошибка 404, такой результат не найден",
+		})
+		c.Abort()
+		return
+	}
+
+	test, err := h.TestService.Get(access.TestID, userID)
+
+	if err != nil {
+		c.HTML(404, "error.html", gin.H{
+			"error": "Ошибка 404, такой тест не найден",
+		})
+		c.Abort()
+		return
+	}
+
+	group, err := h.GroupService.Get(access.GroupID, userID)
+
+	if err != nil {
+		c.HTML(404, "error.html", gin.H{
+			"error": "Ошибка 404, такой тест не найден",
+		})
+		c.Abort()
+		return
+	}
+
+	c.HTML(http.StatusOK, "access.html", gin.H{
+		"title": test.Title,
+		"test":  test,
+		"group": group,
+		"url":   fmt.Sprintf("/p/tests/%d", test.ID),
+	})
+}

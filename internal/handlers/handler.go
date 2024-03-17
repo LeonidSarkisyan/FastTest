@@ -43,6 +43,7 @@ type TestService interface {
 	UpdateTitle(userID, testID int, title string) error
 
 	CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error)
+	GetAccess(userID, accessID int) (models.AccessOut, error)
 	CreatePasses(groupID, accessID int) error
 }
 
@@ -99,6 +100,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		pages.GET("/tests/:test_id", h.OneTestPage)
 		pages.GET("/groups", h.GroupPage)
 		pages.GET("/groups/:group_id", h.OneGroupPage)
+		pages.GET("/results/:result_id", h.OneResultPage)
 	}
 
 	tests := router.Group("/tests", middlewares.AuthProtect)

@@ -87,6 +87,12 @@
                 Всё что ниже - будет поставлена 2
             </div>
         </div>
+        <div class="question__form">
+            <div class="question__form__title mark__2 align">
+                <div class="mix__answers">Перемешать вопросы - </div>
+                <input class="answer__point__checkbox" type="checkbox" x-model="$store.data.shuffle">
+            </div>
+        </div>
         <div class="base__button edit margin__button" @click="$store.methods.CreateAccess()">
             Начать тестирование
         </div>

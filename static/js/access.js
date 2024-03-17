@@ -18,8 +18,6 @@ const input3 = document.getElementById("3")
 input5.addEventListener('input', function() {
     let count = Number(document.getElementById("count").innerText)
 
-    console.log(count)
-
     let numberValue = Number(this.value)
 
     if (numberValue <= 0 || numberValue > count) {
@@ -54,6 +52,7 @@ Spruce.store("data", {
     minutes: "",
     dateStart: formattedDate,
     dateEnd: formattedDate,
+    shuffle: true,
 
     groups: [],
     selectedGroup: {
@@ -80,6 +79,7 @@ Spruce.store("methods", {
     },
 
     async CreateAccess() {
+        const shuffle = $store.data.shuffle
         const groupID = $store.data.selectedGroup.id
         const minutes = Number($store.data.minutes)
         const start = $store.data.dateStart
@@ -123,6 +123,7 @@ Spruce.store("methods", {
         }
 
         const access = {
+            shuffle: shuffle,
             passage_time: minutes,
             date_start: start,
             date_end: end,

@@ -115,14 +115,15 @@ func (r *TestPostgres) UpdateTitle(testID, userID int, title string) error {
 
 func (r *TestPostgres) CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error) {
 	stmt := `
-	INSERT INTO accesses (date_start, date_end, passage_time, criteria, user_id, test_id, group_id)
-	VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;
+	INSERT INTO accesses (shuffle, date_start, date_end, passage_time, criteria, user_id, test_id, group_id)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;
 	`
 
 	var id int
 
 	err := r.conn.QueryRow(
-		stmt, accessIn.DateStart, accessIn.DateEnd, accessIn.PassageTime, accessIn.CriteriaJson, userID, testID, groupID,
+		stmt, accessIn.Shuffle, accessIn.DateStart, accessIn.DateEnd,
+		accessIn.PassageTime, accessIn.CriteriaJson, userID, testID, groupID,
 	).Scan(&id)
 
 	if err != nil {
@@ -152,4 +153,25 @@ func (r *TestPostgres) CreateManyPasses(accessID int, passes []models.PassesIn) 
 	}
 
 	return nil
+}
+
+func (r *TestPostgres) GetAccess(userID, accessID int) (models.AccessOut, error) {
+	query := `
+	SELECT id, test_id, group_id, date_start, date_end, passage_time 
+	FROM accesses
+	WHERE id = $1 AND user_id = $2;
+	`
+
+	var a models.AccessOut
+
+	err := r.conn.QueryRow(query, accessID, userID).Scan(
+		&a.ID, &a.TestID, &a.GroupID, &a.DateStart, &a.DateEnd, &a.PassageTime,
+	)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.AccessOut{}, err
+	}
+
+	return a, nil
 }
