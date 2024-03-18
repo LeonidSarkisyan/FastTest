@@ -14,3 +14,8 @@ type Passes struct {
 	Code              int64      `json:"code"`
 	StudentID         int        `json:"student_id"`
 }
+
+type PassesOut struct {
+	ID        int
+	StudentID int `json:"student_id"`
+}

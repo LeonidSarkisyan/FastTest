@@ -29,6 +29,9 @@
                     </a>
                 </div>
             </template>
+            <div class="tests__list_none" x-show="!$store.data.results.length">
+                Пока нет ни одного результата
+            </div>
         </div>
     </div>
     <script type="module" src="/../static/js/results.js">

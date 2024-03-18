@@ -59,11 +59,12 @@
         async function getStartedTest() {
             try {
                 const response = await axios.post(`/passing/${RESULT_ID}`, {
-                    code: i.value
+                    code: Number(i.value)
                 })
-                console.log(response)
+
+                window.location.href = `/passing/${RESULT_ID}/solving/${response.data.id}`
             } catch (e) {
-                console.log(e.response.data)
+                alert(e.response.data)
             }
         }
     </script>

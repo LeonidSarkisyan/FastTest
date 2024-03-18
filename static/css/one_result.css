@@ -38,6 +38,8 @@
     font-size: 22px;
 
     border: 2px solid var(--color-text);
+
+    margin-bottom: 100px;
 }
 
 .result__row:nth-child(odd) {

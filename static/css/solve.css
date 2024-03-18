@@ -1,0 +1,9 @@
+.solve__container {
+    text-align: center;
+}
+
+.solve {
+    padding: 15px 35px;
+    border: var(--color-text) 2px solid;
+    border-radius: 4px;
+}

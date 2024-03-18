@@ -243,9 +243,9 @@ func (r *TestPostgres) GetAllAccesses(userID int) ([]models.AccessOut, error) {
 	return accesses, nil
 }
 
-func (r *TestPostgres) GetPass(resultID, code int) (models.Passes, error) {
+func (r *TestPostgres) GetPass(resultID int, code int64) (models.Passes, error) {
 	query := `
-	SELECT id, is_activated, datetime_activate, code, student_id, passage_time
+	SELECT id, is_activated, datetime_activate, code, student_id
 	FROM passes
 	WHERE access_id = $1 AND code = $2
 	`
@@ -253,6 +253,55 @@ func (r *TestPostgres) GetPass(resultID, code int) (models.Passes, error) {
 	var p models.Passes
 
 	err := r.conn.QueryRow(query, resultID, code).Scan(
-		&p.ID, &p.IsActivated, &p.DateTimeActivated, &p.Code, &p.StudentID, &p.Pa,
+		&p.ID, &p.IsActivated, &p.DateTimeActivated, &p.Code, &p.StudentID,
 	)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.Passes{}, err
+	}
+
+	return p, nil
+}
+
+func (r *TestPostgres) GetResult(resultID int) (models.AccessOut, error) {
+	query := `
+	SELECT id, test_id, group_id, date_start, date_end, passage_time, shuffle, user_id
+	FROM accesses
+	WHERE id = $1;
+	`
+
+	var a models.AccessOut
+
+	err := r.conn.QueryRow(query, resultID).Scan(
+		&a.ID, &a.TestID, &a.GroupID, &a.DateStart, &a.DateEnd, &a.PassageTime, &a.Shuffle, &a.UserID,
+	)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.AccessOut{}, err
+	}
+
+	return a, nil
+}
+
+func (r *TestPostgres) GetPassByStudentID(passID, studentID int) (models.Passes, error) {
+	query := `
+	SELECT id, is_activated, datetime_activate, code, student_id
+	FROM passes
+	WHERE id = $1 AND student_id = $2
+	`
+
+	var p models.Passes
+
+	err := r.conn.QueryRow(query, passID, studentID).Scan(
+		&p.ID, &p.IsActivated, &p.DateTimeActivated, &p.Code, &p.StudentID,
+	)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.Passes{}, err
+	}
+
+	return p, nil
 }

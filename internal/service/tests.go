@@ -25,6 +25,7 @@ var (
 	PassesGetError = errors.New("ошибка при получении пропусков")
 
 	PassGetError = errors.New("ошибка при получении пропуска")
+	PassNotFound = errors.New("неверный код")
 )
 
 type TestRepository interface {
@@ -36,10 +37,12 @@ type TestRepository interface {
 	CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error)
 	GetAccess(userID, accessID int) (models.AccessOut, error)
 	GetAllAccesses(userID int) ([]models.AccessOut, error)
+	GetResult(resultID int) (models.AccessOut, error)
 
 	CreateManyPasses(accessID int, passes []models.PassesIn) error
 	GetPasses(resultID int) ([]models.Passes, error)
 	GetPass(resultID int, code int64) (models.Passes, error)
+	GetPassByStudentID(passID, studentID int) (models.Passes, error)
 }
 
 type TestService struct {
@@ -286,11 +289,36 @@ func (s *TestService) GetAllAccessess(userID int) ([]models.AccessOut, error) {
 	return accesses, nil
 }
 
-func (s *TestService) GetPass(resultID int, code int64) (models.Passes, error) {
+func (s *TestService) GetPassByCode(resultID int, code int64) (models.Passes, error) {
 	pass, err := s.TestRepository.GetPass(resultID, code)
 
 	if err != nil {
 		log.Err(err).Send()
+
+		if err.Error() == "sql: no rows in result set" {
+			return models.Passes{}, PassNotFound
+		}
+
+		return models.Passes{}, PassGetError
+	}
+
+	return pass, nil
+}
+
+func (s *TestService) GetResult(resultID int) (models.AccessOut, error) {
+	r, err := s.TestRepository.GetResult(resultID)
+
+	if err != nil {
+		return models.AccessOut{}, AccessGetError
+	}
+
+	return r, nil
+}
+
+func (s *TestService) GetPassByStudentID(passID, studentID int) (models.Passes, error) {
+	pass, err := s.TestRepository.GetPassByStudentID(passID, studentID)
+
+	if err != nil {
 		return models.Passes{}, PassGetError
 	}
 

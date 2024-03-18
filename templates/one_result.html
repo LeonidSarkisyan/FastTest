@@ -40,6 +40,15 @@
                 {{ .access.PassageTime }} мин.
             </span>
         </div>
+        <div class="date__event last">
+            Ссылка для прохождения -
+            <a
+                    :href="'{{ .urlPass }}'"
+                    class="date__event__date"
+            >
+                {{ .urlPass }}
+            </a>
+        </div>
         <div class="student__table">
             <table class="student__table results" x-show="$store.data.students.length">
                 <thead>

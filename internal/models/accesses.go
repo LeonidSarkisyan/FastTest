@@ -6,6 +6,7 @@ type AccessOut struct {
 	DateEnd     string `json:"date_end"`
 	TestID      int    `json:"test_id"`
 	GroupID     int    `json:"group_id"`
+	UserID      int    `json:"user_id"`
 	Shuffle     bool   `json:"shuffle"`
 	PassageTime int    `json:"passage_time" binding:"required"`
 

@@ -10,3 +10,11 @@ const response = await axios.get(`/results/${RESULT_ID}`)
 
 $store.data.passes = response.data.passes
 $store.data.students = response.data.students
+
+const codes = document.getElementsByClassName("code")
+
+for (let code of codes) {
+    code.addEventListener("click", event => {
+        navigator.clipboard.writeText(event.target.textContent)
+    })
+}
