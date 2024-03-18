@@ -1,0 +1,28 @@
+body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.passing {
+    width: 35%;
+    padding: 15px 35px;
+    border: var(--color-text) 2px solid;
+    border-radius: 4px;
+}
+
+.code__title {
+    display: block;
+    font-size: 24px;
+
+    margin: 16px 0;
+}
+
+.code__input {
+    width: calc(100% - 16px);
+
+    margin-bottom: 16px;
+
+    text-align: center;
+}

@@ -8,8 +8,9 @@ type PassesIn struct {
 }
 
 type Passes struct {
-	DateTimeActivated time.Time `json:"date_time_activated"`
-	IsActivated       bool      `json:"is_activated"`
-	Code              int64     `json:"code"`
-	StudentID         int       `json:"student_id"`
+	ID                int
+	DateTimeActivated *time.Time `json:"date_time_activated"`
+	IsActivated       bool       `json:"is_activated"`
+	Code              int64      `json:"code"`
+	StudentID         int        `json:"student_id"`
 }

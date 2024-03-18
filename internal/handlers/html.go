@@ -3,7 +3,6 @@ package handlers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -116,6 +115,10 @@ func (h *Handler) OneTestAccessPage(c *gin.Context) {
 	})
 }
 
+func (h *Handler) ResultPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "results.html", gin.H{})
+}
+
 func (h *Handler) OneResultPage(c *gin.Context) {
 	userID := c.GetInt("userID")
 	resultID := MustID(c, "result_id")
@@ -150,8 +153,6 @@ func (h *Handler) OneResultPage(c *gin.Context) {
 		return
 	}
 
-	log.Info().Str("DATE START", access.DateStart).Str("DATE END", access.DateEnd).Msg("access")
-
 	access.DateStart = strings.ReplaceAll(
 		strings.ReplaceAll(access.DateStart, "T00:00:00Z", ""), "-", ".")
 
@@ -165,4 +166,8 @@ func (h *Handler) OneResultPage(c *gin.Context) {
 		"access": access,
 		"url":    fmt.Sprintf("/p/tests/%d", test.ID),
 	})
+}
+
+func (h *Handler) PassingPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "passing.html", gin.H{})
 }

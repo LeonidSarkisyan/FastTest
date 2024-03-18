@@ -28,7 +28,28 @@
 }
 
 .last {
-    padding-bottom: 5px;
 
-    border-bottom: 2px dashed var(--color-text);
+}
+
+.results {
+    width: 100%;
+    text-align: center;
+
+    font-size: 22px;
+
+    border: 2px solid var(--color-text);
+}
+
+.result__row:nth-child(odd) {
+    background: var(--color-background-howered);
+}
+
+.code:hover {
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+}
+
+.code:active {
+    color: #fefefe;
 }

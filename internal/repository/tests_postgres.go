@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
+	"strings"
 )
 
 type TestPostgres struct {
@@ -174,4 +175,84 @@ func (r *TestPostgres) GetAccess(userID, accessID int) (models.AccessOut, error)
 	}
 
 	return a, nil
+}
+
+func (r *TestPostgres) GetPasses(resultID int) ([]models.Passes, error) {
+	query := `
+	SELECT id, is_activated, datetime_activate, code, student_id
+	FROM passes
+	WHERE access_id = $1
+	ORDER BY student_id DESC
+	`
+
+	var passes []models.Passes
+
+	rows, err := r.conn.Query(query, resultID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return nil, err
+	}
+
+	for rows.Next() {
+		var p models.Passes
+
+		if err := rows.Scan(&p.ID, &p.IsActivated, &p.DateTimeActivated, &p.Code, &p.StudentID); err != nil {
+			log.Err(err).Send()
+			continue
+		}
+		passes = append(passes, p)
+	}
+
+	return passes, nil
+}
+
+func (r *TestPostgres) GetAllAccesses(userID int) ([]models.AccessOut, error) {
+	query := `
+	SELECT id, test_id, group_id, date_start, date_end, passage_time 
+	FROM accesses
+	WHERE user_id = $1;
+	`
+
+	var accesses []models.AccessOut
+
+	rows, err := r.conn.Query(query, userID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return nil, err
+	}
+
+	for rows.Next() {
+		var a models.AccessOut
+
+		if err := rows.Scan(&a.ID, &a.TestID, &a.GroupID, &a.DateStart, &a.DateEnd, &a.PassageTime); err != nil {
+			log.Err(err).Send()
+			return nil, err
+		}
+
+		a.DateStart = strings.ReplaceAll(
+			strings.ReplaceAll(a.DateStart, "T00:00:00Z", ""), "-", ".")
+
+		a.DateEnd = strings.ReplaceAll(
+			strings.ReplaceAll(a.DateEnd, "T00:00:00Z", ""), "-", ".")
+
+		accesses = append(accesses, a)
+	}
+
+	return accesses, nil
+}
+
+func (r *TestPostgres) GetPass(resultID, code int) (models.Passes, error) {
+	query := `
+	SELECT id, is_activated, datetime_activate, code, student_id, passage_time
+	FROM passes
+	WHERE access_id = $1 AND code = $2
+	`
+
+	var p models.Passes
+
+	err := r.conn.QueryRow(query, resultID, code).Scan(
+		&p.ID, &p.IsActivated, &p.DateTimeActivated, &p.Code, &p.StudentID, &p.Pa,
+	)
 }

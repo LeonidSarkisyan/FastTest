@@ -34,7 +34,7 @@ th[sort="descending"]::after {
 
 .student__table__head__column {
     font-size: 20px;
-    font-weight: 500;
+    font-weight: 700;
 
     border: 1px solid var(--color-text);
 

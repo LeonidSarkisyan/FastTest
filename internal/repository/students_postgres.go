@@ -51,7 +51,12 @@ func (r *StudentPostgres) CreateMany(groupID int, students []models.Student) ([]
 }
 
 func (r *StudentPostgres) GetAll(groupID int) ([]models.Student, error) {
-	query := "SELECT id, name, surname, patronymic FROM students WHERE group_id = $1"
+	query := `
+	SELECT id, name, surname, patronymic 
+	FROM students 
+	WHERE group_id = $1
+	ORDER BY id DESC
+	`
 
 	var students []models.Student
 

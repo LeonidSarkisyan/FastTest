@@ -22,6 +22,9 @@ var (
 	NotStudentError = errors.New("вы выбрали группу, где нет студентов")
 
 	AccessGetError = errors.New("ошибка при получении результатов теста")
+	PassesGetError = errors.New("ошибка при получении пропусков")
+
+	PassGetError = errors.New("ошибка при получении пропуска")
 )
 
 type TestRepository interface {
@@ -32,8 +35,11 @@ type TestRepository interface {
 
 	CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error)
 	GetAccess(userID, accessID int) (models.AccessOut, error)
+	GetAllAccesses(userID int) ([]models.AccessOut, error)
 
 	CreateManyPasses(accessID int, passes []models.PassesIn) error
+	GetPasses(resultID int) ([]models.Passes, error)
+	GetPass(resultID int, code int64) (models.Passes, error)
 }
 
 type TestService struct {
@@ -235,4 +241,58 @@ func (s *TestService) GetAccess(userID, accessID int) (models.AccessOut, error) 
 	}
 
 	return a, nil
+}
+
+func (s *TestService) GetPassesAndStudents(resultID, userID int) ([]models.Passes, []models.Student, error) {
+	access, err := s.TestRepository.GetAccess(userID, resultID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return nil, nil, AccessGetError
+	}
+
+	_, err = s.GroupService.Get(access.GroupID, userID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return nil, nil, GroupGetError
+	}
+
+	passes, err := s.TestRepository.GetPasses(resultID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return nil, nil, PassesGetError
+	}
+
+	students, err := s.StudentRepository.GetAll(access.GroupID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return nil, nil, StudentGetError
+	}
+
+	return passes, students, nil
+}
+
+func (s *TestService) GetAllAccessess(userID int) ([]models.AccessOut, error) {
+	accesses, err := s.TestRepository.GetAllAccesses(userID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return nil, AccessGetError
+	}
+
+	return accesses, nil
+}
+
+func (s *TestService) GetPass(resultID int, code int64) (models.Passes, error) {
+	pass, err := s.TestRepository.GetPass(resultID, code)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.Passes{}, PassGetError
+	}
+
+	return pass, nil
 }

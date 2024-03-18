@@ -45,8 +45,13 @@ type TestService interface {
 
 	CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error)
 	GetAccess(userID, accessID int) (models.AccessOut, error)
+	GetAllAccessess(userID int) ([]models.AccessOut, error)
+
 	CreatePasses(groupID, accessID int) error
 	GetPasses(accessID int) ([]models.Passes, error)
+	GetPass(resultID int, code int64) (models.Passes, error)
+
+	GetPassesAndStudents(resultID, userID int) ([]models.Passes, []models.Student, error)
 }
 
 type UserService interface {
@@ -106,8 +111,11 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		pages.GET("/tests/:test_id", h.OneTestPage)
 		pages.GET("/groups", h.GroupPage)
 		pages.GET("/groups/:group_id", h.OneGroupPage)
+		pages.GET("/results", h.ResultPage)
 		pages.GET("/results/:result_id", h.OneResultPage)
 	}
+
+	router.GET("/passing/:result_id", h.PassingPage)
 
 	tests := router.Group("/tests", middlewares.AuthProtect)
 	{
@@ -148,6 +156,13 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			students.GET("", h.GetAllStudents)
 			students.DELETE("/:student_id", h.DeleteStudent)
 		}
+	}
+
+	results := router.Group("/results", middlewares.AuthProtect)
+	{
+		results.GET("", h.GetResults)
+		results.GET("/:result_id", h.GetPassesAndStudents)
+		results.POST("/:result_id", h.GetStartedTest)
 	}
 
 	return router

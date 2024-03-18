@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/../static/css/main.css">
+    <link rel="stylesheet" href="/../static/css/modal.css">
+    <link rel="stylesheet" href="/../static/css/one_test.css">
+    <link rel="stylesheet" href="/../static/css/tests.css">
+    <link rel="stylesheet" href="/../static/css/access.css">
+    <link rel="stylesheet" href="/../static/css/one_result.css">
+    <link rel="icon" href="/../static/img/logo.png">
+    <script src="https://cdn.jsdelivr.net/gh/ryangjchandler/spruce@0.6.0/dist/spruce.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.3.5/dist/alpine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Результаты</title>
+</head>
+<body>
+    <embed src="/p/header" width="100%" height="100"/>
+    <div class="container" x-data x-subscribe>
+        <h1 class="title">Результаты</h1>
+        <div class="results__list">
+            <template x-for="(result, index) in $store.data.results">
+                <div class="question__form">
+                    <div class="question__form__title">
+                        С <span x-text="result.date_start"></span> до <span x-text="result.date_end"></span>
+                    </div>
+                    <a class="base__button edit" :href="'/p/results/' + result.id">
+                        Перейти
+                    </a>
+                </div>
+            </template>
+        </div>
+    </div>
+    <script type="module" src="/../static/js/results.js">
+
+    </script>
+</body>
+</html>

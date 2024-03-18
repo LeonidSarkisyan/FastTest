@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/../static/css/main.css">
+    <link rel="stylesheet" href="/../static/css/modal.css">
+    <link rel="stylesheet" href="/../static/css/one_test.css">
+    <link rel="stylesheet" href="/../static/css/tests.css">
+    <link rel="stylesheet" href="/../static/css/access.css">
+    <link rel="stylesheet" href="/../static/css/one_result.css">
+    <link rel="stylesheet" href="/../static/css/auth.css">
+    <link rel="icon" href="/../static/img/logo.png">
+    <link rel="stylesheet" href="/../static/css/passing.css">
+    <script src="https://cdn.jsdelivr.net/gh/ryangjchandler/spruce@0.6.0/dist/spruce.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.3.5/dist/alpine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Пройти тест</title>
+</head>
+<body>
+    <div class="passing">
+        <h1>Пройти тест</h1>
+        <div class="register__form">
+            <label class="code__title" for="code__input">
+                Код доступа:
+            </label>
+            <input
+                    class="base__input code__input"
+                    type="number"
+                    id="code__input"
+                    placeholder="Например, 648123"
+                    maxlength="6"
+            >
+            <div class="base__button">
+                Начать
+            </div>
+        </div>
+    </div>
+    <script>
+        const RESULT_ID = Number(window.location.pathname.split("/").pop())
+
+        const i = document.getElementById('code__input');
+
+        i.addEventListener('input', () => {
+            i.value = i.value.slice(0, 6);
+        })
+
+        i.focus()
+
+        document.querySelector('.base__button').addEventListener('click', async () => {
+            await getStartedTest()
+        })
+
+        document.addEventListener('keydown', async (event) => {
+            if (event.key === 'Enter') {
+                await getStartedTest()
+            }
+        })
+
+        async function getStartedTest() {
+            try {
+                const response = await axios.post(`/passing/${RESULT_ID}`, {
+                    code: i.value
+                })
+                console.log(response)
+            } catch (e) {
+                console.log(e.response.data)
+            }
+        }
+    </script>
+</body>
+</html>
