@@ -3,9 +3,17 @@ package handlers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 )
+
+func formatAsDate(t time.Time) string {
+	year, month, day := t.Date()
+	return fmt.Sprintf("%d/%02d/%02d", year, month, day)
+}
 
 func (h *Handler) MainPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.html", gin.H{
@@ -142,10 +150,19 @@ func (h *Handler) OneResultPage(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "access.html", gin.H{
-		"title": test.Title,
-		"test":  test,
-		"group": group,
-		"url":   fmt.Sprintf("/p/tests/%d", test.ID),
+	log.Info().Str("DATE START", access.DateStart).Str("DATE END", access.DateEnd).Msg("access")
+
+	access.DateStart = strings.ReplaceAll(
+		strings.ReplaceAll(access.DateStart, "T00:00:00Z", ""), "-", ".")
+
+	access.DateEnd = strings.ReplaceAll(
+		strings.ReplaceAll(access.DateEnd, "T00:00:00Z", ""), "-", ".")
+
+	c.HTML(http.StatusOK, "one_result.html", gin.H{
+		"title":  test.Title,
+		"test":   test,
+		"group":  group,
+		"access": access,
+		"url":    fmt.Sprintf("/p/tests/%d", test.ID),
 	})
 }

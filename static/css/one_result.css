@@ -1,0 +1,34 @@
+.result__title {
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    width: 100%;
+
+    border-bottom: 2px solid var(--color-text);
+}
+
+.date__event {
+    color: gray;
+
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.date__group__name {
+    color: var(--color-text);
+
+    text-decoration: none;
+}
+
+.date__group__name:hover {
+    text-decoration: underline;
+}
+
+.date__event__date {
+    color: var(--color-text);
+}
+
+.last {
+    padding-bottom: 5px;
+
+    border-bottom: 2px dashed var(--color-text);
+}

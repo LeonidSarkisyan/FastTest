@@ -17,12 +17,28 @@
 <body>
     <embed src="/p/header" width="100%" height="100"/>
     <div class="container" x-data x-subscribe>
-        <h1 class="title title__span">Результаты: <a :href="'{{ .url }}'" class="title__name">{{ .test.Title }}</a></h1>
+        <h1 class="title title__span result__title">Результаты: <a target="_blank"
+                :href="'{{ .url }}'" class="title__name">{{ .test.Title }}</a></h1>
         <div class="date__event">
-            Дата проведения: {{ .access.DateStart }} - {{ .access.DateEnd }}
+            Дата проведения: <span class="date__event__date">{{.access.DateStart }} - {{.access.DateEnd}}</span>
         </div>
         <div class="date__event">
-            Группа: {{ .group.Name }}
+            Группа:
+            <a
+                :href="'/p/groups/{{ .group.ID }}'"
+                class="date__group__name"
+                target="_blank"
+            >
+                {{ .group.Name }}
+            </a>
+        </div>
+        <div class="date__event last">
+            Время прохождения:
+            <span
+                    class="date__event__date"
+            >
+                {{ .access.PassageTime }} мин.
+            </span>
         </div>
     </div>
 </body>

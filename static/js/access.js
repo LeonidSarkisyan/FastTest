@@ -137,6 +137,7 @@ Spruce.store("methods", {
         try {
             const response = await axios.post(`/tests/${TEST_ID}/access/${groupID}`, access)
             console.log(response)
+            window.location.href = `/p/results/${response.data.id}`
         } catch (e) {
             alert(e.response.data)   
         }

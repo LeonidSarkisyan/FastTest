@@ -4,6 +4,7 @@ import (
 	"App/internal/middlewares"
 	"App/internal/models"
 	"github.com/gin-gonic/gin"
+	"html/template"
 	"io"
 )
 
@@ -45,6 +46,7 @@ type TestService interface {
 	CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error)
 	GetAccess(userID, accessID int) (models.AccessOut, error)
 	CreatePasses(groupID, accessID int) error
+	GetPasses(accessID int) ([]models.Passes, error)
 }
 
 type UserService interface {
@@ -82,6 +84,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router.LoadHTMLGlob("templates/*")
 
 	router.Static("/static", "./static")
+
+	router.SetFuncMap(template.FuncMap{
+		"formatAsDate": formatAsDate,
+	})
 
 	router.GET("/", h.MainPage)
 	router.GET("/auth", h.AuthPage)
