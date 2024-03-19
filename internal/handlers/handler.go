@@ -35,6 +35,8 @@ type QuestionService interface {
 	GetAll(testID, userID int) ([]models.Question, error)
 	Update(userID, testID, questionID int, question models.QuestionUpdate) error
 	Delete(userID, testID, questionID int) error
+
+	GetAllQuestionsWithAnswers(testID int) ([]models.QuestionWithAnswers, error)
 }
 
 type TestService interface {
@@ -171,6 +173,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		studentsPage.POST("/:result_id", h.GetStartedTest)
 
 		studentsPage.GET("/:result_id/solving/:pass_id", h.IssueTestPage)
+		studentsPage.GET("/:result_id/solving/:pass_id/questions", h.GetQuestionsForStudent)
+		studentsPage.POST("/:result_id/solving/:pass_id/results")
 	}
 
 	return router

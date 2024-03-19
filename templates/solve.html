@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="/../static/css/main.css">
     <link rel="stylesheet" href="/../static/css/modal.css">
     <link rel="stylesheet" href="/../static/css/one_test.css">
@@ -13,16 +14,30 @@
     <script src="https://cdn.jsdelivr.net/gh/ryangjchandler/spruce@0.6.0/dist/spruce.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.3.5/dist/alpine.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
-    <meta charset="UTF-8">
     <title>Тест: {{ .test.Title }}</title>
 </head>
 <body>
-    <div class="container solve__container">
+    <div class="container solve__container" x-data x-subscribe>
         <div class="solve">
-            <h1>{{ .test.Title }}</h1>
-            <h3>Время прохождения: {{ .access.PassageTime }} мин.</h3>
-            <h3>Количество вопросов: {{ .test.Count }}</h3>
+            <h1 class="question__form__title">Название теста: <span class="solve__char">{{ .test.Title }}</span></h1>
+            <h3 class="solve__subtitle">
+                Время прохождения: <span class="solve__char">{{ .access.PassageTime }} мин.</span>
+            </h3>
+            <h3 class="solve__subtitle">
+                Количество вопросов: <span class="solve__char">{{ .test.Count }}</span>
+            </h3>
+            <div class="base__button edit" id="startButton">
+                Начать прохождение
+            </div>
+            <template x-for="question in $store.data.questions">
+                <div x-text="question.text">
+
+                </div>
+            </template>
         </div>
     </div>
+    <script type="module" src="/../static/js/solve.js">
+
+    </script>
 </body>
 </html>

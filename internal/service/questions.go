@@ -117,3 +117,13 @@ func (s *QuestionService) Delete(userID, testID, questionID int) error {
 
 	return nil
 }
+
+func (s *QuestionService) GetAllQuestionsWithAnswers(testID int) ([]models.QuestionWithAnswers, error) {
+	questions, err := s.QuestionRepository.GetAllWithAnswers(testID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return questions, nil
+}

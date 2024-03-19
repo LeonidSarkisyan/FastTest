@@ -7,3 +7,11 @@
     border: var(--color-text) 2px solid;
     border-radius: 4px;
 }
+
+.solve__subtitle {
+    margin-bottom: 16px;
+}
+
+.solve__char {
+    color: var(--color-text-other);
+}
