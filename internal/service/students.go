@@ -21,6 +21,7 @@ type StudentRepository interface {
 	CreateMany(groupID int, students []models.Student) ([]models.Student, error)
 	GetAll(groupID int) ([]models.Student, error)
 	Delete(studentID, groupID int) error
+	Get(studentID int) (models.Student, error)
 }
 
 type StudentService struct {
@@ -138,4 +139,14 @@ func (s *StudentService) Delete(userID, groupID, studentID int) error {
 	}
 
 	return nil
+}
+
+func (s *StudentService) Get(studentID int) (models.Student, error) {
+	student, err := s.StudentRepository.Get(studentID)
+
+	if err != nil {
+		return models.Student{}, StudentGetError
+	}
+
+	return student, nil
 }

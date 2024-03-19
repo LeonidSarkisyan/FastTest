@@ -8,11 +8,19 @@ import (
 	"io"
 )
 
+type ResultService interface {
+	SaveResult(
+		studentID, accessID, passID int, questions, questionsFromUser []models.QuestionWithAnswers,
+		access models.AccessOut, pass models.Passes,
+	) (models.ResultStudent, error)
+}
+
 type StudentService interface {
 	CreateStudentFromExcel(userID, groupID int, file io.Reader) ([]models.Student, error)
 	GetAll(userID, groupID int) ([]models.Student, error)
 	Delete(userID, groupID, studentID int) error
 	Create(userID, groupID int, student models.Student) (int, error)
+	Get(studentID int) (models.Student, error)
 }
 
 type GroupService interface {
@@ -55,8 +63,9 @@ type TestService interface {
 	GetPasses(accessID int) ([]models.Passes, error)
 	GetPassByCode(resultID int, code int64) (models.Passes, error)
 	GetPassByStudentID(passID, studentID int) (models.Passes, error)
+	ClosePass(passID int) error
 
-	GetPassesAndStudents(resultID, userID int) ([]models.Passes, []models.Student, error)
+	GetPassesAndStudents(resultID, userID int) (models.ForResultTable, error)
 }
 
 type UserService interface {
@@ -71,12 +80,15 @@ type Handler struct {
 	AnswerService
 	GroupService
 	StudentService
+	ResultService
 }
 
 func NewHandler(
 	u UserService, t TestService, q QuestionService, a AnswerService, g GroupService, s StudentService,
+	r ResultService,
 ) *Handler {
-	return &Handler{u, t, q, a, g, s}
+	return &Handler{u, t, q,
+		a, g, s, r}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
@@ -174,7 +186,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 		studentsPage.GET("/:result_id/solving/:pass_id", h.IssueTestPage)
 		studentsPage.GET("/:result_id/solving/:pass_id/questions", h.GetQuestionsForStudent)
-		studentsPage.POST("/:result_id/solving/:pass_id/results")
+		studentsPage.POST("/:result_id/solving/:pass_id/results", h.CreateResult)
 	}
 
 	return router

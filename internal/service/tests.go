@@ -24,8 +24,9 @@ var (
 	AccessGetError = errors.New("ошибка при получении результатов теста")
 	PassesGetError = errors.New("ошибка при получении пропусков")
 
-	PassGetError = errors.New("ошибка при получении пропуска")
-	PassNotFound = errors.New("неверный код")
+	PassGetError  = errors.New("ошибка при получении пропуска")
+	PassNotFound  = errors.New("неверный код")
+	PassDontClose = errors.New("не удалось закрыть доступ к тесту")
 )
 
 type TestRepository interface {
@@ -43,6 +44,7 @@ type TestRepository interface {
 	GetPasses(resultID int) ([]models.Passes, error)
 	GetPass(resultID int, code int64) (models.Passes, error)
 	GetPassByStudentID(passID, studentID int) (models.Passes, error)
+	ClosePass(passID int) error
 }
 
 type TestService struct {
@@ -50,10 +52,13 @@ type TestService struct {
 	StudentRepository
 	*QuestionService
 	*GroupService
+	ResultRepository
 }
 
-func NewTestService(r TestRepository, sr StudentRepository, sq *QuestionService, gs *GroupService) *TestService {
-	return &TestService{r, sr, sq, gs}
+func NewTestService(
+	r TestRepository, sr StudentRepository, sq *QuestionService, gs *GroupService, rr ResultRepository,
+) *TestService {
+	return &TestService{r, sr, sq, gs, rr}
 }
 
 func (s *TestService) Create(title string, userID int) (int, error) {
@@ -246,36 +251,57 @@ func (s *TestService) GetAccess(userID, accessID int) (models.AccessOut, error) 
 	return a, nil
 }
 
-func (s *TestService) GetPassesAndStudents(resultID, userID int) ([]models.Passes, []models.Student, error) {
+func (s *TestService) GetPassesAndStudents(resultID, userID int) (models.ForResultTable, error) {
 	access, err := s.TestRepository.GetAccess(userID, resultID)
 
 	if err != nil {
 		log.Err(err).Send()
-		return nil, nil, AccessGetError
+		return models.ForResultTable{}, AccessGetError
 	}
 
 	_, err = s.GroupService.Get(access.GroupID, userID)
 
 	if err != nil {
 		log.Err(err).Send()
-		return nil, nil, GroupGetError
+		return models.ForResultTable{}, GroupGetError
 	}
 
 	passes, err := s.TestRepository.GetPasses(resultID)
 
 	if err != nil {
 		log.Err(err).Send()
-		return nil, nil, PassesGetError
+		return models.ForResultTable{}, PassesGetError
 	}
 
 	students, err := s.StudentRepository.GetAll(access.GroupID)
 
 	if err != nil {
 		log.Err(err).Send()
-		return nil, nil, StudentGetError
+		return models.ForResultTable{}, StudentGetError
 	}
 
-	return passes, students, nil
+	forResultTable := models.ForResultTable{
+		Students: students,
+		Passes:   passes,
+		Results:  make([]models.ResultStudent, len(passes)),
+	}
+
+	results, err := s.ResultRepository.GetAll(access.ID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.ForResultTable{}, ResultGetError
+	}
+
+	for i, p := range forResultTable.Passes {
+		for _, r := range results {
+			if r.PassID == p.ID {
+				forResultTable.Results[i] = r
+			}
+		}
+	}
+
+	return forResultTable, nil
 }
 
 func (s *TestService) GetAllAccessess(userID int) ([]models.AccessOut, error) {
@@ -323,4 +349,14 @@ func (s *TestService) GetPassByStudentID(passID, studentID int) (models.Passes, 
 	}
 
 	return pass, nil
+}
+
+func (s *TestService) ClosePass(passID int) error {
+	err := s.TestRepository.ClosePass(passID)
+
+	if err != nil {
+		return PassDontClose
+	}
+
+	return nil
 }

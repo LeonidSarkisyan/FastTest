@@ -18,7 +18,7 @@
 </head>
 <body>
     <div class="container solve__container" x-data x-subscribe>
-        <div class="solve">
+        <div class="solve" x-show="!$store.data.isPass && !$store.data.isComplete">
             <h1 class="question__form__title">Название теста: <span class="solve__char">{{ .test.Title }}</span></h1>
             <h3 class="solve__subtitle">
                 Время прохождения: <span class="solve__char">{{ .access.PassageTime }} мин.</span>
@@ -29,12 +29,102 @@
             <div class="base__button edit" id="startButton">
                 Начать прохождение
             </div>
-            <template x-for="question in $store.data.questions">
-                <div x-text="question.text">
+        </div>
+        <div class="" x-show="$store.data.isPass && !$store.data.isComplete">
+            <div class="solve__test">
+                <div class="solve__test__title"> {{ .test.Title }}</div>
+                <div id="timer" class="timer">00:00:00</div>
+            </div>
+            <template x-for="(question, index) in $store.data.questions">
+                <div class="solve answer" x-show="$store.data.currentQuestionIndex === index">
+                    <div class="solve__answer__number">
+                        Вопрос <span x-text="index + 1"></span> / <span x-text="$store.data.questions.length"></span>
+                    </div>
+                    <div class="question__form__title last solve__char" x-text="question.text"></div>
+                    <div class="answer__list">
+                        <template x-for="(answer, aIndex) in question.answers">
+                            <div class="answer__item">
+                                <label>
+                                    <input
+                                            :name="question.id"
+                                            @change="$store.methods.SaveAnswer($event, index, aIndex)"
+                                            :type="question.type"
+                                            class="answer__point__checkbox"
+                                    >
+                                </label>
+                                <div x-text="answer.text">
 
+                                </div>
+                            </div>
+                        </template>
+                        <div class="answer__item__buttons">
+                            <div
+                                    x-show="$store.data.currentQuestionIndex !== 0"
+                                    class="base__button edit"
+                                    @click="$store.methods.changeIndex($store.data.currentQuestionIndex - 1)"
+                            >
+                                Назад
+                            </div>
+                            <div
+                                    x-show="$store.data.currentQuestionIndex !== $store.data.questions.length - 1"
+                                    class="base__button edit continue"
+                                    @click="$store.methods.changeIndex($store.data.currentQuestionIndex + 1)"
+                            >
+                                К следующему вопросу
+                            </div>
+                            <div
+                                    x-show="$store.data.currentQuestionIndex === $store.data.questions.length - 1"
+                                    class="base__button edit continue"
+                                    @click="$store.methods.ShowModal()"
+                            >
+                                Завершить тест
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </template>
         </div>
+        <div id="myModal" class="modal" x-show="$store.data.showModal">
+            <template x-if="$store.data.showModal">
+                <div class="modal-content solve__modal">
+                    <div class="tests__form">
+                        <div class="tests__form__title">Завершить тест</div>
+                        <div class="tests__form__body" x-show="!$store.methods.CanCompleteTest()">
+                            <h3>Вы не можете завершить тест, пока не ответите на все вопросы</h3>
+                        </div>
+                        <div class="tests__form__body" x-show="$store.methods.CanCompleteTest()">
+                            <h3 class="last">Вы точно хотите завершить тест?</h3>
+                            <div class="solve__error" x-text="$store.data.error" x-show="$store.data.error">
+
+                            </div>
+                            <div
+                                    class="tests__navbar__create"
+                                    @click="$store.methods.completeTest()"
+                            >
+                                Завершить
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <template x-if="$store.data.isComplete">
+            <div class="solve result">
+                <h1 class="question__form__title">
+                    Поздравляем! Вы прошли тест <span class="solve__char">"{{ .test.Title }}"</span>!
+                </h1>
+                <h2 class="solve__subtitle">
+                    Оценка: <span class="solve__char" x-text="$store.data.result.mark"></span>
+                </h2>
+                <h2 class="solve__subtitle">
+                    Баллы: <span class="solve__char" x-text="$store.data.result.score"></span>
+                    <span class="solve__char"> / {{ .test.Count }}</span>
+                </h2>
+                <h2 class="solve__subtitle solve__subtitle__last">
+                    ФИО: <span class="solve__char">{{ .student.Surname }} {{ .student.Name }} {{ .student.Patronymic }}</span>
+                </h2>
+            </div>
+        </template>
     </div>
     <script type="module" src="/../static/js/solve.js">
 

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"App/internal/models"
+	"encoding/json"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
@@ -266,7 +267,7 @@ func (r *TestPostgres) GetPass(resultID int, code int64) (models.Passes, error) 
 
 func (r *TestPostgres) GetResult(resultID int) (models.AccessOut, error) {
 	query := `
-	SELECT id, test_id, group_id, date_start, date_end, passage_time, shuffle, user_id
+	SELECT id, test_id, group_id, date_start, date_end, passage_time, shuffle, user_id, criteria
 	FROM accesses
 	WHERE id = $1;
 	`
@@ -274,8 +275,15 @@ func (r *TestPostgres) GetResult(resultID int) (models.AccessOut, error) {
 	var a models.AccessOut
 
 	err := r.conn.QueryRow(query, resultID).Scan(
-		&a.ID, &a.TestID, &a.GroupID, &a.DateStart, &a.DateEnd, &a.PassageTime, &a.Shuffle, &a.UserID,
+		&a.ID, &a.TestID, &a.GroupID, &a.DateStart, &a.DateEnd, &a.PassageTime, &a.Shuffle, &a.UserID, &a.CriteriaJson,
 	)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.AccessOut{}, err
+	}
+
+	err = json.Unmarshal(a.CriteriaJson, &a.Criteria)
 
 	if err != nil {
 		log.Err(err).Send()
@@ -304,4 +312,28 @@ func (r *TestPostgres) GetPassByStudentID(passID, studentID int) (models.Passes,
 	}
 
 	return p, nil
+}
+
+func (r *TestPostgres) ClosePass(passID int) error {
+	stmt := "UPDATE passes SET is_activated = true, datetime_activate = CURRENT_TIMESTAMP WHERE id = $1;"
+
+	result, err := r.conn.Exec(stmt, passID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	count, err := result.RowsAffected()
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	if count == 0 {
+		return NotUpdateRow
+	}
+
+	return nil
 }

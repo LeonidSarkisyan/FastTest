@@ -96,3 +96,22 @@ func (r *StudentPostgres) Delete(studentID, groupID int) error {
 
 	return nil
 }
+
+func (r *StudentPostgres) Get(studentID int) (models.Student, error) {
+	query := `
+	SELECT id, name, surname, patronymic 
+	FROM students 
+	WHERE id = $1
+	`
+
+	var s models.Student
+
+	err := r.db.QueryRow(query, studentID).Scan(&s.ID, &s.Name, &s.Surname, &s.Patronymic)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.Student{}, err
+	}
+
+	return s, nil
+}

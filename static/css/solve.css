@@ -1,5 +1,5 @@
 .solve__container {
-    text-align: center;
+
 }
 
 .solve {
@@ -14,4 +14,68 @@
 
 .solve__char {
     color: var(--color-text-other);
+}
+
+.solve__answer__number {
+    font-size: 20px;
+    font-weight: 700;
+
+    margin-bottom: 16px;
+}
+
+.solve__test {
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.solve__test__title {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.timer {
+    font-size: 20px;
+    font-weight: 700;
+    position: absolute;
+    right: 0;
+    width: 100px;
+}
+
+.answer__item {
+    display: flex;
+    align-items: center;
+
+    font-size: 20px;
+    font-weight: 700;
+
+    margin-bottom: 16px;
+}
+
+.answer__item__buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.continue {
+    margin-left: auto;
+}
+
+.solve__error {
+    color: var(--color-error);
+
+    font-size: 20px;
+    font-weight: 500;
+
+    margin-bottom: 16px;
+}
+
+.result {
+    text-align: center;
+}
+
+.solve__subtitle__last {
+    margin-bottom: 0;
 }

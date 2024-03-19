@@ -28,7 +28,7 @@
 }
 
 .last {
-
+    margin-bottom: 16px;
 }
 
 .results {
@@ -54,4 +54,34 @@
 
 .code:active {
     color: #fefefe;
+}
+
+.complete {
+    color: green;
+    font-weight: 700;
+}
+
+.green {
+    color: green;
+    font-weight: 700;
+}
+
+.orange {
+    color: #00b400;
+    font-weight: 700;
+}
+
+.yellow {
+    color: hsl(38, 100%, 49%);;
+    font-weight: 700;
+}
+
+.red {
+    color: red;
+    font-weight: 700;
+}
+
+.solving {
+    color: #00b400;
+    font-weight: 700;
 }

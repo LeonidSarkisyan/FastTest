@@ -2,6 +2,12 @@ package models
 
 import "time"
 
+type ForResultTable struct {
+	Students []Student       `json:"students"`
+	Passes   []Passes        `json:"passes"`
+	Results  []ResultStudent `json:"results"`
+}
+
 type PassesIn struct {
 	Code      int64
 	StudentID int

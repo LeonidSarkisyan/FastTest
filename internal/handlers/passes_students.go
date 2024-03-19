@@ -25,17 +25,14 @@ func (h *Handler) GetPassesAndStudents(c *gin.Context) {
 	userID := c.GetInt("userID")
 	resultID := MustID(c, "result_id")
 
-	passes, students, err := h.TestService.GetPassesAndStudents(resultID, userID)
+	forResultTable, err := h.TestService.GetPassesAndStudents(resultID, userID)
 
 	if err != nil {
 		SendErrorResponse(c, 422, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"passes":   passes,
-		"students": students,
-	})
+	c.JSON(200, forResultTable)
 }
 
 func (h *Handler) GetStartedTest(c *gin.Context) {
@@ -113,6 +110,16 @@ func (h *Handler) IssueTestPage(c *gin.Context) {
 		return
 	}
 
+	student, err := h.StudentService.Get(studentID)
+
+	if err != nil {
+		c.HTML(401, "error.html", gin.H{
+			"error": "Ошибка 404, неизвестный студент",
+		})
+		c.Abort()
+		return
+	}
+
 	if pass.IsActivated {
 		c.HTML(401, "error.html", gin.H{
 			"error": "Ошибка 409, попытки закончились",
@@ -144,8 +151,9 @@ func (h *Handler) IssueTestPage(c *gin.Context) {
 	}
 
 	c.HTML(200, "solve.html", gin.H{
-		"title":  "Прохождение теста",
-		"access": result,
-		"test":   test,
+		"title":   "Прохождение теста",
+		"access":  result,
+		"test":    test,
+		"student": student,
 	})
 }

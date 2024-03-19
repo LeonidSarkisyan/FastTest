@@ -17,3 +17,7 @@
 
     border-radius: 16px;
 }
+
+.solve__modal {
+    margin: 15% auto !important;
+}

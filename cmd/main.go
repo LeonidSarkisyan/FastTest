@@ -25,15 +25,19 @@ func main() {
 	answerRepo := repository.NewAnswerPostgres(conn)
 	groupRepo := repository.NewGroupPostgres(conn)
 	studentRepo := repository.NewStudentPostgres(conn)
+	resultRepo := repository.NewResultPostgres(conn)
 
 	userService := service.NewUserService(userRepo)
 	answerService := service.NewAnswerService(answerRepo, testRepo, questionRepo)
 	questionService := service.NewQuestionService(questionRepo, testRepo, answerService)
 	groupService := service.NewGroupService(groupRepo)
-	testService := service.NewTestService(testRepo, studentRepo, questionService, groupService)
+	testService := service.NewTestService(testRepo, studentRepo, questionService, groupService, resultRepo)
 	studentService := service.NewStudentService(studentRepo, groupRepo)
+	resultService := service.NewResultService(resultRepo)
 
-	handler := handlers.NewHandler(userService, testService, questionService, answerService, groupService, studentService)
+	handler := handlers.NewHandler(
+		userService, testService, questionService, answerService, groupService, studentService, resultService,
+	)
 	server_ := new(server.Server)
 
 	go func() {

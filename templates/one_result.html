@@ -43,6 +43,7 @@
         <div class="date__event last">
             Ссылка для прохождения -
             <a
+                    target="_blank"
                     :href="'{{ .urlPass }}'"
                     class="date__event__date"
             >
@@ -50,46 +51,84 @@
             </a>
         </div>
         <div class="student__table">
-            <table class="student__table results" x-show="$store.data.students.length">
-                <thead>
-                <tr>
-                    <th><b>№</b></th>
-                    <th>Код доступа</th>
-                    <th>Фамилия</th>
-                    <th>Имя</th>
-                    <th>Статус</th>
-                    <th>Баллы</th>
-                    <th>Оценка</th>
-                </tr>
-                </thead>
-                <tbody>
-                <template x-for="(student, index) in $store.data.students">
-                    <tr
-                            class="student__table__row result__row"
-                    >
-                        <td x-text="index + 1" class="student__table__head__column"></td>
-                        <td x-text="$store.data.passes[index].code" class="student__table__head__column code"></td>
-                        <td x-text="student.surname" class="student__table__head__column"></td>
-                        <td x-text="student.name" class="student__table__head__column"></td>
-                        <td
-                                x-show="!$store.data.passes[index].is_activated"
-                                class="student__table__head__column">
-                            Не приступил
-                        </td>
-                        <td
-                                x-show="!$store.data.passes[index].is_activated"
-                                class="student__table__head__column">
-                            -
-                        </td>
-                        <td
-                                x-show="!$store.data.passes[index].is_activated"
-                                class="student__table__head__column">
-                            -
-                        </td>
+            <template x-if="$store.data.students.length">
+                <table class="student__table results">
+                    <thead>
+                    <tr>
+                        <th><b>№</b></th>
+                        <th>Код доступа</th>
+                        <th>Фамилия</th>
+                        <th>Имя</th>
+                        <th>Статус</th>
+                        <th>Баллы</th>
+                        <th>Оценка</th>
                     </tr>
-                </template>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    <template x-for="(student, index) in $store.data.students">
+                        <tr
+                                class="student__table__row result__row"
+                        >
+                            <td x-text="index + 1" class="student__table__head__column"></td>
+                            <td x-text="$store.data.passes[index].code" class="student__table__head__column code"></td>
+                            <td x-text="student.surname" class="student__table__head__column"></td>
+                            <td x-text="student.name" class="student__table__head__column"></td>
+                            <td
+                                    x-show="!$store.data.passes[index].is_activated"
+                                    class="student__table__head__column">
+                                Не приступил
+                            </td>
+                            <td
+                                    x-show="$store.data.passes[index].is_activated && $store.data.results[index].access_id === 0"
+                                    class="student__table__head__column solving">
+                                Выполняет...
+                            </td>
+                            <td
+                                    x-show="$store.data.results[index].access_id !== 0"
+                                    class="student__table__head__column complete">
+                                Прошёл
+                            </td>
+                            <td
+                                    x-show="$store.data.results[index].access_id === 0"
+                                    class="student__table__head__column">
+                                -
+                            </td>
+                            <td
+                                    x-show="$store.data.results[index].access_id === 0"
+                                    class="student__table__head__column">
+                                -
+                            </td>
+                            <td
+                                    x-show="$store.data.results[index].access_id !== 0"
+                                    class="student__table__head__column"
+                                    :class="{
+                                        'green': $store.data.results[index].mark === 5,
+                                        'orange': $store.data.results[index].mark === 4,
+                                        'yellow': $store.data.results[index].mark === 3,
+                                        'red': $store.data.results[index].mark === 2
+                                    }"
+                            >
+                                <span x-text="$store.data.results[index].score"></span>
+                                <span> / </span>
+                                <span x-text="$store.data.results[index].max_score"></span>
+                            </td>
+                            <td
+                                    x-show="$store.data.results[index].access_id !== 0"
+                                    x-text="$store.data.results[index].mark"
+                                    class="student__table__head__column"
+                                    :class="{
+                                        'green': $store.data.results[index].mark === 5,
+                                        'orange': $store.data.results[index].mark === 4,
+                                        'yellow': $store.data.results[index].mark === 3,
+                                        'red': $store.data.results[index].mark === 2
+                                    }"
+                            >
+                            </td>
+                        </tr>
+                    </template>
+                    </tbody>
+                </table>
+            </template>
         </div>
     </div>
     <script type="module" src="/../static/js/one_result.js">
