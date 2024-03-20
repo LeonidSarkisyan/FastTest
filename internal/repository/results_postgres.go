@@ -16,7 +16,7 @@ func NewResultPostgres(db *sqlx.DB) *ResultPostgres {
 
 func (r *ResultPostgres) Save(studentID, accessID, passID int, result models.ResultStudentIn) (int, error) {
 	stmt := `
-	INSERT INTO results (mark, score, max_score, pass_id, access_id, student_id)
+	INSERT INTO results (mark, score, max_score, pass_id, access_id, student_id, time_pass)
 	VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;
 	`
 
@@ -55,7 +55,7 @@ func (r *ResultPostgres) Get(resultID int) (models.ResultStudent, error) {
 
 func (r *ResultPostgres) GetAll(accessID int) ([]models.ResultStudent, error) {
 	stmt := `
-	SELECT mark, score, max_score, pass_id, access_id, student_id
+	SELECT mark, score, max_score, pass_id, access_id, student_id, time_pass
 	FROM results
 	WHERE access_id = $1;
 	`
@@ -72,7 +72,9 @@ func (r *ResultPostgres) GetAll(accessID int) ([]models.ResultStudent, error) {
 	for row.Next() {
 		var res models.ResultStudent
 
-		err = row.Scan(&res.Mark, &res.Score, &res.MaxScore, &res.PassID, &res.AccessID, &res.StudentID)
+		err = row.Scan(
+			&res.Mark, &res.Score, &res.MaxScore, &res.PassID, &res.AccessID, &res.StudentID, &res.TimePass,
+		)
 
 		if err != nil {
 			log.Err(err).Send()

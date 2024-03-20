@@ -132,7 +132,16 @@ Spruce.store("methods", {
         console.log(response.data)
     },
 
-    async focusAnswer(index) {
+    async focusAnswer(index, event) {
+        if (event) {
+            if (event.ctrlKey) {
+                console.log(index)
+                $store.data.answers[index].is_correct = !$store.data.answers[index].is_correct
+                await $store.methods.updateAnswer(index)
+                return
+            }
+        }
+
         let inputs = document.getElementsByClassName("answer__input")
 
         if (index < inputs.length - 1) {
@@ -184,7 +193,7 @@ Spruce.store("methods", {
     }
 })
 
-let modal = document.getElementById("myModal");
+const modal = document.getElementById("myModal")
 
 window.onmousedown = function(event) {
     if (event.target === modal) {

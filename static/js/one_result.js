@@ -34,6 +34,52 @@ socket.onclose = function(event) {
 };
 
 socket.onmessage = function(event) {
-    console.log('Message received:', event.data);
+    const newResult = JSON.parse(event.data)
+
+    let index = 0
+
+    for (let p of $store.data.passes) {
+        if (p.id === newResult.pass_id) {
+            if (newResult.mark === -1) {
+                $store.data.passes[index].is_activated = true
+
+                const timerDiv = document.getElementById("timer_" + index)
+
+                startTimer(timerDiv)
+
+                break
+            } else {
+                $store.data.passes[index].is_activated = true
+                $store.data.results[index] = newResult
+                break
+            }
+        }
+        index++
+    }
+
+    console.log('Message received:', newResult);
 };
 
+
+const timers = []
+
+function startTimer(elem) {
+    updateTimer()
+    timer = setInterval(function () {
+        updateTimer(elem)
+    }, 1000);
+}
+
+function updateTimer(elem) {
+    totalSeconds++
+
+    let hours = 0
+    let minutes = 0
+    let remainingSeconds = 0
+
+    elem.innerText = pad(hours) + ':' + pad(minutes) + ':' + pad(remainingSeconds);
+}
+
+function pad(val) {
+    return val > 9 ? val : '0' + val;
+}

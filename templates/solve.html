@@ -44,17 +44,14 @@
                     <div class="answer__list">
                         <template x-for="(answer, aIndex) in question.answers">
                             <div class="answer__item">
-                                <label>
-                                    <input
-                                            :name="question.id"
-                                            @change="$store.methods.SaveAnswer($event, index, aIndex)"
-                                            :type="question.type"
-                                            class="answer__point__checkbox"
-                                    >
-                                </label>
-                                <div x-text="answer.text">
-
-                                </div>
+                                <input
+                                        :id="answer.id"
+                                        :name="question.id"
+                                        @change="$store.methods.SaveAnswer($event, index, aIndex)"
+                                        :type="question.type"
+                                        class="answer__point__checkbox"
+                                >
+                                <label :for="answer.id" x-text="answer.text"></label>
                             </div>
                         </template>
                         <div class="answer__item__buttons">

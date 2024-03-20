@@ -39,14 +39,6 @@
                 </div>
             </div>
         </div>
-<!--        <template x-if="$store.data.questions.length">-->
-<!--            <div class="question__form">-->
-<!--                <div class="question__form__title">Критерии оценивания:</div>-->
-<!--                <div x-text="`Максимальное количество баллов - ${$store.data.questions.length}`">-->
-<!--    -->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </template>-->
         <div class="question__form list">
             <template x-for="(question, index) in $store.data.questions" :key="question.id">
                 <div
@@ -86,8 +78,7 @@
                             x-model="answer.is_correct"
                     >
                     <input
-                            @keydown.up.prevent="console.log('weeewqe')"
-                            @keydown.enter="$store.methods.focusAnswer(index)"
+                            @keydown.enter="$store.methods.focusAnswer(index, $event)"
                             @change="$store.methods.updateAnswer(index)"
                             class="base__input text answer__input"
                             x-model="answer.text"

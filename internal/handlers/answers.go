@@ -38,7 +38,17 @@ func (h *Handler) GetAnswers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, responses.NewListResponse(answers))
+	var answers_ []models.AnswerWithCorrect
+
+	for _, a := range answers {
+		answers_ = append(answers_, models.AnswerWithCorrect{
+			ID:        a.ID,
+			Text:      a.Text,
+			IsCorrect: a.IsCorrect,
+		})
+	}
+
+	c.JSON(200, responses.NewListResponse(answers_))
 }
 
 func (h *Handler) UpdateAnswer(c *gin.Context) {

@@ -4,9 +4,11 @@ import (
 	"App/internal/handlers/responses"
 	"App/internal/models"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"math/rand/v2"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 const (
@@ -90,13 +92,42 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		return
 	}
 
-	h.ClientManager.Broadcast <- []byte("205730 начал проходить тест!")
+	h.ClientManager.Broadcast <- Message{
+		UserID: access.UserID,
+		Result: models.ResultStudent{
+			Mark:         -1,
+			Score:        0,
+			MaxScore:     0,
+			DateTimePass: time.Time{},
+			PassID:       passID,
+			AccessID:     accessID,
+			StudentID:    0,
+		},
+	}
 
 	c.JSON(200, gin.H{
 		"test_id":   access.TestID,
 		"access":    access,
 		"questions": responses.NewListResponse(questions),
 	})
+
+	go func() {
+		time.Sleep(time.Minute * time.Duration(access.PassageTime))
+
+		resultStudent, err := h.ResultService.SaveResult(
+			studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, pass,
+		)
+
+		if err != nil {
+			log.Err(err).Send()
+			return
+		}
+
+		h.ClientManager.Broadcast <- Message{
+			UserID: access.UserID,
+			Result: resultStudent,
+		}
+	}()
 }
 
 func (h *Handler) CreateResult(c *gin.Context) {
@@ -177,6 +208,13 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		SendErrorResponse(c, 409, err.Error())
 		return
 	}
+
+	message := Message{
+		UserID: access.UserID,
+		Result: result,
+	}
+
+	h.ClientManager.Broadcast <- message
 
 	c.JSON(http.StatusCreated, gin.H{
 		"result": result,

@@ -111,13 +111,11 @@ function startTimer(minutes) {
     timer = setInterval(updateTimer, 1000);
 }
 
-function updateTimer() {
+async function updateTimer() {
     totalSeconds--
 
     if (totalSeconds < 0) {
-        clearInterval(timer)
-        alert("Time's up!")
-        return;
+        await $store.methods.completeTest()
     }
 
     let hours = Math.floor(totalSeconds / 3600);

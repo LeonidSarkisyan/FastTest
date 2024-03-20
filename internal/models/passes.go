@@ -14,7 +14,7 @@ type PassesIn struct {
 }
 
 type Passes struct {
-	ID                int
+	ID                int        `json:"id"`
 	DateTimeActivated *time.Time `json:"date_time_activated"`
 	IsActivated       bool       `json:"is_activated"`
 	Code              int64      `json:"code"`

@@ -74,7 +74,7 @@ type UserService interface {
 }
 
 type Handler struct {
-	ClientManager
+	*ClientManager
 	UserService
 	TestService
 	QuestionService
@@ -85,7 +85,7 @@ type Handler struct {
 }
 
 func NewHandler(
-	cm ClientManager,
+	cm *ClientManager,
 	u UserService, t TestService, q QuestionService, a AnswerService, g GroupService, s StudentService,
 	r ResultService,
 ) *Handler {

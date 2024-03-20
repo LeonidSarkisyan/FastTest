@@ -14,27 +14,15 @@ var (
 )
 
 func (h *Handler) CreateWSConnect(c *gin.Context) {
+	userID := c.GetInt("userID")
+
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	client := &Client{socket: conn, send: make(chan []byte)}
+	client := &Client{socket: conn, send: make(chan []byte), userID: userID}
 
 	h.ClientManager.Register <- client
-
-	for {
-		_, msg, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		err = conn.WriteMessage(websocket.TextMessage, msg)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-	}
 }

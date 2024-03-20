@@ -20,4 +20,5 @@ type ResultStudent struct {
 	PassID       int       `json:"pass_id"`
 	AccessID     int       `json:"access_id"`
 	StudentID    int       `json:"student_id"`
+	TimePass     int       `json:"time_pass"`
 }

@@ -62,6 +62,7 @@
                         <th>Статус</th>
                         <th>Баллы</th>
                         <th>Оценка</th>
+                        <th>Время</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -99,6 +100,11 @@
                                 -
                             </td>
                             <td
+                                    x-show="$store.data.results[index].access_id === 0"
+                                    class="student__table__head__column">
+                                -
+                            </td>
+                            <td
                                     x-show="$store.data.results[index].access_id !== 0"
                                     class="student__table__head__column"
                                     :class="{
@@ -115,6 +121,18 @@
                             <td
                                     x-show="$store.data.results[index].access_id !== 0"
                                     x-text="$store.data.results[index].mark"
+                                    class="student__table__head__column"
+                                    :class="{
+                                        'green': $store.data.results[index].mark === 5,
+                                        'orange': $store.data.results[index].mark === 4,
+                                        'yellow': $store.data.results[index].mark === 3,
+                                        'red': $store.data.results[index].mark === 2
+                                    }"
+                            >
+                            </td>
+                            <td
+                                    :id="'timer_' + index"
+                                    x-show="$store.data.results[index].access_id !== 0"
                                     class="student__table__head__column"
                                     :class="{
                                         'green': $store.data.results[index].mark === 5,
