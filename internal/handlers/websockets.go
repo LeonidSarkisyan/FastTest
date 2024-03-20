@@ -1,15 +1,15 @@
 package handlers
 
 import (
+	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/net/websocket"
 )
 
 type ClientManager struct {
-	clients    map[*Client]bool
-	broadcast  chan []byte
-	register   chan *Client
-	unregister chan *Client
+	Clients    map[*Client]bool
+	Broadcast  chan []byte
+	Register   chan *Client
+	Unregister chan *Client
 }
 
 type Client struct {
@@ -17,25 +17,26 @@ type Client struct {
 	send   chan []byte
 }
 
-func (manager *ClientManager) start() {
+func (manager *ClientManager) Start() {
 	for {
 		select {
-		case client := <-manager.register:
-			manager.clients[client] = true
+		case client := <-manager.Register:
+			manager.Clients[client] = true
 			log.Info().Msgf("Client Connected: %s", client.socket.RemoteAddr())
-		case client := <-manager.unregister:
-			if _, ok := manager.clients[client]; ok {
+		case client := <-manager.Unregister:
+			if _, ok := manager.Clients[client]; ok {
 				close(client.send)
-				delete(manager.clients, client)
+				delete(manager.Clients, client)
 				log.Info().Msgf("Client Connected: %s", client.socket.RemoteAddr())
 			}
-		case message := <-manager.broadcast:
-			for client := range manager.clients {
+		case message := <-manager.Broadcast:
+			for client := range manager.Clients {
+				log.Info().Any("client", client).Send()
 				select {
 				case client.send <- message:
 				default:
 					close(client.send)
-					delete(manager.clients, client)
+					delete(manager.Clients, client)
 				}
 			}
 		}

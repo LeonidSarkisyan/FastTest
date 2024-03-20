@@ -74,6 +74,7 @@ type UserService interface {
 }
 
 type Handler struct {
+	ClientManager
 	UserService
 	TestService
 	QuestionService
@@ -84,10 +85,11 @@ type Handler struct {
 }
 
 func NewHandler(
+	cm ClientManager,
 	u UserService, t TestService, q QuestionService, a AnswerService, g GroupService, s StudentService,
 	r ResultService,
 ) *Handler {
-	return &Handler{u, t, q,
+	return &Handler{cm, u, t, q,
 		a, g, s, r}
 }
 
@@ -177,6 +179,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		results.GET("", h.GetResults)
 		results.GET("/:result_id", h.GetPassesAndStudents)
+		results.GET("/:result_id/ws", h.CreateWSConnect)
 	}
 
 	studentsPage := router.Group("/passing")

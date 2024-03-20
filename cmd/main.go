@@ -35,8 +35,17 @@ func main() {
 	studentService := service.NewStudentService(studentRepo, groupRepo)
 	resultService := service.NewResultService(resultRepo)
 
+	manager := handlers.ClientManager{
+		Clients:    make(map[*handlers.Client]bool),
+		Broadcast:  make(chan []byte),
+		Register:   make(chan *handlers.Client),
+		Unregister: make(chan *handlers.Client),
+	}
+
+	go manager.Start()
+
 	handler := handlers.NewHandler(
-		userService, testService, questionService, answerService, groupService, studentService, resultService,
+		manager, userService, testService, questionService, answerService, groupService, studentService, resultService,
 	)
 	server_ := new(server.Server)
 

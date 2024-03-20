@@ -90,6 +90,8 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		return
 	}
 
+	h.ClientManager.Broadcast <- []byte("205730 начал проходить тест!")
+
 	c.JSON(200, gin.H{
 		"test_id":   access.TestID,
 		"access":    access,

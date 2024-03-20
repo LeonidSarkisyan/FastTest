@@ -21,3 +21,19 @@ for (let code of codes) {
         navigator.clipboard.writeText(event.target.textContent)
     })
 }
+
+const socket = new WebSocket(`ws://localhost:8080/results/${RESULT_ID}/ws`);
+
+socket.onopen = function(event) {
+    console.log('WebSocket connected');
+    socket.send('Hello, server!');
+};
+
+socket.onclose = function(event) {
+    console.log('WebSocket disconnected');
+};
+
+socket.onmessage = function(event) {
+    console.log('Message received:', event.data);
+};
+
