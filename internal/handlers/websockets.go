@@ -17,6 +17,7 @@ type ClientManager struct {
 	Broadcast  chan Message
 	Register   chan *Client
 	Unregister chan *Client
+	TimesMap   map[int]*chan int
 }
 
 type Client struct {

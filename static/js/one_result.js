@@ -7,6 +7,20 @@ Spruce.store("data", {
     results: []
 })
 
+Spruce.store("methods", {
+    TimeProcess(seconds) {
+        let hours = Math.floor(seconds / 3600);
+        let minutes = Math.floor((seconds % 3600) / 60);
+        let remainingSeconds = seconds % 60;
+
+        hours = pad(hours)
+        minutes = pad(minutes)
+        remainingSeconds = pad(remainingSeconds)
+
+        return hours + ':' + minutes + ':' + remainingSeconds;
+    }
+})
+
 const response = await axios.get(`/results/${RESULT_ID}`)
 console.log(response.data)
 
@@ -42,11 +56,7 @@ socket.onmessage = function(event) {
         if (p.id === newResult.pass_id) {
             if (newResult.mark === -1) {
                 $store.data.passes[index].is_activated = true
-
-                const timerDiv = document.getElementById("timer_" + index)
-
-                startTimer(timerDiv)
-
+                $store.data.results[index].time_pass = newResult.time_pass
                 break
             } else {
                 $store.data.passes[index].is_activated = true
@@ -59,26 +69,6 @@ socket.onmessage = function(event) {
 
     console.log('Message received:', newResult);
 };
-
-
-const timers = []
-
-function startTimer(elem) {
-    updateTimer()
-    timer = setInterval(function () {
-        updateTimer(elem)
-    }, 1000);
-}
-
-function updateTimer(elem) {
-    totalSeconds++
-
-    let hours = 0
-    let minutes = 0
-    let remainingSeconds = 0
-
-    elem.innerText = pad(hours) + ':' + pad(minutes) + ':' + pad(remainingSeconds);
-}
 
 function pad(val) {
     return val > 9 ? val : '0' + val;

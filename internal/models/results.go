@@ -3,13 +3,15 @@ package models
 import "time"
 
 type Result struct {
-	Questions []QuestionWithAnswersWithOutIsCorrect `json:"questions"`
+	Questions []QuestionWithAnswersWithOutIsCorrect `json:"questions" binding:"required"`
+	TimePass  int                                   `json:"time_pass" binding:"required"`
 }
 
 type ResultStudentIn struct {
 	Mark     int `json:"mark"`
 	Score    int `json:"score"`
 	MaxScore int `json:"max_score"`
+	TimePass int `json:"time_pass"`
 }
 
 type ResultStudent struct {

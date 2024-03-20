@@ -40,6 +40,7 @@ func main() {
 		Broadcast:  make(chan handlers.Message),
 		Register:   make(chan *handlers.Client),
 		Unregister: make(chan *handlers.Client),
+		TimesMap:   make(map[int]*chan int),
 	}
 
 	go manager.Start()

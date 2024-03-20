@@ -100,7 +100,7 @@
                                 -
                             </td>
                             <td
-                                    x-show="$store.data.results[index].access_id === 0"
+                                    x-show="!$store.data.passes[index].is_activated && $store.data.results[index].access_id === 0"
                                     class="student__table__head__column">
                                 -
                             </td>
@@ -132,7 +132,20 @@
                             </td>
                             <td
                                     :id="'timer_' + index"
-                                    x-show="$store.data.results[index].access_id !== 0"
+                                    x-show="$store.data.passes[index].is_activated && $store.data.results[index].access_id === 0"
+                                    x-text="$store.methods.TimeProcess($store.data.results[index].time_pass)"
+                                    class="student__table__head__column"
+                                    :class="{
+                                        'green': $store.data.results[index].mark === 5,
+                                        'orange': $store.data.results[index].mark === 4,
+                                        'yellow': $store.data.results[index].mark === 3,
+                                        'red': $store.data.results[index].mark === 2
+                                    }"
+                            >
+                            </td>
+                            <td
+                                    x-show="$store.data.passes[index].is_activated && $store.data.results[index].access_id !== 0"
+                                    x-text="$store.methods.TimeProcess($store.data.results[index].time_pass)"
                                     class="student__table__head__column"
                                     :class="{
                                         'green': $store.data.results[index].mark === 5,

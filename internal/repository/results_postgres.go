@@ -17,14 +17,16 @@ func NewResultPostgres(db *sqlx.DB) *ResultPostgres {
 func (r *ResultPostgres) Save(studentID, accessID, passID int, result models.ResultStudentIn) (int, error) {
 	stmt := `
 	INSERT INTO results (mark, score, max_score, pass_id, access_id, student_id, time_pass)
-	VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;
+	VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;
 	`
 
 	var id int
 
 	log.Info().Int("access_id", accessID).Int("studentID", studentID).Int("passID", passID).Send()
 
-	err := r.db.QueryRow(stmt, result.Mark, result.Score, result.MaxScore, passID, accessID, studentID).Scan(&id)
+	err := r.db.QueryRow(
+		stmt, result.Mark, result.Score, result.MaxScore, passID, accessID, studentID, result.TimePass,
+	).Scan(&id)
 
 	if err != nil {
 		log.Err(err).Send()
@@ -36,7 +38,7 @@ func (r *ResultPostgres) Save(studentID, accessID, passID int, result models.Res
 
 func (r *ResultPostgres) Get(resultID int) (models.ResultStudent, error) {
 	stmt := `
-	SELECT mark, score, max_score, pass_id, access_id, student_id
+	SELECT mark, score, max_score, pass_id, access_id, student_id, time_pass
 	FROM results
 	WHERE id = $1;
 	`
@@ -44,7 +46,10 @@ func (r *ResultPostgres) Get(resultID int) (models.ResultStudent, error) {
 	var result models.ResultStudent
 
 	row := r.db.QueryRow(stmt, resultID)
-	err := row.Scan(&result.Mark, &result.Score, &result.MaxScore, &result.PassID, &result.AccessID, &result.StudentID)
+	err := row.Scan(
+		&result.Mark, &result.Score, &result.MaxScore, &result.PassID, &result.AccessID, &result.StudentID,
+		&result.TimePass,
+	)
 	if err != nil {
 		log.Err(err).Send()
 		return models.ResultStudent{}, err

@@ -71,9 +71,21 @@ Spruce.store("methods", {
 
     async completeTest() {
         const questions = JSON.parse(localStorage.getItem("questions"))
+
+        const timeText = document.getElementById("timer").innerText
+
+        let timeParts = timeText.split(':');
+
+        let hours = parseInt(timeParts[0]);
+        let minutes = parseInt(timeParts[1]);
+        let seconds = parseInt(timeParts[2]);
+
+        let totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+
         try {
             const response = await axios.post(`/passing/${RESULT_ID}/solving/${PASS_ID}/results`, {
-                questions: questions
+                questions: questions,
+                time_pass: startTotalSeconds - totalSeconds
             })
 
             $store.data.result = response.data.result
@@ -104,9 +116,11 @@ startButton.onclick = async () => {
 
 let timer;
 let totalSeconds;
+let startTotalSeconds
 
 function startTimer(minutes) {
     totalSeconds = minutes * 60;
+    startTotalSeconds = minutes * 60;
     updateTimer()
     timer = setInterval(updateTimer, 1000);
 }
@@ -137,3 +151,8 @@ window.onmousedown = function(event) {
         $store.data.error = ""
     }
 }
+
+window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = 'Вы уверены, что хотите покинуть эту страницу? Все несохраненные изменения будут потеряны.';
+});

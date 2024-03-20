@@ -11,7 +11,7 @@ import (
 type ResultService interface {
 	SaveResult(
 		studentID, accessID, passID int, questions, questionsFromUser []models.QuestionWithAnswers,
-		access models.AccessOut, pass models.Passes,
+		access models.AccessOut, timePass int,
 	) (models.ResultStudent, error)
 }
 

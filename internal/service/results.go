@@ -33,7 +33,7 @@ func NewResultService(r ResultRepository) *ResultService {
 
 func (s *ResultService) SaveResult(
 	studentID, accessID, passID int, questions, questionsFromUser []models.QuestionWithAnswers,
-	access models.AccessOut, pass models.Passes,
+	access models.AccessOut, timePass int,
 ) (models.ResultStudent, error) {
 
 	log.Info().Any("questionsFromUser", questionsFromUser).Send()
@@ -96,6 +96,7 @@ func (s *ResultService) SaveResult(
 		Mark:     mark,
 		Score:    score,
 		MaxScore: len(questions),
+		TimePass: timePass,
 	}
 
 	id, err := s.ResultRepository.Save(studentID, accessID, passID, r)

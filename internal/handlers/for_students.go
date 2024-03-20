@@ -112,10 +112,10 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 	})
 
 	go func() {
-		time.Sleep(time.Minute * time.Duration(access.PassageTime))
+		time.Sleep(time.Duration(access.PassageTime)*time.Minute + 5*time.Second)
 
 		resultStudent, err := h.ResultService.SaveResult(
-			studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, pass,
+			studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
 		)
 
 		if err != nil {
@@ -126,6 +126,38 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		h.ClientManager.Broadcast <- Message{
 			UserID: access.UserID,
 			Result: resultStudent,
+		}
+
+		*h.ClientManager.TimesMap[passID] <- 1
+	}()
+
+	go func() {
+		secondPass := 1
+		c := make(chan int)
+
+		h.ClientManager.TimesMap[passID] = &c
+
+		for {
+			select {
+			case <-time.After(time.Second):
+				h.ClientManager.Broadcast <- Message{
+					UserID: access.UserID,
+					Result: models.ResultStudent{
+						Mark:         -1,
+						Score:        0,
+						MaxScore:     0,
+						DateTimePass: time.Time{},
+						PassID:       passID,
+						AccessID:     0,
+						StudentID:    0,
+						TimePass:     secondPass,
+					},
+				}
+				secondPass++
+			case <-*h.TimesMap[passID]:
+				delete(h.TimesMap, passID)
+				return
+			}
 		}
 	}()
 }
@@ -148,7 +180,7 @@ func (h *Handler) CreateResult(c *gin.Context) {
 	accessID := MustID(c, "result_id")
 	passID := MustID(c, "pass_id")
 
-	pass, err := h.GetPassByStudentID(passID, studentID)
+	_, err = h.GetPassByStudentID(passID, studentID)
 
 	if err != nil {
 		SendErrorResponse(c, 401, err.Error())
@@ -202,7 +234,9 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		questionWithAnswer = append(questionWithAnswer, newQ)
 	}
 
-	result, err := h.ResultService.SaveResult(studentID, accessID, passID, questions, questionWithAnswer, access, pass)
+	result, err := h.ResultService.SaveResult(
+		studentID, accessID, passID, questions, questionWithAnswer, access, r.TimePass,
+	)
 
 	if err != nil {
 		SendErrorResponse(c, 409, err.Error())
@@ -215,6 +249,7 @@ func (h *Handler) CreateResult(c *gin.Context) {
 	}
 
 	h.ClientManager.Broadcast <- message
+	*h.ClientManager.TimesMap[passID] <- 1
 
 	c.JSON(http.StatusCreated, gin.H{
 		"result": result,
