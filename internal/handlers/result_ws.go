@@ -24,13 +24,21 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 	c.Header("Connection", "keep-alive")
 	c.Header("Content-Type", "text/event-stream")
 
-	for {
+	for i := 0; ; i++ {
 		_, err := fmt.Fprintf(c.Writer, "data: %d \n\n", rand.Intn(100))
 		if err != nil {
 			log.Err(err).Send()
 		}
 		c.Writer.(http.Flusher).Flush()
 		time.Sleep(1 * time.Second)
+
+		if i%10 == 0 {
+			_, err = fmt.Fprint(c.Writer, "\n")
+			if err != nil {
+				log.Err(err).Send()
+			}
+			c.Writer.(http.Flusher).Flush()
+		}
 	}
 }
 
