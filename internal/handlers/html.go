@@ -160,12 +160,13 @@ func (h *Handler) OneResultPage(c *gin.Context) {
 		strings.ReplaceAll(access.DateEnd, "T00:00:00Z", ""), "-", ".")
 
 	c.HTML(http.StatusOK, "one_result.html", gin.H{
-		"title":   test.Title,
-		"test":    test,
-		"group":   group,
-		"access":  access,
-		"url":     fmt.Sprintf("/p/tests/%d", test.ID),
-		"urlPass": DomainWithPort + fmt.Sprintf("/passing/%d", access.ID),
+		"title":    test.Title,
+		"test":     test,
+		"group":    group,
+		"access":   access,
+		"url":      fmt.Sprintf("/p/tests/%d", test.ID),
+		"urlPass":  DomainWithPort + fmt.Sprintf("/passing/%d", access.ID),
+		"hrefPass": fmt.Sprintf("/passing/%d", access.ID),
 	})
 }
 
