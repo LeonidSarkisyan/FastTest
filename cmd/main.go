@@ -50,9 +50,10 @@ func main() {
 	)
 	handler.Config = cfg
 	handler.Channels = &handlers.Channels{
-		Broadcast: make(map[int]*chan handlers.Message),
-		TimesMap:  make(map[int]*chan int),
-		ResetMap:  make(map[int]*chan int),
+		Broadcast:         make(map[int]*chan handlers.Message),
+		BroadcastStudents: make(map[int]*chan handlers.Message),
+		TimesMap:          make(map[int]*chan int),
+		ResetMap:          make(map[int]*chan int),
 	}
 
 	server_ := new(server.Server)

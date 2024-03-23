@@ -77,9 +77,10 @@ type UserService interface {
 }
 
 type Channels struct {
-	Broadcast map[int]*chan Message
-	TimesMap  map[int]*chan int
-	ResetMap  map[int]*chan int
+	Broadcast         map[int]*chan Message
+	BroadcastStudents map[int]*chan Message
+	TimesMap          map[int]*chan int
+	ResetMap          map[int]*chan int
 }
 
 type Handler struct {
@@ -202,7 +203,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		studentsPage.GET("/:result_id/solving/:pass_id", h.IssueTestPage)
 		studentsPage.GET("/:result_id/solving/:pass_id/questions", h.GetQuestionsForStudent)
 		studentsPage.POST("/:result_id/solving/:pass_id/results", h.CreateResult)
-		studentsPage.GET("/:result_id/ws/student", h.CreateWSStudentConnect)
+		studentsPage.GET("/:result_id/ws/student/:pass_id", h.CreateWSStudentConnect)
 		studentsPage.GET("/abort", h.AbortPage)
 	}
 

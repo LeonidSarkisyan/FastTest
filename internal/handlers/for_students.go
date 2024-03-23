@@ -154,23 +154,22 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 			}
 		}()
 
+		msg := Message{
+			UserID: access.UserID,
+			Result: models.ResultStudent{
+				Mark:         -1,
+				DateTimePass: time.Time{},
+				PassID:       passID,
+				TimePass:     secondPass,
+			},
+		}
+
 		for {
 			select {
 			case <-time.After(time.Second):
 				log.Info().Msg("отправляем...")
-				*h.Channels.Broadcast[accessID] <- Message{
-					UserID: access.UserID,
-					Result: models.ResultStudent{
-						Mark:         -1,
-						Score:        0,
-						MaxScore:     0,
-						DateTimePass: time.Time{},
-						PassID:       passID,
-						AccessID:     0,
-						StudentID:    0,
-						TimePass:     secondPass,
-					},
-				}
+				*h.Channels.Broadcast[accessID] <- msg
+				*h.Channels.BroadcastStudents[passID] <- msg
 				secondPass++
 			}
 		}
