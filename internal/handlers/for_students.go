@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"math/rand/v2"
-	"net/http"
 	"strconv"
 	"time"
 )
@@ -105,7 +104,7 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		},
 	}
 
-	c.AbortWithStatusJSON(200, gin.H{
+	c.JSON(200, gin.H{
 		"test_id":   access.TestID,
 		"access":    access,
 		"questions": responses.NewListResponse(questions),
@@ -266,12 +265,17 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		Result: result,
 	}
 
-	h.ClientManager.Broadcast <- message
-	*h.ClientManager.TimesMap[passID] <- 1
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error().Any("r", r).Send()
+		}
+	}()
 
-	c.JSON(http.StatusCreated, gin.H{
-		"result": result,
-	})
+	*h.Channels.Broadcast[accessID] <- message
+
+	message.PassID = passID
+
+	*h.Channels.BroadcastStudents[passID] <- message
 }
 
 func (h *Handler) AbortPage(c *gin.Context) {
