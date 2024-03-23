@@ -97,19 +97,6 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		"questions": responses.NewListResponse(questions),
 	})
 
-	h.ClientManager.Broadcast <- Message{
-		UserID: access.UserID,
-		Result: models.ResultStudent{
-			Mark:         -1,
-			Score:        0,
-			MaxScore:     0,
-			DateTimePass: time.Time{},
-			PassID:       passID,
-			AccessID:     accessID,
-			StudentID:    0,
-		},
-	}
-
 	go func() {
 		s := make(chan int)
 		h.ClientManager.ResetMap[passID] = &s
