@@ -19,6 +19,13 @@ var (
 func (h *Handler) CreateStreamConnect(c *gin.Context) {
 	resultID := MustID(c, "result_id")
 
+	_, ok := h.Channels.Broadcast[resultID]
+
+	if !ok {
+		ch := make(chan Message)
+		h.Channels.Broadcast[resultID] = &ch
+	}
+
 	chanStream := make(chan Message, 10)
 	go func() {
 		defer close(chanStream)
