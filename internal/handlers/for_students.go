@@ -91,6 +91,12 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		return
 	}
 
+	c.JSON(200, gin.H{
+		"test_id":   access.TestID,
+		"access":    access,
+		"questions": responses.NewListResponse(questions),
+	})
+
 	h.ClientManager.Broadcast <- Message{
 		UserID: access.UserID,
 		Result: models.ResultStudent{
@@ -103,12 +109,6 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 			StudentID:    0,
 		},
 	}
-
-	c.JSON(200, gin.H{
-		"test_id":   access.TestID,
-		"access":    access,
-		"questions": responses.NewListResponse(questions),
-	})
 
 	go func() {
 		s := make(chan int)
