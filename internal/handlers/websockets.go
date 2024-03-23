@@ -45,7 +45,7 @@ func (manager *ClientManager) Start() {
 				log.Info().Int("client user_id", client.userID).Send()
 				log.Info().Int("user_id", message.UserID).Send()
 
-				if client.userID != message.UserID {
+				if client.userID != message.UserID || client.passID != message.Result.PassID {
 					continue
 				}
 
