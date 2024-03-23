@@ -3,7 +3,6 @@ package handlers
 import (
 	"App/internal/models"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
@@ -44,7 +43,7 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 
 			log.Info().Str("message", string(message)).Send()
 
-			_, err = fmt.Fprintf(c.Writer, "data: %s \n\n", message)
+			_, err = c.Writer.Write(message)
 
 			if err != nil {
 				log.Err(err).Send()
