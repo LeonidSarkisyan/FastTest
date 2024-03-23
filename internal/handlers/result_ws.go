@@ -17,12 +17,13 @@ var (
 )
 
 func (h *Handler) CreateStreamConnect(c *gin.Context) {
-	chanStream := make(chan int, 10)
+	resultID := MustID(c, "result_id")
+
+	chanStream := make(chan Message, 10)
 	go func() {
 		defer close(chanStream)
-		for i := 0; i < 5; i++ {
-			chanStream <- i
-			time.Sleep(time.Second * 1)
+		for result := range *h.Channels.Broadcast[resultID] {
+			chanStream <- result
 		}
 	}()
 	c.Stream(func(w io.Writer) bool {
