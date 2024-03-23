@@ -95,7 +95,7 @@ function pad(val) {
 let eventSource = new EventSource(`/results/${RESULT_ID}/stream`);
 
 const onMessage = (event) => {
-    console.log(event.data)
+    console.log(event)
 }
 
 eventSource.onmessage = onMessage
