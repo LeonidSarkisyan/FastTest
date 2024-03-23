@@ -16,11 +16,6 @@ var (
 )
 
 func (h *Handler) CreateStreamConnect(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", "*")
-	c.Header("Cache-Control", "no-cache")
-	c.Header("Connection", "keep-alive")
-	c.Header("Content-Type", "text/event-stream")
-
 	resultID := MustID(c, "result_id")
 
 	_, ok := h.Channels.Broadcast[resultID]
