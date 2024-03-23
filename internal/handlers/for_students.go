@@ -112,6 +112,8 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 			select {
 			case <-time.After(time.Second):
 				h.ClientManager.Broadcast <- msg
+				msg.PassID = 0
+				h.ClientManager.Broadcast <- msg
 				msg.Result.TimePass++
 			}
 		}
