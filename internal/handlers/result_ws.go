@@ -2,12 +2,10 @@ package handlers
 
 import (
 	"App/internal/models"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
-	"math/rand"
-	"net/http"
+	"io"
 	"time"
 )
 
@@ -19,50 +17,65 @@ var (
 )
 
 func (h *Handler) CreateStreamConnect(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", "*")
-	c.Header("Cache-Control", "no-cache")
-	c.Header("Connection", "keep-alive")
-	c.Header("Content-Type", "text/event-stream")
-
-	resultID := MustID(c, "result_id")
-
-	_, ok := h.Channels.Broadcast[resultID]
-
-	if !ok {
-		ch := make(chan Message)
-		h.Channels.Broadcast[resultID] = &ch
-	}
-
-	for {
-
-		_, err := fmt.Fprintf(c.Writer, "data: %d \n\n", rand.Intn(100))
-
-		if err != nil {
-			log.Err(err).Send()
+	chanStream := make(chan int, 10)
+	go func() {
+		defer close(chanStream)
+		for i := 0; i < 5; i++ {
+			chanStream <- i
+			time.Sleep(time.Second * 1)
 		}
-
-		c.Writer.(http.Flusher).Flush()
-		time.Sleep(2 * time.Second)
-
-		//for result := range *h.Channels.Broadcast[resultID] {
-		//	message, err := json.Marshal(result)
-		//
-		//	if err != nil {
-		//		log.Err(err).Send()
-		//		continue
-		//	}
-		//
-		//	log.Info().Str("message", string(message)).Send()
-		//
-		//	_, err = fmt.Fprintf(c.Writer, "data: %s \n\n", message)
-		//
-		//	if err != nil {
-		//		log.Err(err).Send()
-		//	}
-		//
-		//	c.Writer.(http.Flusher).Flush()
-		//}
-	}
+	}()
+	c.Stream(func(w io.Writer) bool {
+		if msg, ok := <-chanStream; ok {
+			c.SSEvent("message", msg)
+			return true
+		}
+		return false
+	})
+	//c.Header("Access-Control-Allow-Origin", "*")
+	//c.Header("Cache-Control", "no-cache")
+	//c.Header("Connection", "keep-alive")
+	//c.Header("Content-Type", "text/event-stream")
+	//
+	//resultID := MustID(c, "result_id")
+	//
+	//_, ok := h.Channels.Broadcast[resultID]
+	//
+	//if !ok {
+	//	ch := make(chan Message)
+	//	h.Channels.Broadcast[resultID] = &ch
+	//}
+	//
+	//for {
+	//
+	//	_, err := fmt.Fprintf(c.Writer, "data: %d \n\n", rand.Intn(100))
+	//
+	//	if err != nil {
+	//		log.Err(err).Send()
+	//	}
+	//
+	//	c.Writer.(http.Flusher).Flush()
+	//	time.Sleep(2 * time.Second)
+	//
+	//	//for result := range *h.Channels.Broadcast[resultID] {
+	//	//	message, err := json.Marshal(result)
+	//	//
+	//	//	if err != nil {
+	//	//		log.Err(err).Send()
+	//	//		continue
+	//	//	}
+	//	//
+	//	//	log.Info().Str("message", string(message)).Send()
+	//	//
+	//	//	_, err = fmt.Fprintf(c.Writer, "data: %s \n\n", message)
+	//	//
+	//	//	if err != nil {
+	//	//		log.Err(err).Send()
+	//	//	}
+	//	//
+	//	//	c.Writer.(http.Flusher).Flush()
+	//	//}
+	//}
 }
 
 func (h *Handler) CreateWSConnect(c *gin.Context) {
