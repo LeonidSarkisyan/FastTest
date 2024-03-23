@@ -65,6 +65,10 @@ socket.onclose = function(event) {
     console.log('WebSocket disconnected');
 };
 
+socket.onerror = (event) => {
+    console.log(event)
+}
+
 socket.onmessage = function(event) {
     const newResult = JSON.parse(event.data)
 
