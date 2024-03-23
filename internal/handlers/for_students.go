@@ -156,6 +156,7 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 
 		msg := Message{
 			UserID: access.UserID,
+			PassID: passID,
 			Result: models.ResultStudent{
 				Mark:         -1,
 				DateTimePass: time.Time{},
@@ -169,9 +170,9 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 			case <-time.After(time.Second):
 				log.Info().Msg("отправляем...")
 				*h.Channels.BroadcastStudents[passID] <- msg
-				msg.Result.PassID = 0
+				msg.PassID = 0
 				*h.Channels.Broadcast[accessID] <- msg
-				msg.Result.PassID = passID
+				msg.PassID = passID
 				secondPass++
 			}
 
