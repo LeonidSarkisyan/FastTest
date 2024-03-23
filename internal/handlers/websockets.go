@@ -43,9 +43,6 @@ func (manager *ClientManager) Start() {
 			}
 		case message := <-manager.Broadcast:
 			for client := range manager.Clients {
-				log.Info().Int("client user_id", client.userID).Send()
-				log.Info().Int("user_id", message.UserID).Send()
-
 				if client.userID != message.UserID || client.passID != message.PassID {
 					continue
 				}
@@ -54,6 +51,7 @@ func (manager *ClientManager) Start() {
 
 				if err != nil {
 					log.Err(err).Send()
+					manager.Unregister <- client
 				}
 			}
 		}
