@@ -190,7 +190,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		results.GET("", h.GetResults)
 		results.GET("/:result_id", h.GetPassesAndStudents)
-		results.GET("/:result_id/stream", h.CreateStreamConnect)
+		results.GET("/:result_id/ws", h.CreateStreamConnect)
 		results.PATCH("/:result_id/reset/:pass_id", h.ResetResult)
 	}
 
