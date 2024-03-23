@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"App/internal/models"
+	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
+	"net/http"
 	"time"
 )
 
@@ -16,6 +19,11 @@ var (
 )
 
 func (h *Handler) CreateStreamConnect(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Header("Content-Type", "text/event-stream")
+
 	resultID := MustID(c, "result_id")
 
 	_, ok := h.Channels.Broadcast[resultID]
@@ -27,7 +35,22 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 
 	for {
 		for result := range *h.Channels.Broadcast[resultID] {
-			c.JSON(200, result)
+			message, err := json.Marshal(result)
+
+			if err != nil {
+				log.Err(err).Send()
+				continue
+			}
+
+			log.Info().Str("message", string(message)).Send()
+
+			_, err = fmt.Fprintf(c.Writer, "data: %s \n\n", message)
+
+			if err != nil {
+				log.Err(err).Send()
+			}
+
+			c.Writer.(http.Flusher).Flush()
 		}
 	}
 }
