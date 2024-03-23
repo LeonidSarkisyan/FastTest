@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
 	"io"
+	"net/http"
 	"time"
 )
 
@@ -17,6 +18,18 @@ var (
 )
 
 func (h *Handler) CreateStreamConnect(c *gin.Context) {
+	userID := c.GetInt("userID")
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Err(err).Send()
+		return
+	}
+
+	client := &Client{socket: conn, send: make(chan []byte), userID: userID}
+
+	h.ClientManager.Register <- client
+
 	resultID := MustID(c, "result_id")
 
 	_, ok := h.Channels.Broadcast[resultID]
@@ -31,11 +44,13 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 		defer close(chanStream)
 		for result := range *h.Channels.Broadcast[resultID] {
 			chanStream <- result
+			h.ClientManager.Broadcast <- result
 		}
 	}()
 	c.Stream(func(w io.Writer) bool {
 		if msg, ok := <-chanStream; ok {
 			c.SSEvent("message", msg)
+			c.Writer.(http.Flusher).Flush()
 			return true
 		}
 		return false
