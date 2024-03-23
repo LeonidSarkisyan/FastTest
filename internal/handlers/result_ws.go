@@ -42,7 +42,7 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 				continue
 			}
 
-			_, err = fmt.Fprintf(c.Writer, "data: %d \n\n", message)
+			_, err = fmt.Fprintf(c.Writer, "data: %s \n\n", string(message))
 
 			if err != nil {
 				log.Err(err).Send()
