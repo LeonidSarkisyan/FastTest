@@ -147,20 +147,18 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 
 	go func() {
 		secondPass := 1
-		c := make(chan int)
 
-		h.ClientManager.TimesMap[passID] = &c
+		_, ok := h.Channels.Broadcast[accessID]
 
-		defer func() {
-			if r := recover(); r != nil {
-				log.Info().Msg("нечего заканчивать")
-			}
-		}()
+		if !ok {
+			ch := make(chan Message)
+			h.Channels.Broadcast[accessID] = &ch
+		}
 
 		for {
 			select {
 			case <-time.After(time.Second):
-				h.ClientManager.Broadcast <- Message{
+				*h.Channels.Broadcast[accessID] <- Message{
 					UserID: access.UserID,
 					Result: models.ResultStudent{
 						Mark:         -1,
@@ -174,13 +172,13 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 					},
 				}
 				secondPass++
-			case <-*h.TimesMap[passID]:
-				delete(h.TimesMap, passID)
-				delete(h.ResetMap, passID)
+			case <-*h.ClientManager.TimesMap[passID]:
+				delete(h.ClientManager.TimesMap, passID)
+				delete(h.ClientManager.ResetMap, passID)
 				return
-			case <-*h.ResetMap[passID]:
-				delete(h.TimesMap, passID)
-				delete(h.ResetMap, passID)
+			case <-*h.ClientManager.ResetMap[passID]:
+				delete(h.ClientManager.TimesMap, passID)
+				delete(h.ClientManager.ResetMap, passID)
 				return
 			}
 		}

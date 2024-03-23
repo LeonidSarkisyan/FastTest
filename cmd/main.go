@@ -49,6 +49,12 @@ func main() {
 		manager, userService, testService, questionService, answerService, groupService, studentService, resultService,
 	)
 	handler.Config = cfg
+	handler.Channels = &handlers.Channels{
+		Broadcast: make(map[int]*chan handlers.Message),
+		TimesMap:  make(map[int]*chan int),
+		ResetMap:  make(map[int]*chan int),
+	}
+
 	server_ := new(server.Server)
 
 	go func() {

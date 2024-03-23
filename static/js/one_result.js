@@ -92,11 +92,17 @@ function pad(val) {
     return val > 9 ? val : '0' + val;
 }
 
-const onLoaded = () => {
-    let eventSource = new EventSource(`/results/${RESULT_ID}/stream`);
-    eventSource.onmessage = (event) => {
-        console.log(event)
-    }
+let eventSource = new EventSource(`/results/${RESULT_ID}/stream`);
+
+const onError = (event) => {
+    eventSource = new EventSource(`/results/${RESULT_ID}/stream`);
+    eventSource.onerror = onError
+    eventSource.onmessage = onMessage
 }
 
-onLoaded()
+const onMessage = (event) => {
+    eventSource = new EventSource(`/results/${RESULT_ID}/stream`);
+}
+
+eventSource.onmessage = onMessage
+eventSource.onerror = onError

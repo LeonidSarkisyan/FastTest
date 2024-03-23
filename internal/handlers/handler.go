@@ -76,8 +76,15 @@ type UserService interface {
 	Login(in models.UserIn) (string, error)
 }
 
+type Channels struct {
+	Broadcast map[int]*chan Message
+	TimesMap  map[int]*chan int
+	ResetMap  map[int]*chan int
+}
+
 type Handler struct {
 	*ClientManager
+	*Channels
 	UserService
 	TestService
 	QuestionService

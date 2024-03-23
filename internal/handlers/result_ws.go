@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"App/internal/models"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/exp/rand"
 	"net/http"
 	"time"
 )
@@ -24,14 +24,32 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 	c.Header("Connection", "keep-alive")
 	c.Header("Content-Type", "text/event-stream")
 
-	for i := 0; ; i++ {
-		_, err := fmt.Fprintf(c.Writer, "data: %d \n\n", rand.Intn(100))
-		if err != nil {
-			log.Err(err).Send()
-			return
+	resultID := MustID(c, "result_id")
+
+	_, ok := h.Channels.Broadcast[resultID]
+
+	if !ok {
+		ch := make(chan Message)
+		h.Channels.Broadcast[resultID] = &ch
+	}
+
+	for {
+		for result := range *h.Channels.Broadcast[resultID] {
+			message, err := json.Marshal(result)
+
+			if err != nil {
+				log.Err(err).Send()
+				continue
+			}
+
+			_, err = fmt.Fprintf(c.Writer, "data: %d \n\n", message)
+
+			if err != nil {
+				log.Err(err).Send()
+			}
+
+			c.Writer.(http.Flusher).Flush()
 		}
-		c.Writer.(http.Flusher).Flush()
-		time.Sleep(1 * time.Second)
 	}
 }
 
