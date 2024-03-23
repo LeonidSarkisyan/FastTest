@@ -265,9 +265,14 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		Result: result,
 	}
 
+	c.JSON(201, gin.H{
+		"result": result,
+	})
+
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error().Any("r", r).Send()
+			return
 		}
 	}()
 
