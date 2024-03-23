@@ -172,6 +172,8 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 				*h.Channels.BroadcastStudents[passID] <- msg
 				secondPass++
 			}
+
+			msg.Result.TimePass = secondPass
 		}
 	}()
 }
