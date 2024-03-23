@@ -28,17 +28,10 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 		_, err := fmt.Fprintf(c.Writer, "data: %d \n\n", rand.Intn(100))
 		if err != nil {
 			log.Err(err).Send()
+			return
 		}
 		c.Writer.(http.Flusher).Flush()
 		time.Sleep(1 * time.Second)
-
-		if i%10 == 0 {
-			_, err = fmt.Fprint(c.Writer, "\n")
-			if err != nil {
-				log.Err(err).Send()
-			}
-			c.Writer.(http.Flusher).Flush()
-		}
 	}
 }
 
