@@ -13,6 +13,8 @@ type ResultService interface {
 		studentID, accessID, passID int, questions, questionsFromUser []models.QuestionWithAnswers,
 		access models.AccessOut, timePass int,
 	) (models.ResultStudent, error)
+
+	Reset(passID int, access models.AccessOut) error
 }
 
 type StudentService interface {
@@ -180,6 +182,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		results.GET("", h.GetResults)
 		results.GET("/:result_id", h.GetPassesAndStudents)
 		results.GET("/:result_id/ws", h.CreateWSConnect)
+		results.PATCH("/:result_id/reset/:pass_id/", h.ResetResult)
 	}
 
 	studentsPage := router.Group("/passing")
@@ -190,6 +193,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		studentsPage.GET("/:result_id/solving/:pass_id", h.IssueTestPage)
 		studentsPage.GET("/:result_id/solving/:pass_id/questions", h.GetQuestionsForStudent)
 		studentsPage.POST("/:result_id/solving/:pass_id/results", h.CreateResult)
+		studentsPage.GET("/:result_id/ws/student", h.CreateWSStudentConnect)
+		studentsPage.GET("/abort", h.AbortPage)
 	}
 
 	return router

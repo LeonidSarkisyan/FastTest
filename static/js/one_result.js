@@ -4,10 +4,21 @@ Spruce.store("data", {
     access: {},
     passes: [],
     students: [],
-    results: []
+    results: [],
+
+    hideCodes: false,
 })
 
 Spruce.store("methods", {
+    async Reset(passID, index) {
+        const response = await axios.patch(`/results/${RESULT_ID}/reset/${passID}`)
+        console.log(response)
+
+        $store.data.passes[index].is_activated = false
+        $store.data.results[index].access_id = 0
+        $store.data.results[index].mark = 0
+    },
+
     TimeProcess(seconds) {
         let hours = Math.floor(seconds / 3600);
         let minutes = Math.floor((seconds % 3600) / 60);
@@ -18,6 +29,20 @@ Spruce.store("methods", {
         remainingSeconds = pad(remainingSeconds)
 
         return hours + ':' + minutes + ':' + remainingSeconds;
+    },
+
+    CopyCode(code) {
+        navigator.clipboard.writeText(code)
+
+        let notification = document.getElementById("notification");
+        notification.style.display = "block";
+        setTimeout(function(){
+            notification.style.display = "none";
+        }, 3000);
+    },
+
+    ToggleHideCodes() {
+        $store.data.hideCodes = !$store.data.hideCodes
     }
 })
 
@@ -28,13 +53,6 @@ $store.data.results = response.data.results
 $store.data.passes = response.data.passes
 $store.data.students = response.data.students
 
-const codes = document.getElementsByClassName("code")
-
-for (let code of codes) {
-    code.addEventListener("click", event => {
-        navigator.clipboard.writeText(event.target.textContent)
-    })
-}
 
 const socket = new WebSocket(`ws://localhost:8080/results/${RESULT_ID}/ws`);
 

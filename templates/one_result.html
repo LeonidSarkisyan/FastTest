@@ -16,7 +16,10 @@
 </head>
 <body>
     <embed src="/p/header" width="100%" height="100"/>
-    <div class="container" x-data x-subscribe>
+    <div class="container result__container" x-data x-subscribe>
+        <div id="notification" class="notification">
+            Код скопирован!
+        </div>
         <h1 class="title title__span result__title">Результаты: <a target="_blank"
                 :href="'{{ .url }}'" class="title__name">{{ .test.Title }}</a></h1>
         <div class="date__event">
@@ -56,7 +59,11 @@
                     <thead>
                     <tr>
                         <th><b>№</b></th>
-                        <th>Код доступа</th>
+                        <th>Код доступа <span
+                                @click="$store.methods.ToggleHideCodes()"
+                                x-text="$store.data.hideCodes ? 'скрыть' : 'показать'"
+                                class="hide"
+                        ></span></th>
                         <th>Фамилия</th>
                         <th>Имя</th>
                         <th>Статус</th>
@@ -71,7 +78,12 @@
                                 class="student__table__row result__row"
                         >
                             <td x-text="index + 1" class="student__table__head__column"></td>
-                            <td x-text="$store.data.passes[index].code" class="student__table__head__column code"></td>
+                            <td
+                                    x-text="$store.data.hideCodes ? $store.data.passes[index].code : '******'"
+                                    class="student__table__head__column code"
+                                    @click="$store.methods.CopyCode($store.data.passes[index].code)"
+                            >
+                            </td>
                             <td x-text="student.surname" class="student__table__head__column"></td>
                             <td x-text="student.name" class="student__table__head__column"></td>
                             <td
@@ -154,6 +166,16 @@
                                         'red': $store.data.results[index].mark === 2
                                     }"
                             >
+                            </td>
+                            <td title="Сбросить результаты" class="reload__cell" :class="{
+                                'active': $store.data.passes[index].is_activated === true
+                            }">
+                                <img
+                                        @click="$store.methods.Reset($store.data.passes[index].id, index)"
+                                        class="reload"
+                                        src="/../static/img/reload.png"
+                                        alt="Сбросить результат"
+                                >
                             </td>
                         </tr>
                     </template>

@@ -30,7 +30,7 @@
                 Начать прохождение
             </div>
         </div>
-        <div class="" x-show="$store.data.isPass && !$store.data.isComplete">
+        <div x-show="$store.data.isPass && !$store.data.isComplete">
             <div class="solve__test">
                 <div class="solve__test__title"> {{ .test.Title }}</div>
                 <div id="timer" class="timer">00:00:00</div>
@@ -56,16 +56,16 @@
                         </template>
                         <div class="answer__item__buttons">
                             <div
+                                    @click="$store.methods.ChangeIndex(-1)"
                                     x-show="$store.data.currentQuestionIndex !== 0"
                                     class="base__button edit"
-                                    @click="$store.methods.changeIndex($store.data.currentQuestionIndex - 1)"
                             >
                                 Назад
                             </div>
                             <div
+                                    @click="$store.methods.ChangeIndex(1)"
                                     x-show="$store.data.currentQuestionIndex !== $store.data.questions.length - 1"
                                     class="base__button edit continue"
-                                    @click="$store.methods.changeIndex($store.data.currentQuestionIndex + 1)"
                             >
                                 К следующему вопросу
                             </div>
@@ -86,10 +86,14 @@
                 <div class="modal-content solve__modal">
                     <div class="tests__form">
                         <div class="tests__form__title">Завершить тест</div>
-                        <div class="tests__form__body" x-show="!$store.methods.CanCompleteTest()">
-                            <h3>Вы не можете завершить тест, пока не ответите на все вопросы</h3>
+                        <div class="tests__form__body" x-show="!$store.methods.CanCompleteTest()[0]">
+                            <h3 class="not-complete">Вы не можете завершить тест, пока не ответите на все вопросы</h3>
+                            <h4 class="not-complete">Номера вопросов, на которые вы не дали ответа:</h4>
+                            <template x-for="q in $store.methods.CanCompleteTest()[1]">
+                                <h5 x-text="q" class="number"></h5>
+                            </template>
                         </div>
-                        <div class="tests__form__body" x-show="$store.methods.CanCompleteTest()">
+                        <div class="tests__form__body" x-show="$store.methods.CanCompleteTest()[0]">
                             <h3 class="last">Вы точно хотите завершить тест?</h3>
                             <div class="solve__error" x-text="$store.data.error" x-show="$store.data.error">
 

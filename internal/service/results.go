@@ -15,12 +15,14 @@ var (
 	ResultCreateError        = errors.New("ошибка при сохранение результата")
 	ResultGetError           = errors.New("ошибка при получении результата")
 	ResultCreateAlreadyError = errors.New("вы уже завершали тест")
+	ResultResetError         = errors.New("ошибка при обнулении результата")
 )
 
 type ResultRepository interface {
 	Save(studentID, accessID, passID int, result models.ResultStudentIn) (int, error)
 	Get(resultID int) (models.ResultStudent, error)
 	GetAll(accessID int) ([]models.ResultStudent, error)
+	ResetPass(passID int, access models.AccessOut) error
 }
 
 type ResultService struct {
@@ -115,4 +117,14 @@ func (s *ResultService) SaveResult(
 	}
 
 	return result, nil
+}
+
+func (s *ResultService) Reset(passID int, access models.AccessOut) error {
+	err := s.ResultRepository.ResetPass(passID, access)
+
+	if err != nil {
+		return ResultResetError
+	}
+
+	return nil
 }

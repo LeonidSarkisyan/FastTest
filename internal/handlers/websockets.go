@@ -18,6 +18,7 @@ type ClientManager struct {
 	Register   chan *Client
 	Unregister chan *Client
 	TimesMap   map[int]*chan int
+	ResetMap   map[int]*chan int
 }
 
 type Client struct {
@@ -41,6 +42,9 @@ func (manager *ClientManager) Start() {
 			}
 		case message := <-manager.Broadcast:
 			for client := range manager.Clients {
+				log.Info().Int("client user_id", client.userID).Send()
+				log.Info().Int("user_id", message.UserID).Send()
+
 				if client.userID != message.UserID {
 					continue
 				}

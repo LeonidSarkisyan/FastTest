@@ -42,6 +42,10 @@
     margin-bottom: 100px;
 }
 
+.result__row {
+    height: 30px;
+}
+
 .result__row:nth-child(odd) {
     background: var(--color-background-howered);
 }
@@ -84,4 +88,53 @@
 .solving {
     color: #00b400;
     font-weight: 700;
+}
+
+.hide {
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+.hide:hover {
+    text-decoration: underline;
+}
+
+.notification {
+    display: none;
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+.result__container {
+    width: 1300px;
+}
+
+.reload__cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0.75;
+}
+
+.reload {
+    height: 30px;
+}
+
+.active {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.active:hover {
+    background: #ffc75b;
 }

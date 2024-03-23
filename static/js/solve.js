@@ -5,6 +5,7 @@ const PASS_ID = URL_CHAPTERS[URL_CHAPTERS.length - 1]
 console.log(RESULT_ID, PASS_ID)
 
 Spruce.store("data", {
+    emptyQuestions: null,
     questions: [],
     minutes: 0,
 
@@ -19,13 +20,16 @@ Spruce.store("data", {
     result: {}
 })
 
+
 Spruce.store("methods", {
-    changeIndex(index) {
-        if (index === $store.data.questions.length || index < 0) {
-            return null
+    ChangeIndex(index){
+        let newIndex = $store.data.currentQuestionIndex + index
+
+        if (newIndex === $store.data.questions.length || newIndex < 0) {
+            return
         }
 
-        $store.data.currentQuestionIndex = index
+        $store.data.currentQuestionIndex = newIndex
     },
 
     SaveAnswer(event, index, aIndex) {
@@ -51,7 +55,9 @@ Spruce.store("methods", {
 
     CanCompleteTest() {
         const questions = JSON.parse(localStorage.getItem("questions"))
+        let need = []
 
+        let index = 0
         for (let q of questions) {
             let completeQ = false
 
@@ -62,11 +68,12 @@ Spruce.store("methods", {
             }
 
             if (!completeQ) {
-                return false
+                need.push(index + 1)
             }
+            index++
         }
 
-        return true
+        return [need.length <= 0, need]
     },
 
     async completeTest() {
@@ -105,7 +112,9 @@ startButton.onclick = async () => {
     try {
         const response = await axios.get(`/passing/${RESULT_ID}/solving/${PASS_ID}/questions`)
         $store.data.questions = response.data.questions
-        startTimer(response.data.access.passage_time)
+        totalSeconds = response.data.access.passage_time * 60
+        startTotalSeconds = totalSeconds
+        document.getElementById('timer').innerText = TimeProcess(totalSeconds)
         localStorage.setItem("questions", JSON.stringify(response.data.questions))
         $store.data.isPass = true
         console.log(response.data)
@@ -114,34 +123,8 @@ startButton.onclick = async () => {
     }
 }
 
-let timer;
 let totalSeconds;
-let startTotalSeconds
-
-function startTimer(minutes) {
-    totalSeconds = minutes * 60;
-    startTotalSeconds = minutes * 60;
-    updateTimer()
-    timer = setInterval(updateTimer, 1000);
-}
-
-async function updateTimer() {
-    totalSeconds--
-
-    if (totalSeconds < 0) {
-        await $store.methods.completeTest()
-    }
-
-    let hours = Math.floor(totalSeconds / 3600);
-    let minutes = Math.floor((totalSeconds % 3600) / 60);
-    let remainingSeconds = totalSeconds % 60;
-
-    document.getElementById('timer').innerText = pad(hours) + ':' + pad(minutes) + ':' + pad(remainingSeconds);
-}
-
-function pad(val) {
-    return val > 9 ? val : '0' + val;
-}
+let startTotalSeconds;
 
 let modal = document.getElementById("myModal");
 
@@ -153,6 +136,61 @@ window.onmousedown = function(event) {
 }
 
 window.addEventListener('beforeunload', function (e) {
-    e.preventDefault();
-    e.returnValue = 'Вы уверены, что хотите покинуть эту страницу? Все несохраненные изменения будут потеряны.';
+    if (needProtect) {
+        e.preventDefault();
+        e.returnValue = 'Вы уверены, что хотите покинуть эту страницу? Вы не сможете вернуться к тесту.';
+    }
 });
+
+let needProtect = true
+
+const socket = new WebSocket(`ws://localhost:8080/passing/${RESULT_ID}/ws/student`);
+
+socket.onopen = function(event) {
+    console.log('WebSocket connected');
+    socket.send('Hello, server!');
+};
+
+socket.onclose = function(event) {
+    console.log('WebSocket disconnected');
+};
+
+socket.onmessage = async function(event) {
+    const newResult = JSON.parse(event.data)
+    console.log('Message received:', newResult);
+
+    console.log(`total seconds = ${totalSeconds}`)
+    console.log(`time_pass = ${newResult.time_pass}`)
+
+    console.log(`total seconds - time_pass = ${totalSeconds - newResult.time_pass}`)
+
+    if (totalSeconds - newResult.time_pass < 0) {
+        await $store.methods.completeTest()
+    }
+
+    if (newResult.mark === -1) {
+        document.getElementById("timer").innerText = TimeProcess(totalSeconds - newResult.time_pass)
+    } else if (newResult.mark === -2) {
+        needProtect = false
+        window.location.href = "/passing/abort"
+        history.replaceState(null, null, window.location.href);
+    }
+
+    console.log('Message received:', newResult);
+};
+
+function TimeProcess(seconds) {
+    let hours = Math.floor(seconds / 3600);
+    let minutes = Math.floor((seconds % 3600) / 60);
+    let remainingSeconds = seconds % 60;
+
+    hours = pad(hours)
+    minutes = pad(minutes)
+    remainingSeconds = pad(remainingSeconds)
+
+    return hours + ':' + minutes + ':' + remainingSeconds;
+}
+
+function pad(val) {
+    return val > 9 ? val : '0' + val;
+}

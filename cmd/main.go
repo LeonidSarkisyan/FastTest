@@ -41,6 +41,7 @@ func main() {
 		Register:   make(chan *handlers.Client),
 		Unregister: make(chan *handlers.Client),
 		TimesMap:   make(map[int]*chan int),
+		ResetMap:   make(map[int]*chan int),
 	}
 
 	go manager.Start()

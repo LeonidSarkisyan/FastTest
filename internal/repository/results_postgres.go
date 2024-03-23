@@ -91,3 +91,52 @@ func (r *ResultPostgres) GetAll(accessID int) ([]models.ResultStudent, error) {
 
 	return results, nil
 }
+
+func (r *ResultPostgres) ResetPass(passID int, access models.AccessOut) error {
+	tx, err := r.db.Begin()
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	stmt := "DELETE FROM results WHERE pass_id = $1;"
+
+	result, err := tx.Exec(stmt, passID)
+
+	_, err = result.RowsAffected()
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	stmt = "UPDATE passes SET is_activated = false, datetime_activate = null WHERE id = $1;"
+
+	result, err = tx.Exec(stmt, passID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	count, err := result.RowsAffected()
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	if count == 0 {
+		return NotUpdateRow
+	}
+
+	err = tx.Commit()
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	return nil
+}

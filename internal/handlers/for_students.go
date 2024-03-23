@@ -112,23 +112,37 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 	})
 
 	go func() {
-		time.Sleep(time.Duration(access.PassageTime)*time.Minute + 5*time.Second)
+		s := make(chan int)
+		h.ClientManager.ResetMap[passID] = &s
 
-		resultStudent, err := h.ResultService.SaveResult(
-			studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
-		)
+		defer func() {
+			if r := recover(); r != nil {
+				log.Info().Msg("нечего заканчивать")
+			}
+		}()
 
-		if err != nil {
-			log.Err(err).Send()
-			return
+		for {
+			select {
+			case <-time.After(time.Duration(access.PassageTime)*time.Minute + 5*time.Second):
+				resultStudent, err := h.ResultService.SaveResult(
+					studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
+				)
+
+				if err != nil {
+					log.Err(err).Send()
+					return
+				}
+
+				h.ClientManager.Broadcast <- Message{
+					UserID: access.UserID,
+					Result: resultStudent,
+				}
+
+				*h.ClientManager.TimesMap[passID] <- 1
+			case <-*h.ClientManager.ResetMap[passID]:
+				return
+			}
 		}
-
-		h.ClientManager.Broadcast <- Message{
-			UserID: access.UserID,
-			Result: resultStudent,
-		}
-
-		*h.ClientManager.TimesMap[passID] <- 1
 	}()
 
 	go func() {
@@ -136,6 +150,12 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		c := make(chan int)
 
 		h.ClientManager.TimesMap[passID] = &c
+
+		defer func() {
+			if r := recover(); r != nil {
+				log.Info().Msg("нечего заканчивать")
+			}
+		}()
 
 		for {
 			select {
@@ -156,6 +176,11 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 				secondPass++
 			case <-*h.TimesMap[passID]:
 				delete(h.TimesMap, passID)
+				delete(h.ResetMap, passID)
+				return
+			case <-*h.ResetMap[passID]:
+				delete(h.TimesMap, passID)
+				delete(h.ResetMap, passID)
 				return
 			}
 		}
@@ -253,5 +278,11 @@ func (h *Handler) CreateResult(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"result": result,
+	})
+}
+
+func (h *Handler) AbortPage(c *gin.Context) {
+	c.HTML(409, "error.html", gin.H{
+		"error": "Ошибка 409, прохождение теста было прервано создателем теста",
 	})
 }
