@@ -172,14 +172,6 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 					},
 				}
 				secondPass++
-			case <-*h.ClientManager.TimesMap[passID]:
-				delete(h.ClientManager.TimesMap, passID)
-				delete(h.ClientManager.ResetMap, passID)
-				return
-			case <-*h.ClientManager.ResetMap[passID]:
-				delete(h.ClientManager.TimesMap, passID)
-				delete(h.ClientManager.ResetMap, passID)
-				return
 			}
 		}
 	}()
