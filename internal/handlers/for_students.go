@@ -115,6 +115,7 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 				msg.PassID = 0
 				h.ClientManager.Broadcast <- msg
 				msg.Result.TimePass++
+				msg.PassID = passID
 			}
 		}
 	}()
