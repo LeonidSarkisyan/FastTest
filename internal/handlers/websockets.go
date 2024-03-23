@@ -43,9 +43,9 @@ func (manager *ClientManager) Start() {
 			}
 		case message := <-manager.Broadcast:
 			for client := range manager.Clients {
-				//if client.userID != message.UserID || client.passID != message.PassID {
-				//	continue
-				//}
+				if client.userID != message.UserID || client.passID != message.PassID {
+					continue
+				}
 
 				err := client.socket.WriteJSON(message.Result)
 
