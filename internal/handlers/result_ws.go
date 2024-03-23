@@ -42,6 +42,8 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 				continue
 			}
 
+			log.Info().Str("message", string(message)).Send()
+
 			_, err = fmt.Fprintf(c.Writer, "data: %s \n\n", string(message))
 
 			if err != nil {
