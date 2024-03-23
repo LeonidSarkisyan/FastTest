@@ -4,7 +4,6 @@ import (
 	"App/internal/handlers/responses"
 	"App/internal/models"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 	"math/rand/v2"
 	"strconv"
 	"time"
@@ -91,6 +90,12 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		return
 	}
 
+	c.JSON(200, gin.H{
+		"test_id":   access.TestID,
+		"access":    access,
+		"questions": responses.NewListResponse(questions),
+	})
+
 	go func() {
 		secondPass := 1
 
@@ -108,9 +113,9 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		for {
 			select {
 			case <-time.After(time.Second):
-				*h.Channels.BroadcastStudents[passID] <- msg
+				h.Channels.BroadcastStudents[passID] <- msg
 				msg.PassID = 0
-				*h.Channels.Broadcast[accessID] <- msg
+				h.Channels.Broadcast[accessID] <- msg
 				msg.PassID = passID
 				secondPass++
 			}
@@ -118,12 +123,6 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 			msg.Result.TimePass = secondPass
 		}
 	}()
-
-	c.JSON(200, gin.H{
-		"test_id":   access.TestID,
-		"access":    access,
-		"questions": responses.NewListResponse(questions),
-	})
 	//
 	//go func() {
 	//	s := make(chan int)
@@ -244,18 +243,11 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		"result": result,
 	})
 
-	defer func() {
-		if r := recover(); r != nil {
-			log.Error().Any("r", r).Send()
-			return
-		}
-	}()
-
-	*h.Channels.Broadcast[accessID] <- message
+	h.Channels.Broadcast[accessID] <- message
 
 	message.PassID = passID
 
-	*h.Channels.BroadcastStudents[passID] <- message
+	h.Channels.BroadcastStudents[passID] <- message
 }
 
 func (h *Handler) AbortPage(c *gin.Context) {

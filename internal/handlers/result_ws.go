@@ -34,10 +34,10 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 
 	if !ok {
 		ch := make(chan Message)
-		h.Channels.Broadcast[resultID] = &ch
+		h.Channels.Broadcast[resultID] = ch
 	}
 
-	for result := range *h.Channels.Broadcast[resultID] {
+	for result := range h.Channels.Broadcast[resultID] {
 		h.ClientManager.Broadcast <- result
 	}
 }
@@ -70,10 +70,10 @@ func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
 
 	if !ok {
 		ch := make(chan Message)
-		h.Channels.BroadcastStudents[passID] = &ch
+		h.Channels.BroadcastStudents[passID] = ch
 	}
 
-	for result := range *h.Channels.BroadcastStudents[passID] {
+	for result := range h.Channels.BroadcastStudents[passID] {
 		h.ClientManager.Broadcast <- result
 	}
 }

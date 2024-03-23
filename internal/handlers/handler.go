@@ -77,8 +77,8 @@ type UserService interface {
 }
 
 type Channels struct {
-	Broadcast         map[int]*chan Message
-	BroadcastStudents map[int]*chan Message
+	Broadcast         map[int]chan Message
+	BroadcastStudents map[int]chan Message
 	TimesMap          map[int]*chan int
 	ResetMap          map[int]*chan int
 }
