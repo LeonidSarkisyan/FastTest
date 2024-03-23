@@ -234,20 +234,19 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		return
 	}
 
-	message := Message{
-		UserID: access.UserID,
-		Result: result,
-	}
-
 	c.JSON(201, gin.H{
 		"result": result,
 	})
-
-	h.Channels.Broadcast[accessID] <- message
-
-	message.PassID = passID
-
-	h.Channels.BroadcastStudents[passID] <- message
+	//message := Message{
+	//	UserID: access.UserID,
+	//	Result: result,
+	//}
+	//
+	//h.Channels.Broadcast[accessID] <- message
+	//
+	//message.PassID = passID
+	//
+	//h.Channels.BroadcastStudents[passID] <- message
 }
 
 func (h *Handler) AbortPage(c *gin.Context) {
