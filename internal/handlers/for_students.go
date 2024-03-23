@@ -148,12 +148,11 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 	go func() {
 		secondPass := 1
 
-		_, ok := h.Channels.Broadcast[accessID]
-
-		if !ok {
-			ch := make(chan Message)
-			h.Channels.Broadcast[accessID] = &ch
-		}
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error().Any("r", r).Send()
+			}
+		}()
 
 		for {
 			select {
