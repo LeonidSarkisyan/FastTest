@@ -27,19 +27,6 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 	client := &Client{socket: conn, send: make(chan []byte), userID: userID}
 
 	h.ClientManager.Register <- client
-
-	resultID := MustID(c, "result_id")
-
-	_, ok := h.Channels.Broadcast[resultID]
-
-	if !ok {
-		ch := make(chan Message)
-		h.Channels.Broadcast[resultID] = ch
-	}
-
-	for result := range h.Channels.Broadcast[resultID] {
-		h.ClientManager.Broadcast <- result
-	}
 }
 
 func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
@@ -65,17 +52,6 @@ func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
 	client := &Client{socket: conn, send: make(chan []byte), userID: result.UserID, passID: passID}
 
 	h.ClientManager.Register <- client
-
-	_, ok := h.Channels.BroadcastStudents[passID]
-
-	if !ok {
-		ch := make(chan Message)
-		h.Channels.BroadcastStudents[passID] = ch
-	}
-
-	for result := range h.Channels.BroadcastStudents[passID] {
-		h.ClientManager.Broadcast <- result
-	}
 }
 
 func (h *Handler) ResetResult(c *gin.Context) {

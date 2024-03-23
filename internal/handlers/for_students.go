@@ -97,8 +97,6 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 	})
 
 	go func() {
-		secondPass := 1
-
 		msg := Message{
 			UserID: access.UserID,
 			PassID: passID,
@@ -106,21 +104,16 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 				Mark:         -1,
 				DateTimePass: time.Time{},
 				PassID:       passID,
-				TimePass:     secondPass,
+				TimePass:     1,
 			},
 		}
 
 		for {
 			select {
 			case <-time.After(time.Second):
-				h.Channels.BroadcastStudents[passID] <- msg
-				msg.PassID = 0
-				h.Channels.Broadcast[accessID] <- msg
-				msg.PassID = passID
-				secondPass++
+				h.ClientManager.Broadcast <- msg
+				msg.Result.TimePass++
 			}
-
-			msg.Result.TimePass = secondPass
 		}
 	}()
 	//
