@@ -144,40 +144,40 @@ window.addEventListener('beforeunload', function (e) {
 
 let needProtect = true
 
-// const socket = new WebSocket(`ws://81.200.149.16:8080/passing/${RESULT_ID}/ws/student`);
-//
-// socket.onopen = function(event) {
-//     console.log('WebSocket connected');
-//     socket.send('Hello, server!');
-// };
-//
-// socket.onclose = function(event) {
-//     console.log('WebSocket disconnected');
-// };
-//
-// socket.onmessage = async function(event) {
-//     const newResult = JSON.parse(event.data)
-//     console.log('Message received:', newResult);
-//
-//     console.log(`total seconds = ${totalSeconds}`)
-//     console.log(`time_pass = ${newResult.time_pass}`)
-//
-//     console.log(`total seconds - time_pass = ${totalSeconds - newResult.time_pass}`)
-//
-//     if (totalSeconds - newResult.time_pass < 0) {
-//         await $store.methods.completeTest()
-//     }
-//
-//     if (newResult.mark === -1) {
-//         document.getElementById("timer").innerText = TimeProcess(totalSeconds - newResult.time_pass)
-//     } else if (newResult.mark === -2) {
-//         needProtect = false
-//         window.location.href = "/passing/abort"
-//         history.replaceState(null, null, window.location.href);
-//     }
-//
-//     console.log('Message received:', newResult);
-// };
+const socket = new WebSocket(`ws://81.200.149.16:8080/passing/${RESULT_ID}/ws/student`);
+
+socket.onopen = function(event) {
+    console.log('WebSocket connected');
+    socket.send('Hello, server!');
+};
+
+socket.onclose = function(event) {
+    console.log('WebSocket disconnected');
+};
+
+socket.onmessage = async function(event) {
+    const newResult = JSON.parse(event.data)
+    console.log('Message received:', newResult);
+
+    console.log(`total seconds = ${totalSeconds}`)
+    console.log(`time_pass = ${newResult.time_pass}`)
+
+    console.log(`total seconds - time_pass = ${totalSeconds - newResult.time_pass}`)
+
+    if (totalSeconds - newResult.time_pass < 0) {
+        await $store.methods.completeTest()
+    }
+
+    if (newResult.mark === -1) {
+        document.getElementById("timer").innerText = TimeProcess(totalSeconds - newResult.time_pass)
+    } else if (newResult.mark === -2) {
+        needProtect = false
+        window.location.href = "/passing/abort"
+        history.replaceState(null, null, window.location.href);
+    }
+
+    console.log('Message received:', newResult);
+};
 
 function TimeProcess(seconds) {
     let hours = Math.floor(seconds / 3600);
