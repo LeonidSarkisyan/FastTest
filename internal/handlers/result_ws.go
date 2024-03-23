@@ -35,7 +35,12 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 
 	for {
 
-		fmt.Fprintf(c.Writer, "data: %d \n\n", rand.Intn(100))
+		_, err := fmt.Fprintf(c.Writer, "data: %d \n\n", rand.Intn(100))
+
+		if err != nil {
+			log.Err(err).Send()
+		}
+
 		c.Writer.(http.Flusher).Flush()
 		time.Sleep(2 * time.Second)
 
