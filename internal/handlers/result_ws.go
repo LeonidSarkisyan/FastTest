@@ -5,8 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
-	"io"
-	"net/http"
 	"time"
 )
 
@@ -39,22 +37,9 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 		h.Channels.Broadcast[resultID] = &ch
 	}
 
-	chanStream := make(chan Message, 10)
-	go func() {
-		defer close(chanStream)
-		for result := range *h.Channels.Broadcast[resultID] {
-			chanStream <- result
-			h.ClientManager.Broadcast <- result
-		}
-	}()
-	c.Stream(func(w io.Writer) bool {
-		if msg, ok := <-chanStream; ok {
-			c.SSEvent("message", msg)
-			c.Writer.(http.Flusher).Flush()
-			return true
-		}
-		return false
-	})
+	for result := range *h.Channels.Broadcast[resultID] {
+		h.ClientManager.Broadcast <- result
+	}
 	//c.Header("Access-Control-Allow-Origin", "*")
 	//c.Header("Cache-Control", "no-cache")
 	//c.Header("Connection", "keep-alive")
