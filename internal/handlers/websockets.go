@@ -42,6 +42,9 @@ func (manager *ClientManager) Start() {
 				log.Info().Msgf("Client Connected: %s", client.socket.RemoteAddr())
 			}
 		case message := <-manager.Broadcast:
+
+			log.Info()
+
 			for client := range manager.Clients {
 				if client.userID != message.UserID || client.passID != message.PassID {
 					continue

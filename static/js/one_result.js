@@ -56,20 +56,21 @@ $store.data.students = response.data.students
 
 const socket = new WebSocket(`ws://81.200.149.16:8080/results/${RESULT_ID}/ws`);
 
-socket.onopen = function(event) {
+socket.onopen = async function(event) {
     console.log('WebSocket connected');
     socket.send('Hello, server!');
 };
 
 socket.onclose = function(event) {
     console.log('WebSocket disconnected');
+    console.log(event)
 };
 
 socket.onerror = (event) => {
     console.log(event)
 }
 
-socket.onmessage = function(event) {
+socket.onmessage = async function(event) {
     const newResult = JSON.parse(event.data)
 
     let index = 0
