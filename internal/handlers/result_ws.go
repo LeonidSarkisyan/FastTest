@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"App/internal/models"
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
+	"math/rand"
 	"net/http"
 	"time"
 )
@@ -34,24 +34,29 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 	}
 
 	for {
-		for result := range *h.Channels.Broadcast[resultID] {
-			message, err := json.Marshal(result)
 
-			if err != nil {
-				log.Err(err).Send()
-				continue
-			}
+		fmt.Fprintf(c.Writer, "data: %d \n\n", rand.Intn(100))
+		c.Writer.(http.Flusher).Flush()
+		time.Sleep(2 * time.Second)
 
-			log.Info().Str("message", string(message)).Send()
-
-			_, err = fmt.Fprintf(c.Writer, "data: %s \n\n", message)
-
-			if err != nil {
-				log.Err(err).Send()
-			}
-
-			c.Writer.(http.Flusher).Flush()
-		}
+		//for result := range *h.Channels.Broadcast[resultID] {
+		//	message, err := json.Marshal(result)
+		//
+		//	if err != nil {
+		//		log.Err(err).Send()
+		//		continue
+		//	}
+		//
+		//	log.Info().Str("message", string(message)).Send()
+		//
+		//	_, err = fmt.Fprintf(c.Writer, "data: %s \n\n", message)
+		//
+		//	if err != nil {
+		//		log.Err(err).Send()
+		//	}
+		//
+		//	c.Writer.(http.Flusher).Flush()
+		//}
 	}
 }
 
