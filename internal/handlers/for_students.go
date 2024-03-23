@@ -91,40 +91,6 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"test_id":   access.TestID,
-		"access":    access,
-		"questions": responses.NewListResponse(questions),
-	})
-
-	go func() {
-		s := make(chan int)
-		h.ClientManager.ResetMap[passID] = &s
-
-		for {
-			select {
-			case <-time.After(time.Duration(access.PassageTime)*time.Minute + 5*time.Second):
-				resultStudent, err := h.ResultService.SaveResult(
-					studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
-				)
-
-				if err != nil {
-					log.Err(err).Send()
-					return
-				}
-
-				h.ClientManager.Broadcast <- Message{
-					UserID: access.UserID,
-					Result: resultStudent,
-				}
-
-				*h.ClientManager.TimesMap[passID] <- 1
-			case <-*h.ClientManager.ResetMap[passID]:
-				return
-			}
-		}
-	}()
-
 	go func() {
 		secondPass := 1
 
@@ -152,6 +118,40 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 			msg.Result.TimePass = secondPass
 		}
 	}()
+
+	c.JSON(200, gin.H{
+		"test_id":   access.TestID,
+		"access":    access,
+		"questions": responses.NewListResponse(questions),
+	})
+	//
+	//go func() {
+	//	s := make(chan int)
+	//	h.ClientManager.ResetMap[passID] = &s
+	//
+	//	for {
+	//		select {
+	//		case <-time.After(time.Duration(access.PassageTime)*time.Minute + 5*time.Second):
+	//			resultStudent, err := h.ResultService.SaveResult(
+	//				studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
+	//			)
+	//
+	//			if err != nil {
+	//				log.Err(err).Send()
+	//				return
+	//			}
+	//
+	//			h.ClientManager.Broadcast <- Message{
+	//				UserID: access.UserID,
+	//				Result: resultStudent,
+	//			}
+	//
+	//			*h.ClientManager.TimesMap[passID] <- 1
+	//		case <-*h.ClientManager.ResetMap[passID]:
+	//			return
+	//		}
+	//	}
+	//}()
 }
 
 func (h *Handler) CreateResult(c *gin.Context) {
