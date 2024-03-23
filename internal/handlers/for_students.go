@@ -168,8 +168,10 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 			select {
 			case <-time.After(time.Second):
 				log.Info().Msg("отправляем...")
-				*h.Channels.Broadcast[accessID] <- msg
 				*h.Channels.BroadcastStudents[passID] <- msg
+				msg.Result.PassID = 0
+				*h.Channels.Broadcast[accessID] <- msg
+				msg.Result.PassID = passID
 				secondPass++
 			}
 

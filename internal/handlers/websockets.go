@@ -24,6 +24,7 @@ type Client struct {
 	socket *websocket.Conn
 	send   chan []byte
 	userID int
+	passID int
 }
 
 func (manager *ClientManager) Start() {

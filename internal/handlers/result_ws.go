@@ -62,7 +62,7 @@ func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
 		return
 	}
 
-	client := &Client{socket: conn, send: make(chan []byte), userID: result.UserID}
+	client := &Client{socket: conn, send: make(chan []byte), userID: result.UserID, passID: passID}
 
 	h.ClientManager.Register <- client
 
