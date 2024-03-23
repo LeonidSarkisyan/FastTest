@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"App/internal/models"
-	"encoding/json"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
 )
@@ -49,14 +48,7 @@ func (manager *ClientManager) Start() {
 					continue
 				}
 
-				resultMessage, err := json.Marshal(message.Result)
-
-				if err != nil {
-					log.Err(err).Send()
-					return
-				}
-
-				err = client.socket.WriteJSON(resultMessage)
+				err := client.socket.WriteJSON(message.Result)
 
 				if err != nil {
 					log.Err(err).Send()
