@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-const DOMAIN = "http://localhost:8080/"
-
 func formatAsDate(t time.Time) string {
 	year, month, day := t.Date()
 	return fmt.Sprintf("%d/%02d/%02d", year, month, day)
@@ -167,7 +165,7 @@ func (h *Handler) OneResultPage(c *gin.Context) {
 		"group":   group,
 		"access":  access,
 		"url":     fmt.Sprintf("/p/tests/%d", test.ID),
-		"urlPass": DOMAIN + fmt.Sprintf("passing/%d", access.ID),
+		"urlPass": DomainWithPort + fmt.Sprintf("/passing/%d", access.ID),
 	})
 }
 

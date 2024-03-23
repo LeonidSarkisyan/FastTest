@@ -1,7 +1,12 @@
-address: "localhost"
-port: "8080"
+debug: true
 
-debug: false
+local:
+  address: "localhost"
+  port: "8080"
+
+prod:
+  address: "81.200.149.16"
+  port: "8080"
 
 test_db:
   host: "localhost"

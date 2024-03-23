@@ -8,7 +8,6 @@ import (
 	"App/pkg/systems"
 	"context"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 	"os"
 	"os/signal"
 	"syscall"
@@ -49,15 +48,16 @@ func main() {
 	handler := handlers.NewHandler(
 		manager, userService, testService, questionService, answerService, groupService, studentService, resultService,
 	)
+	handler.Config = cfg
 	server_ := new(server.Server)
 
 	go func() {
-		if err := server_.Run(viper.GetString("port"), handler.InitRoutes()); err != nil {
+		if err := server_.Run(cfg.Port, handler.InitRoutes()); err != nil {
 			log.Fatal().Err(err).Msg("ошибка при запуске сервера")
 		}
 	}()
 
-	log.Printf("MakeTest старует на порту: %s", viper.GetString("port"))
+	log.Printf("MakeTest старует на порту: %s", cfg.Port)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT)

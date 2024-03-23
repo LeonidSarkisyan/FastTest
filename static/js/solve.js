@@ -144,7 +144,7 @@ window.addEventListener('beforeunload', function (e) {
 
 let needProtect = true
 
-const socket = new WebSocket(`ws://localhost:8080/passing/${RESULT_ID}/ws/student`);
+const socket = new WebSocket(`ws://81.200.149.16:8080/passing/${RESULT_ID}/ws/student`);
 
 socket.onopen = function(event) {
     console.log('WebSocket connected');

@@ -6,6 +6,9 @@ import (
 	"net/http"
 )
 
+const Domain = "81.200.149.16"
+const DomainWithPort = "81.200.149.16:8080"
+
 func (h *Handler) Register(c *gin.Context) {
 	var in models.UserIn
 
@@ -39,6 +42,6 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("Authorization", token, 2592000, "/", "localhost", false, true)
+	c.SetCookie("Authorization", token, 2592000, "/", Domain, false, true)
 	c.AbortWithStatusJSON(http.StatusNoContent, "")
 }

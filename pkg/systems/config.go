@@ -51,12 +51,13 @@ func MustConfig() *AppConfig {
 
 func getConfig() (*AppConfig, error) {
 	cfg := AppConfig{
-		Address: viper.GetString("address"),
-		Port:    viper.GetString("port"),
-		Debug:   viper.GetBool("debug"),
+		Debug: viper.GetBool("debug"),
 	}
 
 	if cfg.Debug {
+		cfg.Address = viper.GetString("local.address")
+		cfg.Port = viper.GetString("local.port")
+
 		cfg.Database = DBConfig{
 			Host: viper.GetString("test_db.host"),
 			Port: viper.GetString("test_db.port"),
@@ -65,6 +66,9 @@ func getConfig() (*AppConfig, error) {
 			Name: viper.GetString("test_db.name"),
 		}
 	} else {
+		cfg.Address = viper.GetString("prod.address")
+		cfg.Port = viper.GetString("prod.port")
+
 		cfg.Database = DBConfig{
 			Host: viper.GetString("prod_db.host"),
 			Port: viper.GetString("prod_db.port"),

@@ -3,6 +3,7 @@ package handlers
 import (
 	"App/internal/middlewares"
 	"App/internal/models"
+	"App/pkg/systems"
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"io"
@@ -84,6 +85,7 @@ type Handler struct {
 	GroupService
 	StudentService
 	ResultService
+	Config *systems.AppConfig
 }
 
 func NewHandler(
@@ -91,8 +93,8 @@ func NewHandler(
 	u UserService, t TestService, q QuestionService, a AnswerService, g GroupService, s StudentService,
 	r ResultService,
 ) *Handler {
-	return &Handler{cm, u, t, q,
-		a, g, s, r}
+	return &Handler{ClientManager: cm, UserService: u, TestService: t, QuestionService: q,
+		AnswerService: a, GroupService: g, StudentService: s, ResultService: r}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
@@ -181,8 +183,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		results.GET("", h.GetResults)
 		results.GET("/:result_id", h.GetPassesAndStudents)
-		results.GET("/:result_id/ws", h.CreateWSConnect)
-		results.PATCH("/:result_id/reset/:pass_id/", h.ResetResult)
+		results.GET("/:result_id/stream", h.CreateStreamConnect)
+		results.PATCH("/:result_id/reset/:pass_id", h.ResetResult)
 	}
 
 	studentsPage := router.Group("/passing")

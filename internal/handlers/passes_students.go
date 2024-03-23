@@ -69,7 +69,7 @@ func (h *Handler) GetStartedTest(c *gin.Context) {
 
 	c.SetCookie(
 		"StudentID", strconv.Itoa(pass.StudentID), 2592000, "/",
-		"localhost", false, true,
+		Domain, false, true,
 	)
 
 	c.AbortWithStatusJSON(200, gin.H{

@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"App/internal/models"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/exp/rand"
+	"net/http"
 	"time"
 )
 
@@ -14,6 +17,22 @@ var (
 		WriteBufferSize: 1024,
 	}
 )
+
+func (h *Handler) CreateStreamConnect(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Header("Content-Type", "text/event-stream")
+
+	for {
+		_, err := fmt.Fprintf(c.Writer, "data: %d \n\n", rand.Intn(100))
+		if err != nil {
+			log.Err(err).Send()
+		}
+		c.Writer.(http.Flusher).Flush()
+		time.Sleep(1 * time.Second)
+	}
+}
 
 func (h *Handler) CreateWSConnect(c *gin.Context) {
 	userID := c.GetInt("userID")
