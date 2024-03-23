@@ -94,15 +94,8 @@ function pad(val) {
 
 let eventSource = new EventSource(`/results/${RESULT_ID}/stream`);
 
-const onError = (event) => {
-    eventSource = new EventSource(`/results/${RESULT_ID}/stream`);
-    eventSource.onerror = onError
-    eventSource.onmessage = onMessage
-}
-
 const onMessage = (event) => {
     eventSource = new EventSource(`/results/${RESULT_ID}/stream`);
 }
 
 eventSource.onmessage = onMessage
-eventSource.onerror = onError
