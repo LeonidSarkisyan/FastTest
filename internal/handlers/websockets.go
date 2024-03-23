@@ -56,7 +56,7 @@ func (manager *ClientManager) Start() {
 					return
 				}
 
-				err = client.socket.WriteMessage(websocket.TextMessage, resultMessage)
+				err = client.socket.WriteJSON(resultMessage)
 
 				if err != nil {
 					log.Err(err).Send()
