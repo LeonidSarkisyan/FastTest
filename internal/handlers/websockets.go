@@ -51,7 +51,6 @@ func (manager *ClientManager) Start() {
 
 				if err != nil {
 					log.Err(err).Send()
-					manager.Unregister <- client
 				}
 			}
 		}
