@@ -114,12 +114,6 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		s := make(chan int)
 		h.ClientManager.ResetMap[passID] = &s
 
-		defer func() {
-			if r := recover(); r != nil {
-				log.Info().Msg("нечего заканчивать")
-			}
-		}()
-
 		for {
 			select {
 			case <-time.After(time.Duration(access.PassageTime)*time.Minute + 5*time.Second):
@@ -146,12 +140,6 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 
 	go func() {
 		secondPass := 1
-
-		defer func() {
-			if r := recover(); r != nil {
-				log.Error().Any("r", r).Send()
-			}
-		}()
 
 		msg := Message{
 			UserID: access.UserID,
