@@ -2,11 +2,9 @@ package handlers
 
 import (
 	"App/internal/models"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
-	"net/http"
 	"time"
 )
 
@@ -34,22 +32,7 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 
 	for {
 		for result := range *h.Channels.Broadcast[resultID] {
-			message, err := json.Marshal(result)
-
-			if err != nil {
-				log.Err(err).Send()
-				continue
-			}
-
-			log.Info().Str("message", string(message)).Send()
-
-			_, err = c.Writer.Write(message)
-
-			if err != nil {
-				log.Err(err).Send()
-			}
-
-			c.Writer.(http.Flusher).Flush()
+			c.JSON(200, result)
 		}
 	}
 }
