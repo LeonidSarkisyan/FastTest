@@ -4,6 +4,7 @@ import (
 	"App/internal/handlers/responses"
 	"App/internal/models"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"math/rand/v2"
 	"net/http"
 	"strconv"
@@ -110,73 +111,73 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		"questions": responses.NewListResponse(questions),
 	})
 
-	//go func() {
-	//	s := make(chan int)
-	//	h.ClientManager.ResetMap[passID] = &s
-	//
-	//	defer func() {
-	//		if r := recover(); r != nil {
-	//			log.Info().Msg("нечего заканчивать")
-	//		}
-	//	}()
-	//
-	//	for {
-	//		select {
-	//		case <-time.After(time.Duration(access.PassageTime)*time.Minute + 5*time.Second):
-	//			resultStudent, err := h.ResultService.SaveResult(
-	//				studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
-	//			)
-	//
-	//			if err != nil {
-	//				log.Err(err).Send()
-	//				return
-	//			}
-	//
-	//			h.ClientManager.Broadcast <- Message{
-	//				UserID: access.UserID,
-	//				Result: resultStudent,
-	//			}
-	//
-	//			*h.ClientManager.TimesMap[passID] <- 1
-	//		case <-*h.ClientManager.ResetMap[passID]:
-	//			return
-	//		}
-	//	}
-	//}()
-	//
-	//go func() {
-	//	secondPass := 1
-	//
-	//	defer func() {
-	//		if r := recover(); r != nil {
-	//			log.Error().Any("r", r).Send()
-	//		}
-	//	}()
-	//
-	//	msg := Message{
-	//		UserID: access.UserID,
-	//		PassID: passID,
-	//		Result: models.ResultStudent{
-	//			Mark:         -1,
-	//			DateTimePass: time.Time{},
-	//			PassID:       passID,
-	//			TimePass:     secondPass,
-	//		},
-	//	}
-	//
-	//	for {
-	//		select {
-	//		case <-time.After(time.Second):
-	//			*h.Channels.BroadcastStudents[passID] <- msg
-	//			msg.PassID = 0
-	//			*h.Channels.Broadcast[accessID] <- msg
-	//			msg.PassID = passID
-	//			secondPass++
-	//		}
-	//
-	//		msg.Result.TimePass = secondPass
-	//	}
-	//}()
+	go func() {
+		s := make(chan int)
+		h.ClientManager.ResetMap[passID] = &s
+
+		defer func() {
+			if r := recover(); r != nil {
+				log.Info().Msg("нечего заканчивать")
+			}
+		}()
+
+		for {
+			select {
+			case <-time.After(time.Duration(access.PassageTime)*time.Minute + 5*time.Second):
+				resultStudent, err := h.ResultService.SaveResult(
+					studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
+				)
+
+				if err != nil {
+					log.Err(err).Send()
+					return
+				}
+
+				h.ClientManager.Broadcast <- Message{
+					UserID: access.UserID,
+					Result: resultStudent,
+				}
+
+				*h.ClientManager.TimesMap[passID] <- 1
+			case <-*h.ClientManager.ResetMap[passID]:
+				return
+			}
+		}
+	}()
+
+	go func() {
+		secondPass := 1
+
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error().Any("r", r).Send()
+			}
+		}()
+
+		msg := Message{
+			UserID: access.UserID,
+			PassID: passID,
+			Result: models.ResultStudent{
+				Mark:         -1,
+				DateTimePass: time.Time{},
+				PassID:       passID,
+				TimePass:     secondPass,
+			},
+		}
+
+		for {
+			select {
+			case <-time.After(time.Second):
+				*h.Channels.BroadcastStudents[passID] <- msg
+				msg.PassID = 0
+				*h.Channels.Broadcast[accessID] <- msg
+				msg.PassID = passID
+				secondPass++
+			}
+
+			msg.Result.TimePass = secondPass
+		}
+	}()
 }
 
 func (h *Handler) CreateResult(c *gin.Context) {
