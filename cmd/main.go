@@ -35,12 +35,10 @@ func main() {
 	resultService := service.NewResultService(resultRepo)
 
 	manager := &handlers.ClientManager{
-		Clients:    make(map[*handlers.Client]bool),
-		Broadcast:  make(chan handlers.Message, 100),
-		Register:   make(chan *handlers.Client),
-		Unregister: make(chan *handlers.Client),
-		TimesMap:   make(map[int]*chan int),
-		ResetMap:   make(map[int]*chan int),
+		Clients:   make([]*handlers.Client, 0),
+		Broadcast: make(chan handlers.Message),
+		TimesMap:  make(map[int]*chan int),
+		ResetMap:  make(map[int]*chan int),
 	}
 
 	go manager.Start()

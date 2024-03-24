@@ -26,7 +26,7 @@ func (h *Handler) CreateStreamConnect(c *gin.Context) {
 
 	client := &Client{socket: conn, send: make(chan []byte), userID: userID}
 
-	h.ClientManager.Register <- client
+	h.ClientManager.AddClient(client)
 }
 
 func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
@@ -51,7 +51,7 @@ func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
 
 	client := &Client{socket: conn, send: make(chan []byte), userID: result.UserID, passID: passID}
 
-	h.ClientManager.Register <- client
+	h.ClientManager.AddClient(client)
 }
 
 func (h *Handler) ResetResult(c *gin.Context) {
