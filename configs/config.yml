@@ -6,7 +6,7 @@ local:
 
 prod:
   address: "81.200.149.16"
-  port: "80"
+  port: "443"
 
 test_db:
   host: "localhost"
