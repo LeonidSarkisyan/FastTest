@@ -144,7 +144,7 @@ window.addEventListener('beforeunload', function (e) {
 
 let needProtect = true
 
-const socket = new WebSocket(`ws://фаст-тест.рф/passing/${RESULT_ID}/ws/student/${PASS_ID}`);
+const socket = new WebSocket(`wss://фаст-тест.рф/passing/${RESULT_ID}/ws/student/${PASS_ID}`);
 
 socket.onopen = function(event) {
     console.log('WebSocket connected');
