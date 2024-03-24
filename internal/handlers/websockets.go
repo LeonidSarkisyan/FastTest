@@ -45,6 +45,7 @@ func (manager *ClientManager) SendToBroadcast(message Message) {
 		err := client.socket.WriteJSON(message.Result)
 		if err != nil {
 			log.Err(err).Send()
+			manager.RemoveClient(client)
 		}
 	}
 	manager.Mutex.Unlock()
