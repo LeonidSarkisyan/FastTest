@@ -99,6 +99,10 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 	})
 
 	go func() {
+
+	}()
+
+	go func() {
 		msg := Message{
 			UserID: access.UserID,
 			PassID: passID,
@@ -116,9 +120,11 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		h.ClientManager.TimesMap[passID] = make(chan int)
 		mu.Unlock()
 
+		timeout := time.Duration(access.PassageTime)*time.Minute + 5*time.Second
+
 		for {
 			select {
-			case <-time.After(time.Duration(access.PassageTime)*time.Minute + 5*time.Second):
+			case <-time.After(timeout):
 				resultStudent, err := h.ResultService.SaveResult(
 					studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
 				)
