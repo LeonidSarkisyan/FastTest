@@ -62,7 +62,7 @@ $store.data.passes = response.data.passes
 $store.data.students = response.data.students
 
 
-const socket = new WebSocket(`ws://81.200.149.16:8080/results/${RESULT_ID}/ws`);
+const socket = new WebSocket(`ws://фаст-тест.рф/results/${RESULT_ID}/ws`);
 
 socket.onopen = async function(event) {
     console.log('WebSocket connected');
