@@ -99,7 +99,27 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 	})
 
 	go func() {
+		timeout := time.Duration(access.PassageTime)*time.Minute + 5*time.Second
 
+		<-time.After(timeout)
+
+		resultStudent, err := h.ResultService.SaveResult(
+			studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
+		)
+
+		if err != nil {
+			log.Err(err).Send()
+			return
+		}
+
+		h.SendToBroadcast(Message{
+			UserID: access.UserID,
+			Result: resultStudent,
+		})
+
+		go func() {
+			h.ClientManager.TimesMap[passID] <- 1
+		}()
 	}()
 
 	go func() {
@@ -120,27 +140,8 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		h.ClientManager.TimesMap[passID] = make(chan int)
 		mu.Unlock()
 
-		timeout := time.Duration(access.PassageTime)*time.Minute + 5*time.Second
-
 		for {
 			select {
-			case <-time.After(timeout):
-				resultStudent, err := h.ResultService.SaveResult(
-					studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
-				)
-
-				if err != nil {
-					log.Err(err).Send()
-					return
-				}
-
-				h.SendToBroadcast(Message{
-					UserID: access.UserID,
-					Result: resultStudent,
-				})
-
-				delete(h.ClientManager.TimesMap, passID)
-				return
 			case <-time.After(time.Second):
 				log.Info().Msg("прошла секунда, отправляю...")
 				h.ClientManager.SendToBroadcast(msg)
