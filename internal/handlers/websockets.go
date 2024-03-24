@@ -33,19 +33,21 @@ func (manager *ClientManager) Start() {
 		message := <-manager.Broadcast
 
 		log.Info().Any("message пришёл", message).Send()
-
-		manager.Mutex.Lock()
-		for _, client := range manager.Clients {
-			if client.userID != message.UserID || client.passID != message.PassID {
-				continue
-			}
-			err := client.socket.WriteJSON(message.Result)
-			if err != nil {
-				log.Err(err).Send()
-			}
-		}
-		manager.Mutex.Unlock()
 	}
+}
+
+func (manager *ClientManager) SendToBroadcast(message Message) {
+	manager.Mutex.Lock()
+	for _, client := range manager.Clients {
+		if client.userID != message.UserID || client.passID != message.PassID {
+			continue
+		}
+		err := client.socket.WriteJSON(message.Result)
+		if err != nil {
+			log.Err(err).Send()
+		}
+	}
+	manager.Mutex.Unlock()
 }
 
 func (manager *ClientManager) AddClient(client *Client) {

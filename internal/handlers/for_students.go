@@ -119,9 +119,10 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		for {
 			select {
 			case <-time.After(time.Second):
-				h.ClientManager.Broadcast <- msg
+				log.Info().Msg("прошла секунда, отправляю...")
+				h.ClientManager.SendToBroadcast(msg)
 				msg.PassID = 0
-				h.ClientManager.Broadcast <- msg
+				h.ClientManager.SendToBroadcast(msg)
 				msg.Result.TimePass++
 				msg.PassID = passID
 			case <-h.ClientManager.TimesMap[passID]:
@@ -262,13 +263,15 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		"result": result,
 	})
 
-	message := Message{
-		UserID: access.UserID,
-		Result: result,
-	}
+	go func() {
+		message := Message{
+			UserID: access.UserID,
+			Result: result,
+		}
 
-	h.ClientManager.Broadcast <- message
-	h.ClientManager.TimesMap[passID] <- 1
+		h.ClientManager.SendToBroadcast(message)
+		h.ClientManager.TimesMap[passID] <- 1
+	}()
 }
 
 func (h *Handler) AbortPage(c *gin.Context) {
