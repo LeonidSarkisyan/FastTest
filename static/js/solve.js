@@ -144,40 +144,53 @@ window.addEventListener('beforeunload', function (e) {
 
 let needProtect = true
 
-const socket = new WebSocket(`wss://фаст-тест.рф/passing/${RESULT_ID}/ws/student/${PASS_ID}`);
+let socket;
 
-socket.onopen = function(event) {
-    console.log('WebSocket connected');
-    socket.send('Hello, server!');
-};
+function connectWebSocket() {
+    socket = new WebSocket(`wss://фаст-тест.рф/passing/${RESULT_ID}/ws/student/${PASS_ID}`);
 
-socket.onclose = function(event) {
-    console.log('WebSocket disconnected');
-};
+    socket.onopen = function(event) {
+        console.log('WebSocket connected');
+        socket.send('Hello, server!');
+    };
 
-socket.onmessage = async function(event) {
-    const newResult = JSON.parse(event.data)
-    console.log('Message received:', newResult);
+    socket.onclose = function(event) {
+        console.log('WebSocket disconnected');
+        setTimeout(connectWebSocket, 3000);
+    };
 
-    console.log(`total seconds = ${totalSeconds}`)
-    console.log(`time_pass = ${newResult.time_pass}`)
+    socket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+        // Попытка переподключения через 5 секунд
+        setTimeout(connectWebSocket, 5000);
+    };
 
-    console.log(`total seconds - time_pass = ${totalSeconds - newResult.time_pass}`)
+    socket.onmessage = async function(event) {
+        const newResult = JSON.parse(event.data);
+        console.log('Message received:', newResult);
 
-    if (totalSeconds - newResult.time_pass < 0) {
-        await $store.methods.completeTest()
-    }
+        console.log(`total seconds = ${totalSeconds}`);
+        console.log(`time_pass = ${newResult.time_pass}`);
 
-    if (newResult.mark === -1) {
-        document.getElementById("timer").innerText = TimeProcess(totalSeconds - newResult.time_pass)
-    } else if (newResult.mark === -2) {
-        needProtect = false
-        window.location.href = "/passing/abort"
-        history.replaceState(null, null, window.location.href);
-    }
+        console.log(`total seconds - time_pass = ${totalSeconds - newResult.time_pass}`);
 
-    console.log('Message received:', newResult);
-};
+        if (totalSeconds - newResult.time_pass < 0) {
+            await $store.methods.completeTest();
+        }
+
+        if (newResult.mark === -1) {
+            document.getElementById("timer").innerText = TimeProcess(totalSeconds - newResult.time_pass);
+        } else if (newResult.mark === -2) {
+            needProtect = false;
+            window.location.href = "/passing/abort";
+            history.replaceState(null, null, window.location.href);
+        }
+
+        console.log('Message received:', newResult);
+    };
+}
+
+connectWebSocket();
 
 function TimeProcess(seconds) {
     let hours = Math.floor(seconds / 3600);
