@@ -118,6 +118,23 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 
 		for {
 			select {
+			case <-time.After(time.Duration(access.PassageTime)*time.Minute + 5*time.Second):
+				resultStudent, err := h.ResultService.SaveResult(
+					studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
+				)
+
+				if err != nil {
+					log.Err(err).Send()
+					return
+				}
+
+				h.SendToBroadcast(Message{
+					UserID: access.UserID,
+					Result: resultStudent,
+				})
+
+				delete(h.ClientManager.TimesMap, passID)
+				return
 			case <-time.After(time.Second):
 				log.Info().Msg("прошла секунда, отправляю...")
 				h.ClientManager.SendToBroadcast(msg)
@@ -129,22 +146,6 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 				log.Info().Msg("тест завершён, выключает посекундное обновление")
 				delete(h.ClientManager.TimesMap, passID)
 				return
-				//case <-time.After(time.Duration(access.PassageTime)*time.Minute + 5*time.Second):
-				//	resultStudent, err := h.ResultService.SaveResult(
-				//		studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
-				//	)
-				//
-				//	if err != nil {
-				//		log.Err(err).Send()
-				//		return
-				//	}
-				//
-				//	h.ClientManager.Broadcast <- Message{
-				//		UserID: access.UserID,
-				//		Result: resultStudent,
-				//	}
-				//
-				//	return
 			}
 		}
 	}()
