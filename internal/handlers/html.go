@@ -165,7 +165,7 @@ func (h *Handler) OneResultPage(c *gin.Context) {
 		"group":    group,
 		"access":   access,
 		"url":      fmt.Sprintf("/p/tests/%d", test.ID),
-		"urlPass":  DomainWithPort + fmt.Sprintf("/passing/%d", access.ID),
+		"urlPass":  DomainWithPort + fmt.Sprintf("passing/%d", access.ID),
 		"hrefPass": fmt.Sprintf("/passing/%d", access.ID),
 	})
 }
