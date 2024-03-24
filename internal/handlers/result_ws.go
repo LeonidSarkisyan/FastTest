@@ -80,6 +80,7 @@ func (h *Handler) ResetResult(c *gin.Context) {
 	go func() {
 		message := Message{
 			UserID: userID,
+			PassID: passID,
 			Result: models.ResultStudent{
 				Mark:         -2,
 				Score:        0,
@@ -92,8 +93,6 @@ func (h *Handler) ResetResult(c *gin.Context) {
 			},
 		}
 
-		h.SendToBroadcast(message)
-		message.PassID = passID
 		h.SendToBroadcast(message)
 
 		var mu sync.Mutex
