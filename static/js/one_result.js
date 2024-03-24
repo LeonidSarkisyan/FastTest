@@ -11,12 +11,12 @@ Spruce.store("data", {
 
 Spruce.store("methods", {
     async Reset(passID, index) {
-        const response = await axios.patch(`/results/${RESULT_ID}/reset/${passID}`)
-        console.log(response)
-
         $store.data.passes[index].is_activated = false
         $store.data.results[index].access_id = 0
         $store.data.results[index].mark = 0
+
+        const response = await axios.patch(`/results/${RESULT_ID}/reset/${passID}`)
+        console.log(response)
     },
 
     TimeProcess(seconds) {
