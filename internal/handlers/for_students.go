@@ -118,7 +118,10 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		})
 
 		go func() {
+			var mu sync.Mutex
+			mu.Lock()
 			h.ClientManager.TimesMap[passID] <- 1
+			mu.Unlock()
 		}()
 	}()
 
@@ -151,39 +154,13 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 				msg.PassID = passID
 			case <-h.ClientManager.TimesMap[passID]:
 				log.Info().Msg("тест завершён, выключает посекундное обновление")
+				mu.Lock()
 				delete(h.ClientManager.TimesMap, passID)
+				mu.Unlock()
 				return
 			}
 		}
 	}()
-	//
-	//go func() {
-	//	s := make(chan int)
-	//	h.ClientManager.ResetMap[passID] = &s
-	//
-	//	for {
-	//		select {
-	//		case <-time.After(time.Duration(access.PassageTime)*time.Minute + 5*time.Second):
-	//			resultStudent, err := h.ResultService.SaveResult(
-	//				studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
-	//			)
-	//
-	//			if err != nil {
-	//				log.Err(err).Send()
-	//				return
-	//			}
-	//
-	//			h.ClientManager.Broadcast <- Message{
-	//				UserID: access.UserID,
-	//				Result: resultStudent,
-	//			}
-	//
-	//			*h.ClientManager.TimesMap[passID] <- 1
-	//		case <-*h.ClientManager.ResetMap[passID]:
-	//			return
-	//		}
-	//	}
-	//}()
 }
 
 func (h *Handler) CreateResult(c *gin.Context) {
@@ -278,7 +255,11 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		}
 
 		h.ClientManager.SendToBroadcast(message)
+
+		var mu sync.Mutex
+		mu.Lock()
 		h.ClientManager.TimesMap[passID] <- 1
+		mu.Unlock()
 	}()
 }
 
