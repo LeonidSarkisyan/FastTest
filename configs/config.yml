@@ -5,7 +5,7 @@ local:
   port: "80"
 
 prod:
-  address: "http://фаст-тест.рф/"
+  address: "81.200.149.16"
   port: "80"
 
 test_db:
