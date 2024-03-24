@@ -32,7 +32,15 @@ Spruce.store("methods", {
     },
 
     CopyCode(code) {
-        navigator.clipboard.writeText(code)
+        let tempInput = document.createElement("input");
+        tempInput.value = code;
+        document.body.appendChild(tempInput);
+
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+
 
         let notification = document.getElementById("notification");
         notification.style.display = "block";
