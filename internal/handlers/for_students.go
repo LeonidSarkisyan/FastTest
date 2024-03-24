@@ -4,8 +4,10 @@ import (
 	"App/internal/handlers/responses"
 	"App/internal/models"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"math/rand/v2"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -108,6 +110,12 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 			},
 		}
 
+		var mu sync.Mutex
+
+		mu.Lock()
+		h.ClientManager.TimesMap[passID] = make(chan int)
+		mu.Unlock()
+
 		for {
 			select {
 			case <-time.After(time.Second):
@@ -116,6 +124,26 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 				h.ClientManager.Broadcast <- msg
 				msg.Result.TimePass++
 				msg.PassID = passID
+			case <-h.ClientManager.TimesMap[passID]:
+				log.Info().Msg("тест завершён, выключает посекундное обновление")
+				delete(h.ClientManager.TimesMap, passID)
+				return
+				//case <-time.After(time.Duration(access.PassageTime)*time.Minute + 5*time.Second):
+				//	resultStudent, err := h.ResultService.SaveResult(
+				//		studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
+				//	)
+				//
+				//	if err != nil {
+				//		log.Err(err).Send()
+				//		return
+				//	}
+				//
+				//	h.ClientManager.Broadcast <- Message{
+				//		UserID: access.UserID,
+				//		Result: resultStudent,
+				//	}
+				//
+				//	return
 			}
 		}
 	}()
@@ -233,16 +261,14 @@ func (h *Handler) CreateResult(c *gin.Context) {
 	c.JSON(201, gin.H{
 		"result": result,
 	})
-	//message := Message{
-	//	UserID: access.UserID,
-	//	Result: result,
-	//}
-	//
-	//h.Channels.Broadcast[accessID] <- message
-	//
-	//message.PassID = passID
-	//
-	//h.Channels.BroadcastStudents[passID] <- message
+
+	message := Message{
+		UserID: access.UserID,
+		Result: result,
+	}
+
+	h.ClientManager.Broadcast <- message
+	h.ClientManager.TimesMap[passID] <- 1
 }
 
 func (h *Handler) AbortPage(c *gin.Context) {
