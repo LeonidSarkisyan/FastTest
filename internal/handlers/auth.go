@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-const Domain = "http://фаст-тест.рф/"
-const DomainWithPort = "http://фаст-тест.рф/"
+const Domain = "https://фаст-тест.рф/"
+const DomainWithPort = "https://фаст-тест.рф/"
 
 func (h *Handler) Register(c *gin.Context) {
 	var in models.UserIn
