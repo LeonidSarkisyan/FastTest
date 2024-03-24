@@ -77,7 +77,7 @@ func (h *Handler) ResetResult(c *gin.Context) {
 	}
 
 	go func() {
-		h.SendToBroadcast(Message{
+		message := Message{
 			UserID: userID,
 			Result: models.ResultStudent{
 				Mark:         -2,
@@ -89,7 +89,11 @@ func (h *Handler) ResetResult(c *gin.Context) {
 				StudentID:    0,
 				TimePass:     0,
 			},
-		})
+		}
+
+		h.SendToBroadcast(message)
+		message.PassID = passID
+		h.SendToBroadcast(message)
 
 		h.ClientManager.TimesMap[passID] <- 1
 	}()
