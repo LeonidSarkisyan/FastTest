@@ -36,7 +36,7 @@ func main() {
 
 	manager := &handlers.ClientManager{
 		Clients:    make(map[*handlers.Client]bool),
-		Broadcast:  make(chan handlers.Message),
+		Broadcast:  make(chan handlers.Message, 100),
 		Register:   make(chan *handlers.Client),
 		Unregister: make(chan *handlers.Client),
 		TimesMap:   make(map[int]*chan int),

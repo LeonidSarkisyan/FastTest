@@ -43,7 +43,7 @@ func (manager *ClientManager) Start() {
 			}
 		case message := <-manager.Broadcast:
 
-			log.Info()
+			log.Info().Any("message пришёл", message).Send()
 
 			for client := range manager.Clients {
 				if client.userID != message.UserID || client.passID != message.PassID {
