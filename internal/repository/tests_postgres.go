@@ -214,7 +214,8 @@ func (r *TestPostgres) GetAllAccesses(userID int) ([]models.AccessOut, error) {
 	FROM accesses a
 	JOIN tests AS t ON a.test_id = t.id 
 	JOIN groups AS g ON a.group_id = g.id 
-	WHERE a.user_id = $1;
+	WHERE a.user_id = $1
+	ORDER BY a.id DESC;
 	`
 
 	var accesses []models.AccessOut
