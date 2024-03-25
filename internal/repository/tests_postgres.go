@@ -210,9 +210,11 @@ func (r *TestPostgres) GetPasses(resultID int) ([]models.Passes, error) {
 
 func (r *TestPostgres) GetAllAccesses(userID int) ([]models.AccessOut, error) {
 	query := `
-	SELECT id, test_id, group_id, date_start, date_end, passage_time 
-	FROM accesses
-	WHERE user_id = $1;
+	SELECT a.id, a.test_id, a.group_id, a.date_start, a.date_end, a.passage_time, t.title, g.name 
+	FROM accesses a
+	JOIN tests AS t ON a.test_id = t.id 
+	JOIN groups AS g ON a.group_id = g.id 
+	WHERE a.user_id = $1;
 	`
 
 	var accesses []models.AccessOut
@@ -227,7 +229,10 @@ func (r *TestPostgres) GetAllAccesses(userID int) ([]models.AccessOut, error) {
 	for rows.Next() {
 		var a models.AccessOut
 
-		if err := rows.Scan(&a.ID, &a.TestID, &a.GroupID, &a.DateStart, &a.DateEnd, &a.PassageTime); err != nil {
+		if err := rows.Scan(
+			&a.ID, &a.TestID, &a.GroupID, &a.DateStart, &a.DateEnd, &a.PassageTime, &a.Test.Title,
+			&a.GroupOut.Name,
+		); err != nil {
 			log.Err(err).Send()
 			return nil, err
 		}

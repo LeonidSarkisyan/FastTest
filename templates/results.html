@@ -23,10 +23,21 @@
             <template x-for="(result, index) in $store.data.results">
                 <div class="question__form">
                     <div class="question__form__title result__title_list">
-                        С <span x-text="result.date_start"></span> до <span x-text="result.date_end"></span>
+                        Тестирование группы: <span x-text="result.group.name" class="choose__group__name"></span>
+                    </div>
+                    <div class="question__form__title result__title_list">
+                        Тест: <span x-text="result.test.title" class="choose__group__name"></span>
+                    </div>
+                    <div class="question__form__title result__title_list">
+                        Дата проведения: <span
+                            class="choose__group__name"
+                            x-text="result.date_start"
+                    ></span><span class="choose__group__name"> - </span><span
+                            class="choose__group__name"
+                            x-text="result.date_end"></span>
                     </div>
                     <a class="base__button edit" :href="'/p/results/' + result.id">
-                        Перейти
+                        Перейти к результатам
                     </a>
                 </div>
             </template>

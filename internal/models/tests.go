@@ -5,7 +5,7 @@ type TestIn struct {
 }
 
 type Test struct {
-	Title  string
+	Title  string `json:"title"`
 	UserID int
 }
 

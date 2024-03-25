@@ -12,6 +12,9 @@ type AccessOut struct {
 
 	Criteria     `json:"criteria" binding:"required"`
 	CriteriaJson []byte
+
+	Test     `json:"test"`
+	GroupOut `json:"group"`
 }
 
 type Access struct {
