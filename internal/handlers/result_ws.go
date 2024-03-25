@@ -98,6 +98,7 @@ func (h *Handler) ResetResult(c *gin.Context) {
 		var mu sync.Mutex
 		mu.Lock()
 		h.ClientManager.TimesMap[passID] <- 1
+		h.ClientManager.ResetMap[passID] <- 1
 		mu.Unlock()
 	}()
 }
