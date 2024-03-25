@@ -38,7 +38,7 @@ func main() {
 		Clients:   make([]*handlers.Client, 0),
 		Broadcast: make(chan handlers.Message),
 		TimesMap:  make(map[int]chan int),
-		ResetMap:  make(map[int]*chan int),
+		ResetMap:  make(map[int]chan int),
 	}
 
 	go manager.Start()

@@ -99,6 +99,12 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 	})
 
 	go func() {
+		var mu sync.Mutex
+
+		mu.Lock()
+		h.ClientManager.ResetMap[passID] = make(chan int)
+		mu.Unlock()
+
 		timeout := time.Duration(access.PassageTime)*time.Minute + 5*time.Second
 
 		for {
@@ -122,9 +128,10 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 					var mu sync.Mutex
 					mu.Lock()
 					h.ClientManager.TimesMap[passID] <- 1
+					h.ClientManager.ResetMap[passID] <- 1
 					mu.Unlock()
 				}()
-			case <-h.ClientManager.TimesMap[passID]:
+			case <-h.ClientManager.ResetMap[passID]:
 				var mu sync.Mutex
 				log.Info().Msg("тест прерван или завершён, выключаем принудельную двойку")
 				mu.Lock()
@@ -270,6 +277,7 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		var mu sync.Mutex
 		mu.Lock()
 		h.ClientManager.TimesMap[passID] <- 1
+		h.ClientManager.ResetMap[passID] <- 1
 		mu.Unlock()
 	}()
 }

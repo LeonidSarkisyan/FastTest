@@ -17,7 +17,7 @@ type ClientManager struct {
 	Clients   []*Client
 	Broadcast chan Message
 	TimesMap  map[int]chan int
-	ResetMap  map[int]*chan int
+	ResetMap  map[int]chan int
 	Mutex     sync.Mutex
 }
 
