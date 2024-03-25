@@ -101,28 +101,39 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 	go func() {
 		timeout := time.Duration(access.PassageTime)*time.Minute + 5*time.Second
 
-		<-time.After(timeout)
+		for {
+			select {
+			case <-time.After(timeout):
+				resultStudent, err := h.ResultService.SaveResult(
+					studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
+				)
 
-		resultStudent, err := h.ResultService.SaveResult(
-			studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
-		)
+				if err != nil {
+					log.Err(err).Send()
+					return
+				}
 
-		if err != nil {
-			log.Err(err).Send()
-			return
+				h.SendToBroadcast(Message{
+					UserID: access.UserID,
+					Result: resultStudent,
+				})
+
+				go func() {
+					var mu sync.Mutex
+					mu.Lock()
+					h.ClientManager.TimesMap[passID] <- 1
+					mu.Unlock()
+				}()
+			case <-h.ClientManager.TimesMap[passID]:
+				var mu sync.Mutex
+				log.Info().Msg("тест прерван или завершён, выключаем принудельную двойку")
+				mu.Lock()
+				delete(h.ClientManager.TimesMap, passID)
+				mu.Unlock()
+				return
+			}
 		}
 
-		h.SendToBroadcast(Message{
-			UserID: access.UserID,
-			Result: resultStudent,
-		})
-
-		go func() {
-			var mu sync.Mutex
-			mu.Lock()
-			h.ClientManager.TimesMap[passID] <- 1
-			mu.Unlock()
-		}()
 	}()
 
 	go func() {
