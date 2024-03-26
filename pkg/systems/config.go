@@ -14,6 +14,8 @@ type AppConfig struct {
 	Debug   bool
 
 	Database DBConfig
+
+	OpenAIUrl string
 }
 
 type DBConfig struct {
@@ -51,7 +53,8 @@ func MustConfig() *AppConfig {
 
 func getConfig() (*AppConfig, error) {
 	cfg := AppConfig{
-		Debug: viper.GetBool("debug"),
+		Debug:     viper.GetBool("debug"),
+		OpenAIUrl: viper.GetString("open_ai_url"),
 	}
 
 	if cfg.Debug {

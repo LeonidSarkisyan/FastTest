@@ -19,3 +19,5 @@ prod_db:
   host: "147.45.144.230"
   port: "5432"
   name: "default_db"
+
+open_ai_url: "https://api.openai.com/v1/chat/completions"
