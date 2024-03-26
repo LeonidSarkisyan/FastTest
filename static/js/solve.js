@@ -182,8 +182,8 @@ function connectWebSocket() {
             document.getElementById("timer").innerText = TimeProcess(totalSeconds - newResult.time_pass);
         } else if (newResult.mark === -2) {
             needProtect = false;
-            window.location.href = "/passing/abort";
             history.replaceState(null, null, window.location.href);
+            window.location.href = "/passing/abort";
         }
 
         console.log('Message received:', newResult);
