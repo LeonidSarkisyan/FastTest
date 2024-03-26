@@ -8,8 +8,7 @@
     <h1>{{ .error }}</h1>
 
     <script>
-        window.addEventListener('beforeunload', function(event) {
-            window.location.href = window.location.href
+        window.addEventListener('popstate', function(event) {
             event.preventDefault()
         });
     </script>
