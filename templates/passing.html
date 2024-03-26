@@ -57,9 +57,11 @@
         })
 
         async function getStartedTest() {
+            const code = Number(i.value)
+
             try {
                 const response = await axios.post(`/passing/${RESULT_ID}`, {
-                    code: Number(i.value)
+                    code: Number(code)
                 })
 
                 window.location.href = `/passing/${RESULT_ID}/solving/${response.data.id}`
