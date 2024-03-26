@@ -58,6 +58,7 @@
 
         async function getStartedTest() {
             const code = Number(i.value)
+            i.value = ""
 
             try {
                 const response = await axios.post(`/passing/${RESULT_ID}`, {
