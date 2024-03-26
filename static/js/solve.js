@@ -182,11 +182,11 @@ function connectWebSocket() {
             document.getElementById("timer").innerText = TimeProcess(totalSeconds - newResult.time_pass);
         } else if (newResult.mark === -2) {
             needProtect = false;
-            function Navigate(){
-                window.location.replace("/passing/abort");
-                return false;
-            }
-            Navigate()
+            window.location.href = "/passing/abort";
+            history.pushState(null, null, window.location.href);
+            window.addEventListener('popstate', function(event) {
+                history.pushState(null, null, window.location.href);
+            });
         }
 
         console.log('Message received:', newResult);
