@@ -69,7 +69,7 @@
         </template>
         <div class="question__form">
             <div class="question__form__title">Варианты ответов:</div>
-            <template x-for="(answer, index) in $store.data.answers">
+            <template x-for="(answer, index) in $store.data.questions[$store.data.currentIndex].answers">
                 <div class="answer__point">
                     <input
                             @change="$store.methods.updateAnswer(index)"

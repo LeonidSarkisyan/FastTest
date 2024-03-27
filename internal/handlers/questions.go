@@ -49,7 +49,7 @@ func (h *Handler) GetAllQuestion(c *gin.Context) {
 
 	log.Info().Int("testID", testID).Int("userID", userID).Send()
 
-	questions, err := h.QuestionService.GetAll(testID, userID)
+	questions, err := h.QuestionService.GetAllQuestionsWithAnswers(testID)
 
 	log.Info().Any("questions", questions).Send()
 

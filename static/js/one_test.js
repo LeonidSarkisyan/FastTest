@@ -20,8 +20,7 @@ Spruce.store("data", {
     title: "",
     currentIndex: GetIndex(TEST_ID),
 
-    questions: [],
-    answers: []
+    questions: []
 })
 
 let response = await axios.get("/tests/" + TEST_ID)
@@ -36,9 +35,6 @@ $store.data.answers = response.data
 
 Spruce.store("methods", {
     async chooseIndex(index) {
-        const response = await axios.get(QUESTION_WITH_ID_URL($store.data.questions[index].id))
-        $store.data.answers = response.data
-        console.log(response.data)
         $store.data.currentIndex = index
         ChangeIndex(TEST_ID, index)
     },
