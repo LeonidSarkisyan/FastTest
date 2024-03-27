@@ -66,36 +66,36 @@
                         x-model="$store.data.questions[$store.data.currentIndex].text"
                 >
             </div>
-        </template>
-        <div class="question__form">
-            <div class="question__form__title">Варианты ответов:</div>
-            <template x-for="(answer, index) in $store.data.questions[$store.data.currentIndex].answers">
-                <div class="answer__point">
-                    <input
-                            @change="$store.methods.updateAnswer(index)"
-                            class="answer__point__checkbox"
-                            type="checkbox"
-                            x-model="answer.is_correct"
-                    >
-                    <input
-                            @keydown.enter="$store.methods.focusAnswer(index, $event)"
-                            @change="$store.methods.updateAnswer(index)"
-                            class="base__input text answer__input"
-                            x-model="answer.text"
-                    >
-                    <div
-                            @click="$store.methods.deleteAnswer(answer.id)"
-                            class="answer__point__delete"
-                            :class="{ 'answer__point__delete__disable': $store.data.answers.length < 3}"
-                    >
-                        &#10006;
+            <div class="question__form">
+                <div class="question__form__title">Варианты ответов:</div>
+                <template x-for="(answer, index) in $store.data.questions[$store.data.currentIndex].answers">
+                    <div class="answer__point">
+                        <input
+                                @change="$store.methods.updateAnswer(index)"
+                                class="answer__point__checkbox"
+                                type="checkbox"
+                                x-model="answer.is_correct"
+                        >
+                        <input
+                                @keydown.enter="$store.methods.focusAnswer(index, $event)"
+                                @change="$store.methods.updateAnswer(index)"
+                                class="base__input text answer__input"
+                                x-model="answer.text"
+                        >
+                        <div
+                                @click="$store.methods.deleteAnswer(answer.id)"
+                                class="answer__point__delete"
+                                :class="{ 'answer__point__delete__disable': $store.data.answers.length < 3}"
+                        >
+                            &#10006;
+                        </div>
                     </div>
+                </template>
+                <div class="base__button" @click="$store.methods.addAnswer()">
+                    Добавить вариант ответа
                 </div>
-            </template>
-            <div class="base__button" @click="$store.methods.addAnswer()">
-                Добавить вариант ответа
             </div>
-        </div>
+        </template>
     </div>
     <script type="module" src="/../static/js/one_test.js">
 
