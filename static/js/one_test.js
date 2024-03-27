@@ -160,7 +160,7 @@ Spruce.store("methods", {
         try {
             const response = await axios.delete(QUESTION_WITH_ID_URL(questionID) + "/" + id)
 
-            $store.data.questions[$store.data.currentIndex].answers = $store.data.answers.filter(answer => {
+            $store.data.questions[$store.data.currentIndex].answers = $store.data.questions[$store.data.currentIndex].answers.filter(answer => {
                 return answer.id !== id
             })
         } catch (e) {
