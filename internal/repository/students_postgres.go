@@ -55,7 +55,7 @@ func (r *StudentPostgres) GetAll(groupID int) ([]models.Student, error) {
 	SELECT id, name, surname, patronymic 
 	FROM students 
 	WHERE group_id = $1
-	ORDER BY id DESC
+	ORDER BY surname
 	`
 
 	var students []models.Student

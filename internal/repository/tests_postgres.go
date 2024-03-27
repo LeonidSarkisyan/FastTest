@@ -180,10 +180,11 @@ func (r *TestPostgres) GetAccess(userID, accessID int) (models.AccessOut, error)
 
 func (r *TestPostgres) GetPasses(resultID int) ([]models.Passes, error) {
 	query := `
-	SELECT id, is_activated, datetime_activate, code, student_id
+	SELECT passes.id, passes.is_activated, passes.datetime_activate, passes.code, passes.student_id
 	FROM passes
-	WHERE access_id = $1
-	ORDER BY student_id DESC
+	JOIN students ON passes.student_id = students.id
+	WHERE passes.access_id = $1
+	ORDER BY students.surname;
 	`
 
 	var passes []models.Passes
