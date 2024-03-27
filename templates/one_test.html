@@ -12,50 +12,51 @@
     <title>{{ .title }}</title>
 </head>
 <body>
-    <embed src="/p/header" width="100%" height="100"/>
-    <div class="container" x-data x-subscribe>
-        <h1 class="title title__span" x-text="$store.data.title"></h1>
-        <span class="sub__title" @click="$store.methods.showModal()">
+<embed src="/p/header" width="100%" height="100"/>
+<div class="container" x-data x-subscribe>
+    <h1 class="title title__span" x-text="$store.data.title"></h1>
+    <span class="sub__title" @click="$store.methods.showModal()">
             изменить название
         </span>
-        <div id="myModal" class="modal" x-show="$store.data.showModal">
-            <div class="modal-content">
-                <div class="tests__form">
-                    <div class="tests__form__title">Изменить название</div>
-                    <div class="tests__form__body">
-                        <label for="test__title" class="test__title__label">Название теста:</label>
-                        <input
-                                @keydown.enter="$store.methods.UpdateTitleTest()"
-                                placeholder="Например, Windows формы"
-                                type="text"
-                                id="test__title"
-                                class="base__input create"
-                                x-model="$store.data.mainTitle"
-                        >
-                        <div class="base__button" @click="$store.methods.UpdateTitleTest()">
-                            Изменить название
-                        </div>
+    <div id="myModal" class="modal" x-show="$store.data.showModal">
+        <div class="modal-content">
+            <div class="tests__form">
+                <div class="tests__form__title">Изменить название</div>
+                <div class="tests__form__body">
+                    <label for="test__title" class="test__title__label">Название теста:</label>
+                    <input
+                            @keydown.enter="$store.methods.UpdateTitleTest()"
+                            placeholder="Например, Windows формы"
+                            type="text"
+                            id="test__title"
+                            class="base__input create"
+                            x-model="$store.data.mainTitle"
+                    >
+                    <div class="base__button" @click="$store.methods.UpdateTitleTest()">
+                        Изменить название
                     </div>
                 </div>
             </div>
         </div>
-        <div class="question__form list">
-            <template x-for="(question, index) in $store.data.questions" :key="question.id">
-                <div
+    </div>
+    <div class="question__form list">
+        <template x-for="(question, index) in $store.data.questions" :key="question.id">
+            <div
                     @contextmenu.prevent="$store.methods.deleteQuestion(index, question.id)"
                     :title="question.text"
                     @click="$store.methods.chooseIndex(index)"
                     :class="{ 'question__list__point__active': $store.data.currentIndex === index }"
                     class="question__list__point"
                     x-text="index + 1"
-                >
-                </div>
-            </template>
-            <div class="question__list__point plus" @click="$store.methods.addQuestion()">
-                +
+            >
             </div>
+        </template>
+        <div class="question__list__point plus" @click="$store.methods.addQuestion()">
+            +
         </div>
-        <template x-if="$store.data.questions.length">
+    </div>
+    <template x-if="$store.data.questions.length">
+        <div>
             <div class="question__form">
                 <div class="question__form__title">Текст вопроса:</div>
                 <input
@@ -95,10 +96,11 @@
                     Добавить вариант ответа
                 </div>
             </div>
-        </template>
-    </div>
-    <script type="module" src="/../static/js/one_test.js">
+        </div>
+    </template>
+</div>
+<script type="module" src="/../static/js/one_test.js">
 
-    </script>
+</script>
 </body>
 </html>

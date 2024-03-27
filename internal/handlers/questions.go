@@ -53,12 +53,31 @@ func (h *Handler) GetAllQuestion(c *gin.Context) {
 
 	log.Info().Any("questions", questions).Send()
 
+	var questionsWithAnswers []models.QuestionWithAnswersWithOutIsCorrect
+
+	for _, question := range questions {
+		questionWithAnswer := models.QuestionWithAnswersWithOutIsCorrect{
+			ID:   question.ID,
+			Text: question.Text,
+		}
+
+		for _, answer := range question.Answers {
+			questionWithAnswer.Answers = append(questionWithAnswer.Answers, models.AnswerWithCorrect{
+				ID:        answer.ID,
+				Text:      answer.Text,
+				IsCorrect: answer.IsCorrect,
+			})
+		}
+
+		questionsWithAnswers = append(questionsWithAnswers, questionWithAnswer)
+	}
+
 	if err != nil {
 		log.Err(err).Send()
 		SendErrorResponse(c, 400, err.Error())
 	}
 
-	c.JSON(200, responses.NewListResponse(questions))
+	c.JSON(200, responses.NewListResponse(questionsWithAnswers))
 }
 
 func (h *Handler) UpdateQuestion(c *gin.Context) {
