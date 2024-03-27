@@ -93,3 +93,7 @@
     align-items: center;
     justify-content: space-between;
 }
+
+.close {
+    font-size: 26px;
+}
