@@ -41,10 +41,10 @@ Spruce.store("methods", {
 
     async addQuestion() {
         const response = await axios.post(QUESTION_URL)
-        $store.data.questions.push({
+        $store.data.questions = [...$store.data.questions, {
             id: response.data.id,
             text: ""
-        })
+        }]
         await this.chooseIndex($store.data.questions.length - 1)
         const input = document.getElementById("input")
         input.focus()
