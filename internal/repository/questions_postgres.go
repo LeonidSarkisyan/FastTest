@@ -137,7 +137,7 @@ func (r *QuestionPostgres) GetAllWithAnswers(testID int) ([]models.QuestionWithA
 	FROM questions q
 	LEFT JOIN answers a ON q.id = a.question_id
 	WHERE q.test_id = $1
-	ORDER BY q.id ASC
+	ORDER BY q.id ASC, a.id ASC;
 	`
 
 	rows, err := r.conn.Query(query, testID)
