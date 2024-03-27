@@ -49,7 +49,8 @@ func (c *OpenAIClient) CreateQuestionFromGPT(themeName string, countQuestion int
 
 		количество вопросов - ` + strconv.Itoa(countQuestion) + `
 		
-		очень важно следи за структурой json, так как ты используешься в системе тестирования
+		очень важно следи за структурой json, так как ты используешься в системе тестирования,
+		не используй никаких специальных символов, которые могут помешать взять твой ответ-json.
 		`
 
 	messages := []Message{
