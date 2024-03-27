@@ -67,7 +67,7 @@
                         x-model="$store.data.questions[$store.data.currentIndex].text"
                 >
             </div>
-            <div class="question__form">
+            <div class="question__form" id="answer__list">
                 <div class="question__form__title">Варианты ответов:</div>
                 <template x-for="(answer, index) in $store.data.questions[$store.data.currentIndex].answers">
                     <div class="answer__point">
