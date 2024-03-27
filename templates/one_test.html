@@ -77,6 +77,13 @@
                     </select>
                     <div
                             x-show="!$store.data.loading"
+                            class="note"
+                    >
+                        ChatGPT может ошибаться, после генерации проверьте созданные им вопросы <br>
+                        Генерация может занимать до 1 минуты
+                    </div>
+                    <div
+                            x-show="!$store.data.loading"
                             class="base__button chat__color chat__border chat__button"
                             @click="$store.methods.CreateQuestionsFromChatGPT()"
                     >
