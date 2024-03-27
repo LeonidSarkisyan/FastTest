@@ -36,14 +36,19 @@ func (r *AnswerPostgres) CreateThree(questionID int) ([]int, error) {
 	INSERT INTO answers (text, question_id)
 	VALUES
 		($1, $2),
-		($3, $4),
-		($5, $6)
+		($1, $2),
+		($1, $2)
 	RETURNING id;
 	`
 
 	var ids []int
 
 	rows, err := r.conn.Query(stmt, DefaultTextAnswer, questionID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return nil, err
+	}
 
 	for rows.Next() {
 		var id int
