@@ -47,7 +47,10 @@ func (c *OpenAIClient) CreateQuestionFromGPT(themeName string, countQuestion int
 		поля text и поле answers - массив ответов, элементы которого являются объектом (ответом)
 		с полями text и is_correct - булево значение. Правильных ответов может быть несколько.
 
-		количество вопросов - ` + strconv.Itoa(countQuestion)
+		количество вопросов - ` + strconv.Itoa(countQuestion) + `
+		
+		очень важно следи за структурой json, так как ты используешься в системе тестирования
+		`
 
 	messages := []Message{
 		{
