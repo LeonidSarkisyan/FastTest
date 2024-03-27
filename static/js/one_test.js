@@ -107,7 +107,7 @@ Spruce.store("methods", {
     async addAnswer() {
         let questionID = $store.data.questions[$store.data.currentIndex].id
         const response = await axios.post(QUESTION_WITH_ID_URL(questionID))
-        $store.data.answers.push({
+        $store.data.questions[$store.data.currentIndex].answers.push({
             id: response.data.id,
             text: ""
         })
@@ -115,7 +115,7 @@ Spruce.store("methods", {
 
     async updateAnswer(answerIndex) {
         let questionID = $store.data.questions[$store.data.currentIndex].id
-        let answer = $store.data.answers[answerIndex]
+        let answer = $store.data.questions[$store.data.currentIndex].answers[answerIndex]
 
         const body = {
             text: answer.text,
@@ -132,7 +132,7 @@ Spruce.store("methods", {
         if (event) {
             if (event.ctrlKey) {
                 console.log(index)
-                $store.data.answers[index].is_correct = !$store.data.answers[index].is_correct
+                $store.data.questions[$store.data.currentIndex].answers[index].is_correct = !$store.data.questions[$store.data.currentIndex].answers[index].is_correct
                 await $store.methods.updateAnswer(index)
                 return
             }
@@ -150,7 +150,7 @@ Spruce.store("methods", {
     },
 
     async deleteAnswer(id) {
-        if ($store.data.answers.length < 3) {
+        if ($store.data.questions[$store.data.currentIndex].answers.length < 3) {
             return
         }
 

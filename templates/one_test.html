@@ -86,7 +86,7 @@
                         <div
                                 @click="$store.methods.deleteAnswer(answer.id)"
                                 class="answer__point__delete"
-                                :class="{ 'answer__point__delete__disable': $store.data.answers.length < 3}"
+                                :class="{ 'answer__point__delete__disable': $store.data.questions[$store.data.currentIndex].answers.length < 3}"
                         >
                             &#10006;
                         </div>
