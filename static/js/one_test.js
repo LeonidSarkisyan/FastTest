@@ -34,18 +34,30 @@ response = await axios.get(QUESTION_WITH_ID_URL($store.data.questions[$store.dat
 $store.data.answers = response.data
 
 Spruce.store("methods", {
-    async chooseIndex(index) {
+    chooseIndex(index) {
         $store.data.currentIndex = index
         ChangeIndex(TEST_ID, index)
     },
 
     async addQuestion() {
         const response = await axios.post(QUESTION_URL)
-        $store.data.questions = [...$store.data.questions, {
+
+        let newQuestion = {
             id: response.data.id,
-            text: ""
-        }]
-        await this.chooseIndex($store.data.questions.length - 1)
+            text: "",
+            answers: []
+        }
+
+        for (let answerID of response.data.answers_ids) {
+            newQuestion.answers.push({
+                id: answerID,
+                text: "",
+                is_correct: false,
+            })
+        }
+
+        $store.data.questions = [...$store.data.questions, newQuestion]
+        this.chooseIndex($store.data.questions.length - 1)
         const input = document.getElementById("input")
         input.focus()
     },

@@ -13,7 +13,7 @@ var (
 
 type AnswerRepository interface {
 	Create(questionID int) (int, error)
-	CreateThree(questionID int) error
+	CreateThree(questionID int) ([]int, error)
 	GetAll(questionID int) ([]models.Answer, error)
 	Update(answerUpdate models.AnswerUpdate, answerID, questionID int) error
 	Delete(answerID, questionID int) error
@@ -51,26 +51,26 @@ func (s *AnswerService) Create(userID, testID, questionID int) (int, error) {
 	return id, nil
 }
 
-func (s *AnswerService) CreateThree(userID, testID, questionID int) error {
+func (s *AnswerService) CreateThree(userID, testID, questionID int) ([]int, error) {
 	_, err := s.TestRepository.Get(testID, userID)
 
 	if err != nil {
-		return TestForbidden
+		return nil, TestForbidden
 	}
 
 	_, err = s.QuestionRepository.Get(questionID, testID)
 
 	if err != nil {
-		return QuestionNotFound
+		return nil, QuestionNotFound
 	}
 
-	err = s.AnswerRepository.CreateThree(questionID)
+	ids, err := s.AnswerRepository.CreateThree(questionID)
 
 	if err != nil {
-		return AnswerCreateError
+		return nil, AnswerCreateError
 	}
 
-	return nil
+	return ids, nil
 }
 
 func (s *AnswerService) GetAllByQuestionID(userID, testID, questionID int) ([]models.Answer, error) {

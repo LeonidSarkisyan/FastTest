@@ -76,7 +76,7 @@ func (s *TestService) Create(title string, userID int) (int, error) {
 
 	log.Info().Int("test_id", id).Send()
 
-	_, err = s.QuestionService.Create(id, userID)
+	_, _, err = s.QuestionService.Create(id, userID)
 
 	if err != nil {
 		log.Err(err).Send()

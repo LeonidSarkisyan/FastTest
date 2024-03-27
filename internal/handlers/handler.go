@@ -35,14 +35,14 @@ type GroupService interface {
 
 type AnswerService interface {
 	Create(userID, testID, questionID int) (int, error)
-	CreateThree(userID, testID, questionID int) error
+	CreateThree(userID, testID, questionID int) ([]int, error)
 	GetAllByQuestionID(userID, testID, questionID int) ([]models.Answer, error)
 	Update(userID, testID, questionID, answerID int, answerUpdate models.AnswerUpdate) error
 	Delete(userID, testID, questionID, answerID int) error
 }
 
 type QuestionService interface {
-	Create(testID, userID int) (int, error)
+	Create(testID, userID int) (int, []int, error)
 	GetAll(testID, userID int) ([]models.Question, error)
 	Update(userID, testID, questionID int, question models.QuestionUpdate) error
 	Delete(userID, testID, questionID int) error

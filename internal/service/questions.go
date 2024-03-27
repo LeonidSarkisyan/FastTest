@@ -40,28 +40,28 @@ func NewQuestionService(r QuestionRepository, rt TestRepository, sa *AnswerServi
 	}
 }
 
-func (s *QuestionService) Create(testID, userID int) (int, error) {
+func (s *QuestionService) Create(testID, userID int) (int, []int, error) {
 	_, err := s.TestRepository.Get(testID, userID)
 
 	if err != nil {
 		log.Err(err).Send()
-		return 0, TestForbidden
+		return 0, nil, TestForbidden
 	}
 
 	id, err := s.QuestionRepository.Create(testID)
 
 	if err != nil {
 		log.Err(err).Send()
-		return 0, QuestionErrorCreate
+		return 0, nil, QuestionErrorCreate
 	}
 
-	err = s.AnswerService.CreateThree(userID, testID, id)
+	ids, err := s.AnswerService.CreateThree(userID, testID, id)
 
 	if err != nil {
-		return 0, AnswerCreateError
+		return 0, nil, AnswerCreateError
 	}
 
-	return id, nil
+	return id, ids, nil
 }
 
 func (s *QuestionService) GetAll(testID, userID int) ([]models.Question, error) {

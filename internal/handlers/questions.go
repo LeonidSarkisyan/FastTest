@@ -22,7 +22,7 @@ func (h *Handler) CreateQuestion(c *gin.Context) {
 		return
 	}
 
-	id, err := h.QuestionService.Create(testID, userID)
+	id, ids, err := h.QuestionService.Create(testID, userID)
 
 	if err != nil {
 		log.Err(err).Send()
@@ -30,7 +30,8 @@ func (h *Handler) CreateQuestion(c *gin.Context) {
 	}
 
 	c.JSON(201, gin.H{
-		"id": id,
+		"id":          id,
+		"answers_ids": ids,
 	})
 }
 

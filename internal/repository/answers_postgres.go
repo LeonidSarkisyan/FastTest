@@ -31,22 +31,35 @@ func (r *AnswerPostgres) Create(questionID int) (int, error) {
 	return id, nil
 }
 
-func (r *AnswerPostgres) CreateThree(questionID int) error {
+func (r *AnswerPostgres) CreateThree(questionID int) ([]int, error) {
 	stmt := `
 	INSERT INTO answers (text, question_id)
 	VALUES
-	($1, $2),
-	($1, $2),
-	($1, $2);
+		($1, $2),
+		($3, $4),
+		($5, $6)
+	RETURNING id;
 	`
 
-	_, err := r.conn.Exec(stmt, DefaultTextAnswer, questionID)
+	var ids []int
+
+	rows, err := r.conn.Query(stmt, DefaultTextAnswer, questionID)
+
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			log.Err(err).Send()
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
 
 	if err != nil {
 		log.Err(err).Send()
+		return nil, err
 	}
 
-	return nil
+	return ids, nil
 }
 
 func (r *AnswerPostgres) GetAll(questionID int) ([]models.Answer, error) {
