@@ -107,10 +107,12 @@ Spruce.store("methods", {
     async addAnswer() {
         let questionID = $store.data.questions[$store.data.currentIndex].id
         const response = await axios.post(QUESTION_WITH_ID_URL(questionID))
+        console.log($store.data.questions[$store.data.currentIndex].answers)
         $store.data.questions[$store.data.currentIndex].answers.push({
             id: response.data.id,
             text: ""
         })
+        console.log($store.data.questions[$store.data.currentIndex].answers)
     },
 
     async updateAnswer(answerIndex) {
