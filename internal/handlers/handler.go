@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"App/internal/ai"
 	"App/internal/middlewares"
 	"App/internal/models"
 	"App/pkg/systems"
@@ -8,6 +9,10 @@ import (
 	"html/template"
 	"io"
 )
+
+type AiService interface {
+	CreateQuestionsFromGPT(userID, testID int, params ai.PromptParams) ([]models.QuestionWithAnswersWithOutIsCorrect, error)
+}
 
 type ResultService interface {
 	SaveResult(
@@ -86,6 +91,7 @@ type Channels struct {
 type Handler struct {
 	*ClientManager
 	*Channels
+	AiService
 	UserService
 	TestService
 	QuestionService
@@ -99,10 +105,10 @@ type Handler struct {
 func NewHandler(
 	cm *ClientManager,
 	u UserService, t TestService, q QuestionService, a AnswerService, g GroupService, s StudentService,
-	r ResultService,
+	r ResultService, ai AiService,
 ) *Handler {
 	return &Handler{ClientManager: cm, UserService: u, TestService: t, QuestionService: q,
-		AnswerService: a, GroupService: g, StudentService: s, ResultService: r}
+		AnswerService: a, GroupService: g, StudentService: s, ResultService: r, AiService: ai}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
@@ -158,6 +164,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			questions.POST("", h.CreateQuestion)
 			questions.GET("", h.GetAllQuestion)
+			questions.POST("/chat-gpt", h.CreateQuestionsFromGPT)
 			questions.PATCH("/:question_id", h.UpdateQuestion)
 			questions.DELETE("/:question_id", h.DeleteQuestion)
 

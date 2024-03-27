@@ -20,4 +20,4 @@ prod_db:
   port: "5432"
   name: "default_db"
 
-open_ai_url: "https://api.openai.com/v1/chat/completions"
+open_ai_url: "https://api.proxyapi.ru/openai/v1/chat/completions"

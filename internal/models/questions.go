@@ -12,6 +12,10 @@ type QuestionWithAnswers struct {
 	Answers []Answer `json:"answers"`
 }
 
+type QuestionsFromChatGPT struct {
+	Questions []QuestionWithAnswersWithOutIsCorrect `json:"questions"`
+}
+
 type QuestionWithAnswersWithOutIsCorrect struct {
 	ID      int                 `json:"id"`
 	Text    string              `json:"text"`

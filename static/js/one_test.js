@@ -92,10 +92,6 @@ Spruce.store("methods", {
         } catch (e) {
             console.log(e)
         }
-
-        // if (index === 0) {
-        //     this.chooseIndex(0)
-        // }
     },
 
     async updateTextQuestion() {

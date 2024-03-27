@@ -3,6 +3,7 @@ package repository
 import (
 	"App/internal/models"
 	"errors"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
 )
@@ -202,6 +203,86 @@ func (r *QuestionPostgres) GetAllWithAnswers(testID int) ([]models.QuestionWithA
 			Text:      answerText,
 			IsCorrect: isCorrect,
 		})
+	}
+
+	return questions, nil
+}
+
+func (r *QuestionPostgres) CreateManyQuestions(
+	testID int, questions []models.QuestionWithAnswersWithOutIsCorrect,
+) ([]models.QuestionWithAnswersWithOutIsCorrect, error) {
+	stmt := "INSERT INTO questions (text, testID) VALUES "
+
+	for i, question := range questions {
+		stmt += fmt.Sprintf("(%s, %d)", question.Text, testID)
+		if i < len(questions)-1 {
+			stmt += ", "
+		}
+	}
+
+	stmt += " RETURNING id"
+
+	var ids []int
+
+	rows, err := r.conn.Query(stmt)
+
+	if err != nil {
+		log.Err(err).Send()
+		return nil, err
+	}
+
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			log.Err(err).Send()
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+
+	stmtA := "INSERT INTO answers (text, isCorrect, questionID) VALUES "
+
+	for i, question := range questions {
+		for j, answer := range question.Answers {
+			stmtA += fmt.Sprintf("(%s, %t, %d)", answer.Text, answer.IsCorrect, ids[i])
+			if j < len(question.Answers)-1 {
+				stmtA += ", "
+			}
+		}
+		if i < len(questions)-1 {
+			stmtA += ", "
+		}
+	}
+
+	stmtA += " RETURNING id"
+
+	rows, err = r.conn.Query(stmtA)
+
+	if err != nil {
+		log.Err(err).Send()
+		return nil, err
+	}
+
+	var answerIDS []int
+
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			log.Err(err).Send()
+			return nil, err
+		}
+
+		answerIDS = append(answerIDS, id)
+	}
+
+	var index int
+
+	for i, question := range questions {
+		questions[i].ID = ids[i]
+		for j, _ := range question.Answers {
+			questions[i].Answers[j].ID = answerIDS[index]
+			index++
+		}
 	}
 
 	return questions, nil

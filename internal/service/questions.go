@@ -24,6 +24,9 @@ type QuestionRepository interface {
 	Delete(questionID, testID int) error
 
 	GetAllWithAnswers(testID int) ([]models.QuestionWithAnswers, error)
+	CreateManyQuestions(
+		testID int, questions []models.QuestionWithAnswersWithOutIsCorrect,
+	) ([]models.QuestionWithAnswersWithOutIsCorrect, error)
 }
 
 type QuestionService struct {
