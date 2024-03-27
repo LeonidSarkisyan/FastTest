@@ -37,6 +37,7 @@ func (s *AiService) CreateQuestionsFromGPT(userID, testID int, promptParams ai.P
 	questionsWithIDs, err := s.QuestionRepository.CreateManyQuestions(testID, questions)
 
 	if err != nil {
+		log.Err(err).Send()
 		return nil, err
 	}
 

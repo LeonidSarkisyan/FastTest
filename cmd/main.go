@@ -33,6 +33,7 @@ func main() {
 	testService := service.NewTestService(testRepo, studentRepo, questionService, groupService, resultRepo)
 	studentService := service.NewStudentService(studentRepo, groupRepo)
 	resultService := service.NewResultService(resultRepo)
+	aiService := service.NewAiService(questionRepo, testRepo)
 
 	manager := &handlers.ClientManager{
 		Clients:   make([]*handlers.Client, 0),
@@ -45,6 +46,7 @@ func main() {
 
 	handler := handlers.NewHandler(
 		manager, userService, testService, questionService, answerService, groupService, studentService, resultService,
+		aiService,
 	)
 	handler.Config = cfg
 	handler.Channels = &handlers.Channels{

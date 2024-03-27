@@ -149,3 +149,75 @@
 .margin__button {
     margin-bottom: 60px;
 }
+
+.chat__gpt__icon {
+    width: 36px;
+    height: 36px;
+}
+
+.chat__gpt__button {
+    background: var(--chatgpt-background);
+
+    border: 2px solid var(--chatgpt-color);
+}
+
+.chat__gpt__button:hover {
+    background: var(--chatgpt-howered);
+}
+
+.chat__color {
+    color: var(--chatgpt-color);
+}
+
+.chat__color::placeholder {
+    color: var(--chatgpt-color);
+}
+
+.chat__title {
+    border-bottom: 2px var(--chatgpt-color) solid;
+}
+
+.chat__border {
+    border: 2px solid var(--chatgpt-color);
+}
+
+.chat__button {
+
+}
+
+.chat__button:hover {
+    background: var(--chatgpt-color);
+    color: whitesmoke;
+}
+
+.count__questions {
+    cursor: pointer;
+
+    margin-bottom: 16px;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid var(--chatgpt-color);
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

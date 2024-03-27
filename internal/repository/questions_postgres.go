@@ -13,6 +13,7 @@ const DefaultTextQuestion = ""
 var (
 	NotDeleteRow = errors.New("ресурс не был удалён, хотя должен")
 	NotUpdateRow = errors.New("ресурс не был обновлён, хотя должен")
+	NotSaveError = errors.New("в слайсе нечего сохранять, len = 0")
 )
 
 type QuestionPostgres struct {
@@ -211,10 +212,21 @@ func (r *QuestionPostgres) GetAllWithAnswers(testID int) ([]models.QuestionWithA
 func (r *QuestionPostgres) CreateManyQuestions(
 	testID int, questions []models.QuestionWithAnswersWithOutIsCorrect,
 ) ([]models.QuestionWithAnswersWithOutIsCorrect, error) {
-	stmt := "INSERT INTO questions (text, testID) VALUES "
+	if len(questions) == 0 {
+		return nil, NotSaveError
+	}
+
+	stmt := "INSERT INTO questions (text, test_id) VALUES "
+
+	args := make([]any, len(questions)+1)
+
+	args[0] = testID
 
 	for i, question := range questions {
-		stmt += fmt.Sprintf("(%s, %d)", question.Text, testID)
+		stmt += fmt.Sprintf("($%d, $1)", i+2)
+
+		args[i+1] = question.Text
+
 		if i < len(questions)-1 {
 			stmt += ", "
 		}
@@ -224,7 +236,10 @@ func (r *QuestionPostgres) CreateManyQuestions(
 
 	var ids []int
 
-	rows, err := r.conn.Query(stmt)
+	log.Info().Str("stmt", stmt).Send()
+	log.Info().Any("args", args).Send()
+
+	rows, err := r.conn.Query(stmt, args...)
 
 	if err != nil {
 		log.Err(err).Send()
@@ -240,14 +255,20 @@ func (r *QuestionPostgres) CreateManyQuestions(
 		ids = append(ids, id)
 	}
 
-	stmtA := "INSERT INTO answers (text, isCorrect, questionID) VALUES "
+	stmtA := "INSERT INTO answers (text, is_correct, question_id) VALUES "
+
+	var argsA []any
+
+	indexA := 1
 
 	for i, question := range questions {
 		for j, answer := range question.Answers {
-			stmtA += fmt.Sprintf("(%s, %t, %d)", answer.Text, answer.IsCorrect, ids[i])
+			stmtA += fmt.Sprintf("($%d, $%d, $%d)", indexA, indexA+1, indexA+2)
 			if j < len(question.Answers)-1 {
 				stmtA += ", "
 			}
+			indexA += 3
+			argsA = append(argsA, answer.Text, answer.IsCorrect, ids[i])
 		}
 		if i < len(questions)-1 {
 			stmtA += ", "
@@ -256,7 +277,10 @@ func (r *QuestionPostgres) CreateManyQuestions(
 
 	stmtA += " RETURNING id"
 
-	rows, err = r.conn.Query(stmtA)
+	log.Info().Str("stmtA", stmtA).Send()
+	log.Info().Any("argsA", argsA).Send()
+
+	rows, err = r.conn.Query(stmtA, argsA...)
 
 	if err != nil {
 		log.Err(err).Send()

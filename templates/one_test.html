@@ -39,6 +39,58 @@
             </div>
         </div>
     </div>
+    <div id="myModalChat" class="modal" x-show="$store.data.showModalChat">
+        <div class="modal-content">
+            <div class="tests__form">
+                <div class="tests__form__title chat__color chat__title">Добавить вопросы с помощью ChatGPT</div>
+                <div class="tests__form__body">
+                    <label for="chat" class="test__title__label chat__color">Тема теста:</label>
+                    <input
+                            id="chat"
+                            @keydown.enter="$store.methods.UpdateTitleTest()"
+                            placeholder="Например, Численные методы"
+                            type="text"
+                            class="base__input create chat__color chat__border"
+                            x-model="$store.data.titleTheme"
+                    >
+                    <label for="chat__count" class="test__title__label chat__color">Количество вопросов:</label>
+                    <select
+                            x-model="$store.data.countQuestion"
+                            id="chat__count"
+                            class="base__input count__questions chat__color chat__border"
+                    >
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5" selected>5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                    </select>
+                    <div
+                            x-show="!$store.data.loading"
+                            class="base__button chat__color chat__border chat__button"
+                            @click="$store.methods.CreateQuestionsFromChatGPT()"
+                    >
+                        Сгенерировать вопросы
+                    </div>
+                    <div class="loading" x-show="$store.data.loading">
+                        <div class="loader loader__chat__gpt">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="question__form list">
         <template x-for="(question, index) in $store.data.questions" :key="question.id">
             <div
@@ -53,6 +105,9 @@
         </template>
         <div class="question__list__point plus" @click="$store.methods.addQuestion()">
             +
+        </div>
+        <div class="question__list__point plus chat__gpt__button" @click="$store.methods.showChatModal()">
+            <img src="/../static/img/chatgpt.png" alt="Открыть нейросеть" class="chat__gpt__icon">
         </div>
     </div>
     <template x-if="$store.data.questions.length">

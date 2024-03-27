@@ -20,7 +20,12 @@ Spruce.store("data", {
     title: "",
     currentIndex: GetIndex(TEST_ID),
 
-    questions: []
+    titleTheme: "",
+    showModalChat: false,
+    countQuestion: 5,
+    loading: false,
+
+    questions: [],
 })
 
 let response = await axios.get("/tests/" + TEST_ID)
@@ -34,6 +39,42 @@ response = await axios.get(QUESTION_WITH_ID_URL($store.data.questions[$store.dat
 $store.data.answers = response.data
 
 Spruce.store("methods", {
+    async CreateQuestionsFromChatGPT() {
+        if ($store.data.titleTheme === "") {
+            return null
+        }
+
+        const params = {
+            title_theme: $store.data.titleTheme,
+            count_questions: Number($store.data.countQuestion)
+        }
+
+        console.log(params)
+
+        let lastIndex = $store.data.questions.length - 1
+
+        $store.data.loading = true
+
+        try {
+            const response = await axios.post(`/tests/${TEST_ID}/questions/chat-gpt`, params)
+            $store.data.questions = [...$store.data.questions,...response.data]
+            $store.data.showModalChat = false
+
+            this.chooseIndex(lastIndex + 1)
+        } catch (e) {
+            console.log(e)
+        } finally {
+            $store.data.loading = false
+        }
+
+    },
+
+    showChatModal() {
+        $store.data.titleTheme = ""
+        $store.data.countQuestion = 5
+        $store.data.showModalChat = true
+    },
+
     chooseIndex(index) {
         $store.data.currentIndex = index
         ChangeIndex(TEST_ID, index)
@@ -199,9 +240,11 @@ Spruce.store("methods", {
 })
 
 const modal = document.getElementById("myModal")
+const modalChat = document.getElementById("myModalChat")
 
 window.onmousedown = function(event) {
-    if (event.target === modal) {
+    if (event.target === modal || event.target === modalChat) {
         $store.data.showModal = false
+        $store.data.showModalChat = false
     }
 }

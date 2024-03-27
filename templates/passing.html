@@ -64,7 +64,7 @@
                 const response = await axios.post(`/passing/${RESULT_ID}`, {
                     code: Number(code)
                 })
-
+                
                 window.location.href = `/passing/${RESULT_ID}/solving/${response.data.id}`
             } catch (e) {
                 alert(e.response.data)

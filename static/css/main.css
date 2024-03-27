@@ -14,6 +14,10 @@
     --color-text-placeholder: rgba(206, 89, 18, 0.6);
     --color-text-howered: #ffd3b5;
     --color-error: #DC143CFF;
+
+    --chatgpt-color: #6c5cf3;
+    --chatgpt-background: #e7d9ff;
+    --chatgpt-howered: #efe8ff;
 }
 
 body {
@@ -104,4 +108,24 @@ body {
 .base__button:hover {
     color: var(--color-background);
     background: var(--color-text);
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid var(--color-text);
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
