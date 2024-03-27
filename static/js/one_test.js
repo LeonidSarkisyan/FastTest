@@ -160,6 +160,10 @@ Spruce.store("methods", {
         try {
             const response = await axios.delete(QUESTION_WITH_ID_URL(questionID) + "/" + id)
 
+            const answerList = document.getElementById("answer__list")
+
+            answerList.removeChild(document.getElementById("answer_" + id))
+
             $store.data.answers = $store.data.answers.filter(answer => {
                 return answer.id !== id
             })
