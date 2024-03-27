@@ -53,6 +53,10 @@ Spruce.store("methods", {
         $store.data.showModal = true
     },
 
+    CloseModal() {
+      $store.data.showModal = false
+    },
+
     CanCompleteTest() {
         const questions = JSON.parse(localStorage.getItem("questions"))
         let need = []

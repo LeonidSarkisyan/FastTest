@@ -85,7 +85,10 @@
             <template x-if="$store.data.showModal">
                 <div class="modal-content solve__modal">
                     <div class="tests__form">
-                        <div class="tests__form__title">Завершить тест</div>
+                        <div class="complete__title__container">
+                            <div class="tests__form__title">Завершить тест</div>
+                            <div class="close" @click="$store.methods.CloseModal()">&#10006;</div>
+                        </div>
                         <div class="tests__form__body" x-show="!$store.methods.CanCompleteTest()[0]">
                             <h3 class="not-complete">Вы не можете завершить тест, пока не ответите на все вопросы</h3>
                             <h4 class="not-complete">Номера вопросов, на которые вы не дали ответа:</h4>
