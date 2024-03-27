@@ -301,6 +301,12 @@ func (s *TestService) GetPassesAndStudents(resultID, userID int) (models.ForResu
 		}
 	}
 
+	minLen := len(forResultTable.Passes)
+
+	if minLen < len(forResultTable.Students) {
+		forResultTable.Students = forResultTable.Students[:minLen]
+	}
+
 	return forResultTable, nil
 }
 
