@@ -46,6 +46,8 @@ func (c *EmailClient) SendCodeToEmail(emailTo string, code int64) error {
 		c.cfg.SMTP.Host+":"+c.cfg.SMTP.Port, c.Auth, from, to, message,
 	)
 
+	log.Info().Msg("письмо отправлено!")
+
 	if err != nil {
 		log.Err(err).Send()
 		return err
