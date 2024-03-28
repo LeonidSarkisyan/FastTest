@@ -69,7 +69,6 @@ if (window.location.hostname === "localhost") {
     socket = new WebSocket(`wss://${window.location.hostname}/results/${RESULT_ID}/ws`);
 }
 
-
 socket.onopen = async function(event) {
     console.log('WebSocket connected');
     socket.send('Hello, server!');

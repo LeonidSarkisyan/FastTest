@@ -153,9 +153,9 @@ let socket;
 function connectWebSocket() {
     let socket
     if (window.location.hostname === "localhost") {
-        socket = new WebSocket(`ws://${window.location.hostname}/results/${RESULT_ID}/ws`);
+        socket = new WebSocket(`wss://${window.location.hostname}/passing/${RESULT_ID}/ws/student/${PASS_ID}`);
     } else {
-        socket = new WebSocket(`wss://${window.location.hostname}/results/${RESULT_ID}/ws`);
+        socket = new WebSocket(`wss://фаст-тест.рф/passing/${RESULT_ID}/ws/student/${PASS_ID}`);
     }
 
 
