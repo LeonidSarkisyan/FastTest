@@ -82,7 +82,7 @@ func (h *Handler) ConfirmAccount(c *gin.Context) {
 	}
 
 	c.SetCookie("Authorization", token, 2592000, "/", Domain, false, true)
-	c.HTML(204, "success_register.html", gin.H{})
+	c.HTML(200, "success_register.html", gin.H{})
 }
 
 func (h *Handler) Login(c *gin.Context) {
