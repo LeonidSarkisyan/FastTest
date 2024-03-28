@@ -42,6 +42,8 @@ func (c *EmailClient) SendCodeToEmail(emailTo string, code int64) error {
 
 	log.Info().Msg("отправляем письмо...")
 
+	log.Print(c.cfg.SMTP.Host+":"+c.cfg.SMTP.Port, c.Auth, from, to, message)
+
 	err := smtp.SendMail(
 		c.cfg.SMTP.Host+":"+c.cfg.SMTP.Port, c.Auth, from, to, message,
 	)
