@@ -24,4 +24,4 @@ open_ai_url: "https://api.proxyapi.ru/openai/v1/chat/completions"
 
 smtp:
   host: "smtp.yandex.ru"
-  port: "465"
+  port: "587"
