@@ -87,3 +87,14 @@ func (s *UserService) Exist(email string) bool {
 
 	return userExist.ID != 0
 }
+
+func (s *UserService) GetByEmail(email string) (models.User, error) {
+	userExist, err := s.UserRepository.GetByEmail(email)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.User{}, err
+	}
+
+	return userExist, nil
+}

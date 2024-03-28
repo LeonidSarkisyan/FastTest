@@ -82,6 +82,7 @@ type TestService interface {
 type UserService interface {
 	Register(in models.UserIn) error
 	Login(in models.UserIn) (string, error)
+	GetByEmail(email string) (models.User, error)
 
 	Exist(email string) bool
 }

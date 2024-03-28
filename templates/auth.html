@@ -12,85 +12,94 @@
     <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
 </head>
 <body>
-    <div class="auth" x-data x-subscribe="">
-        <div class="register" x-show="!$store.data.isLogin">
-            <h1 class="register__title">Регистрация</h1>
-            <div class="register__form">
-                <div class="register__input-group">
-                    <label for="email" class="register__label">Email:</label>
-                    <input
-                            x-model="$store.data.email"
-                            type="email"
-                            id="email"
-                            class="register__input"
-                            placeholder="Введите ваш email"
-                            required
-                    >
-                </div>
-                <div class="register__input-group">
-                    <label for="password" class="register__label">Пароль:</label>
-                    <input
-                            x-model="$store.data.password"
-                            type="password"
-                            id="password"
-                            class="register__input"
-                            placeholder="Введите ваш пароль" required
-                    >
-                </div>
-                <div class="register__input-group">
-                    <label for="confirm-password" class="register__label">Повторите пароль:</label>
-                    <input
-                            x-model="$store.data.passwordRetry"
-                            type="password"
-                            id="confirm-password"
-                            class="register__input"
-                            placeholder="Повторите ваш пароль"
-                            required
-                    >
-                </div>
-                <div x-show="$store.data.password !== $store.data.passwordRetry" class="password__match">
-                    Ваши пароли не совпадают!
-                </div>
-                <div class="register__button__container">
-                    <div class="register__button" @click="$store.methods.register()">Зарегистрироваться</div>
-                    <div>Уже есть аккаунт? <span class="register__login" @click="$store.methods.toggle()">Войти</span></div>
-                </div>
-            </div>
-        </div>
-        <div class="login" x-show="$store.data.isLogin">
-            <h1 class="register__title">Авторизация</h1>
-            <form class="register__form">
-                <div class="register__input-group">
-                    <label for="email_login" class="register__label">Email:</label>
-                    <input
-                            x-model="$store.data.email"
-                            type="email"
-                            id="email_login"
-                            class="register__input"
-                            placeholder="Введите ваш email"
-                            required
-                    >
-                </div>
-                <div class="register__input-group">
-                    <label for="password_login" class="register__label">Пароль:</label>
-                    <input
-                            x-model="$store.data.password"
-                            type="password"
-                            id="password_login"
-                            class="register__input"
-                            placeholder="Введите ваш пароль"
-                            required
-                    >
-                </div>
-                <div class="register__button__container">
-                    <div class="register__button" @click="$store.methods.login()">Войти</div>
-                    <div>Ещё нет аккаунта? <span class="register__login" @click="$store.methods.toggle()">Создать</span></div>
-                </div>
-            </form>
+<div class="auth" x-data x-subscribe>
+    <div class="login" x-show="$store.data.emailShow">
+        <h1 class="confirm__title">Подтверждение отправлено на почту:</h1>
+        <p class="email" x-text="$store.data.email"></p>
+        <div class="confirm__desc">
+            Пожалуйста, проверьте свою почту и следуйте инструкциям для завершения процесса
         </div>
     </div>
-    <script type="module" src="../static/js/auth.js">
+    <div class="register" x-show="!$store.data.isLogin && !$store.data.emailShow">
+        <h1 class="register__title">Регистрация</h1>
+        <div class="register__form">
+            <div class="register__input-group">
+                <label for="email" class="register__label">Email:</label>
+                <input
+                        x-model="$store.data.email"
+                        type="email"
+                        id="email"
+                        class="register__input"
+                        placeholder="Введите ваш email"
+                        required
+                >
+            </div>
+            <div class="register__input-group">
+                <label for="password" class="register__label">Пароль:</label>
+                <input
+                        x-model="$store.data.password"
+                        type="password"
+                        id="password"
+                        class="register__input"
+                        placeholder="Введите ваш пароль" required
+                >
+            </div>
+            <div class="register__input-group">
+                <label for="confirm-password" class="register__label">Повторите пароль:</label>
+                <input
+                        x-model="$store.data.passwordRetry"
+                        type="password"
+                        id="confirm-password"
+                        class="register__input"
+                        placeholder="Повторите ваш пароль"
+                        required
+                >
+            </div>
+            <div x-show="$store.data.password !== $store.data.passwordRetry" class="password__match">
+                Ваши пароли не совпадают!
+            </div>
+            <div class="register__button__container">
+                <div class="register__button" @click="$store.methods.register()">Зарегистрироваться</div>
+                <div>Уже есть аккаунт? <span class="register__login" @click="$store.methods.toggle()">Войти</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="login" x-show="$store.data.isLogin && !$store.data.emailShow">
+        <h1 class="register__title">Авторизация</h1>
+        <form class="register__form">
+            <div class="register__input-group">
+                <label for="email_login" class="register__label">Email:</label>
+                <input
+                        x-model="$store.data.email"
+                        type="email"
+                        id="email_login"
+                        class="register__input"
+                        placeholder="Введите ваш email"
+                        required
+                >
+            </div>
+            <div class="register__input-group">
+                <label for="password_login" class="register__label">Пароль:</label>
+                <input
+                        x-model="$store.data.password"
+                        type="password"
+                        id="password_login"
+                        class="register__input"
+                        placeholder="Введите ваш пароль"
+                        required
+                >
+            </div>
+            <div class="register__button__container">
+                <div class="register__button" @click="$store.methods.login()">Войти</div>
+                <div>Ещё нет аккаунта? <span class="register__login" @click="$store.methods.toggle()">Создать</span>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
-    </script>
+<script type="module" src="../static/js/auth.js">
+
+</script>
 </body>
 </html>

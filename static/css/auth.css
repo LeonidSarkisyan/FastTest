@@ -96,3 +96,24 @@ body {
     margin-bottom: 25px;
     font-weight: 700;
 }
+
+.confirm__title {
+    font-size: 28px;
+
+    margin-bottom: 16px;
+}
+
+.email {
+    font-weight: 500;
+    font-size: 20px;
+
+    color: var(--color-text-other);
+
+    margin-bottom: 16px;
+}
+
+.confirm__desc {
+    font-size: 22px;
+
+    margin-bottom: 16px;
+}

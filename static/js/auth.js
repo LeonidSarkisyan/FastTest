@@ -6,6 +6,7 @@ const LOGIN_URL = BASE_AUTH_URL + "/login"
 
 Spruce.store("data", {
     isLogin: true,
+    emailShow: false,
 
     email: "",
     password: "",
@@ -34,6 +35,7 @@ Spruce.store("methods", {
                 try {
                     const response = await axios.post(REGISTER_URL, user)
                     console.log(response)
+                    $store.data.emailShow = true
                 } catch (e) {
                     alert(e.response.data)
                 }

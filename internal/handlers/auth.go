@@ -5,6 +5,7 @@ import (
 	"App/internal/service"
 	"App/pkg/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"net/http"
 	"sync"
 )
@@ -56,20 +57,56 @@ func (h *Handler) ConfirmAccount(c *gin.Context) {
 
 	var mu sync.Mutex
 	mu.Lock()
-	in, ok := h.EmailCodeMap[code]
+	in, _ := h.EmailCodeMap[code]
 	mu.Unlock()
-
-	if !ok {
-		SendErrorResponse(c, 404, "неизвестный код")
-		c.Abort()
-		return
-	}
 
 	err := h.UserService.Register(in)
 
 	if err != nil {
-		SendErrorResponse(c, 422, err.Error())
-		c.Abort()
+		token, err := c.Cookie("Authorization")
+
+		if err != nil {
+			log.Err(err).Send()
+			c.Redirect(http.StatusPermanentRedirect, "/auth")
+			c.Abort()
+			return
+		}
+
+		userID, err := utils.GetUserIDFromToken(token)
+
+		if err != nil {
+			log.Err(err).Send()
+			c.Redirect(http.StatusPermanentRedirect, "/auth")
+			c.Abort()
+			return
+		}
+
+		user, err := h.UserService.GetByEmail(in.Email)
+
+		if err != nil {
+			log.Err(err).Send()
+			c.Redirect(http.StatusPermanentRedirect, "/auth")
+			c.Abort()
+			return
+		}
+
+		if user.ID != int(userID) {
+			c.Redirect(http.StatusPermanentRedirect, "/auth")
+			c.Abort()
+			return
+		}
+
+		token, err = h.UserService.Login(in)
+
+		if err != nil {
+			log.Err(err).Send()
+			c.Redirect(http.StatusPermanentRedirect, "/auth")
+			c.Abort()
+			return
+		}
+
+		c.SetCookie("Authorization", token, 2592000, "/", Domain, false, true)
+		c.HTML(200, "success_register.html", gin.H{})
 		return
 	}
 
