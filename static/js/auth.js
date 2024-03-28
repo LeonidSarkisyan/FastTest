@@ -36,7 +36,6 @@ Spruce.store("methods", {
                     console.log(response)
                 } catch (e) {
                     alert(e.response.data)
-                    return null
                 }
             }
         }

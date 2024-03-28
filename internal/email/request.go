@@ -40,6 +40,8 @@ func (c *EmailClient) SendCodeToEmail(emailTo string, code int64) error {
 		"MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\r\n\r\n" +
 		body + "\r\n")
 
+	log.Info().Msg("отправляем письмо...")
+
 	err := smtp.SendMail(
 		c.cfg.SMTP.Host+":"+c.cfg.SMTP.Port, c.Auth, from, to, message,
 	)
