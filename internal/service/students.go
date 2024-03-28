@@ -82,12 +82,12 @@ func (s *StudentService) CreateStudentFromExcel(userID, groupID int, fileContent
 
 		switch countCells {
 		case 3:
-			student.Name = row[0]
-			student.Surname = row[1]
+			student.Surname = row[0]
+			student.Name = row[1]
 			student.Patronymic = row[2]
 		case 2:
-			student.Name = row[0]
-			student.Surname = row[1]
+			student.Surname = row[0]
+			student.Name = row[1]
 		default:
 			return nil, ExcelInCorrectFormatError
 		}
