@@ -1,3 +1,35 @@
 .result__title_list {
     font-size: 20px;
 }
+
+.results_filters {
+    font-size: 20px;
+
+    display: flex;
+    align-items: center;
+}
+
+.results_filters_title {
+    margin-right: 16px;
+
+    font-weight: 700;
+}
+
+.filter {
+    font-size: 18px;
+
+    font-weight: 700;
+}
+
+.filter__point {
+    margin-right: 16px;
+}
+
+.cursor__filter {
+    cursor: pointer;
+
+    margin-right: 16px;
+
+    padding-left: 12px;
+    font-size: 15px;
+}

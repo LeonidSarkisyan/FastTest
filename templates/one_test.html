@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/../static/css/main.css">
     <link rel="icon" href="/../static/img/logo.png">
+    <link rel="stylesheet" href="/../static/css/tests.css">
     <link rel="stylesheet" href="/../static/css/one_test.css">
     <link rel="stylesheet" href="/../static/css/modal.css">
     <script src="https://cdn.jsdelivr.net/gh/ryangjchandler/spruce@0.6.0/dist/spruce.umd.js"></script>
@@ -14,10 +15,15 @@
 <body>
 <embed src="/p/header" width="100%" height="100"/>
 <div class="container" x-data x-subscribe>
-    <h1 class="title title__span" x-text="$store.data.title"></h1>
-    <span class="sub__title" @click="$store.methods.showModal()">
+    <div class="title__container">
+        <h1 class="title title__span" x-text="$store.data.title"></h1>
+        <span class="sub__title" @click="$store.methods.showModal()">
             изменить название
         </span>
+        <div class="base__button edit delete" @click="$store.methods.showModalDelete()">
+            &#10006;
+        </div>
+    </div>
     <div id="myModal" class="modal" x-show="$store.data.showModal">
         <div class="modal-content">
             <div class="tests__form">
@@ -34,6 +40,26 @@
                     >
                     <div class="base__button" @click="$store.methods.UpdateTitleTest()">
                         Изменить название
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="myModalDelete" class="modal" x-show="$store.data.showModalDelete">
+        <div class="modal-content">
+            <div class="tests__form">
+                <div class="tests__form__title">Удалить тест {{ .title }}?</div>
+                <div class="tests__form__body">
+                    <label for="test__title__delete" class="test__title__label">Чтобы удалить тест, напишите его название:</label>
+                    <input
+                            @keydown.enter="$store.methods.DeleteTest()"
+                            placeholder="Например, Windows формы"
+                            type="text"
+                            id="test__title__delete"
+                            class="base__input create"
+                    >
+                    <div class="base__button" @click="$store.methods.DeleteTest()">
+                        Удалить тест
                     </div>
                 </div>
             </div>

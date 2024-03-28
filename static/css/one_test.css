@@ -230,3 +230,19 @@
 .wait {
     margin-right: 16px;
 }
+
+.title__container {
+    display: flex;
+
+    margin-bottom: 25px;
+
+    height: 39px;
+}
+
+.delete {
+    width: 40px;
+
+    margin-left: auto;
+
+    padding: 0;
+}

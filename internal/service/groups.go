@@ -11,6 +11,7 @@ var (
 	GroupGetError    = errors.New("ошибка при получении группы")
 	GroupUpdateError = errors.New("ошибка при обновлении группы")
 	GroupNotFound    = errors.New("группа не найден")
+	GroupDeleteError = errors.New("не удалось удалить группу")
 )
 
 type GroupRepository interface {
@@ -18,6 +19,7 @@ type GroupRepository interface {
 	GetAll(userID int) ([]models.GroupOut, error)
 	Get(groupID, userID int) (models.GroupOut, error)
 	UpdateTitle(groupID, userID int, title string) error
+	Delete(userID, groupID int) error
 }
 
 type GroupService struct {
@@ -67,6 +69,17 @@ func (s *GroupService) UpdateTitle(userID, groupID int, title string) error {
 	if err != nil {
 		log.Err(err).Send()
 		return GroupUpdateError
+	}
+
+	return nil
+}
+
+func (s *GroupService) Delete(userID, groupID int) error {
+	err := s.GroupRepository.Delete(userID, groupID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return GroupDeleteError
 	}
 
 	return nil

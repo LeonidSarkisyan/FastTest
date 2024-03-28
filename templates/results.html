@@ -18,10 +18,52 @@
 <body>
     <embed src="/p/header" width="100%" height="100"/>
     <div class="container" x-data x-subscribe>
-        <h1 class="title">Результаты</h1>
+        <div class="title__container">
+            <h1 class="title">Результаты</h1>
+        </div>
+        <div class="question__form">
+            <div class="question__form__title filter">
+                Фильтры:
+            </div>
+            <div class="results_filters">
+                <div class="filter filter__point">
+                    Тест:
+                </div>
+                <label for="test"></label>
+                <select
+                        id="test"
+                        class="base__input cursor__filter"
+                        x-model="$store.data.selectedTestID"
+                        @change="$store.methods.FilterResults($event, 'test')"
+                >
+                    <option :value="0" selected>Все</option>
+                    <template x-for="test in $store.data.tests">
+                        <option :value="test.id" x-text="test.title"></option>
+                    </template>
+                </select>
+                <div class="filter filter__point">
+                    Группа:
+                </div>
+                <label for="group"></label>
+                <select
+                        @change="$store.methods.FilterResults($event, 'group')"
+                        id="group"
+                        class="base__input cursor__filter"
+                        x-model="$store.data.selectedGroupID"
+                >
+                    <option :value="0" selected>Все</option>
+                    <template x-for="group in $store.data.groups">
+                        <option :value="group.id" x-text="group.name"></option>
+                    </template>
+                </select>
+            </div>
+        </div>
         <div class="results__list">
             <template x-for="(result, index) in $store.data.results">
-                <div class="question__form">
+                <div
+                        x-show="($store.data.selectedTestID == result.test_id && $store.data.selectedGroupID == result.group_id) || ($store.data.selectedTestID == 0 && $store.data.selectedGroupID == result.group_id) || ($store.data.selectedTestID == result.test_id && $store.data.selectedGroupID == 0) || ($store.data.selectedTestID == 0 && $store.data.selectedGroupID == 0)"
+                        class="question__form"
+                >
                     <div class="question__form__title result__title_list">
                         Тестирование группы: <span x-text="result.group.name" class="choose__group__name"></span>
                     </div>

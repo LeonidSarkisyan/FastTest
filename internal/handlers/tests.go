@@ -105,3 +105,18 @@ func (h *Handler) UpdateTestTitle(c *gin.Context) {
 
 	c.AbortWithStatusJSON(http.StatusNoContent, gin.H{})
 }
+
+func (h *Handler) DeleteTest(c *gin.Context) {
+	userID := c.GetInt("userID")
+	testID := MustID(c, "test_id")
+
+	err := h.TestService.Delete(userID, testID)
+
+	if err != nil {
+		SendErrorResponse(c, 422, err.Error())
+		c.Abort()
+		return
+	}
+
+	c.AbortWithStatusJSON(http.StatusNoContent, gin.H{})
+}

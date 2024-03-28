@@ -20,7 +20,9 @@ Spruce.store("data", {
     surname: "",
     patronymic: "",
 
-    students: []
+    students: [],
+
+    showModalDelete: false,
 })
 
 let response = await axios.get("/groups/" + GROUP_ID)
@@ -32,6 +34,18 @@ console.log(response.data)
 $store.data.students = response.data
 
 Spruce.store("methods", {
+    showModalDelete() {
+        document.getElementById("test__title__delete").value = ""
+        $store.data.showModalDelete = true
+    },
+
+    async DeleteGroup() {
+        if (document.getElementById("test__title__delete").value.trim() === $store.data.title) {
+            const response = await axios.delete(`/groups/${GROUP_ID}`)
+            console.log(response)
+            window.location.href = "/p/groups"
+        }
+    },
 
     async AddStudent() {
         let nameText = name.value

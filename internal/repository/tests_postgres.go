@@ -115,6 +115,30 @@ func (r *TestPostgres) UpdateTitle(testID, userID int, title string) error {
 	return nil
 }
 
+func (r *TestPostgres) Delete(userID, testID int) error {
+	query := "DELETE FROM tests WHERE user_id = $1 AND id = $2"
+
+	res, err := r.conn.Exec(query, userID, testID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	count, err := res.RowsAffected()
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	if count == 0 {
+		return NotDeleteRow
+	}
+
+	return nil
+}
+
 func (r *TestPostgres) CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error) {
 	stmt := `
 	INSERT INTO accesses (shuffle, date_start, date_end, passage_time, criteria, user_id, test_id, group_id)

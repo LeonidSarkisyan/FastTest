@@ -26,6 +26,8 @@ Spruce.store("data", {
     loading: false,
 
     questions: [],
+
+    showModalDelete: false,
 })
 
 let response = await axios.get("/tests/" + TEST_ID)
@@ -67,6 +69,19 @@ Spruce.store("methods", {
             $store.data.loading = false
         }
 
+    },
+
+    showModalDelete() {
+        document.getElementById("test__title__delete").value = ""
+        $store.data.showModalDelete = true
+    },
+
+    async DeleteTest() {
+        if (document.getElementById("test__title__delete").value.trim() === $store.data.title) {
+            const response = await axios.delete(`/tests/${TEST_ID}`)
+            console.log(response)
+            window.location.href = "/p/tests"
+        }
     },
 
     showChatModal() {
@@ -241,10 +256,12 @@ Spruce.store("methods", {
 
 const modal = document.getElementById("myModal")
 const modalChat = document.getElementById("myModalChat")
+const myModalDelete = document.getElementById("myModalDelete")
 
 window.onmousedown = function(event) {
-    if (event.target === modal || event.target === modalChat) {
+    if (event.target === modal || event.target === modalChat || event.target === myModalDelete) {
         $store.data.showModal = false
         $store.data.showModalChat = false
+        $store.data.showModalDelete = false
     }
 }

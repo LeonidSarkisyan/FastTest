@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"github.com/goccy/go-json"
 	"github.com/rs/zerolog/log"
+	"strings"
 )
 
 var (
 	TestCreateError = errors.New("ошибка при создании теста")
 	TestGetError    = errors.New("ошибка при получении теста")
 	TestUpdateError = errors.New("ошибка при обновлении теста")
+	TestDeleteError = errors.New("ошибка при удалении теста")
 
 	TestAccessCreateError = errors.New("ошибка при создании доступа к тесту")
 
@@ -34,6 +36,7 @@ type TestRepository interface {
 	Get(testID, userID int) (models.TestOut, error)
 	GetAll(userID int) ([]models.TestOut, error)
 	UpdateTitle(testID, userID int, title string) error
+	Delete(userID, testID int) error
 
 	CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error)
 	GetAccess(userID, accessID int) (models.AccessOut, error)
@@ -63,7 +66,7 @@ func NewTestService(
 
 func (s *TestService) Create(title string, userID int) (int, error) {
 	newTest := models.Test{
-		Title:  title,
+		Title:  strings.Trim(title, " "),
 		UserID: userID,
 	}
 
@@ -362,6 +365,16 @@ func (s *TestService) ClosePass(passID int) error {
 
 	if err != nil {
 		return PassDontClose
+	}
+
+	return nil
+}
+
+func (s *TestService) Delete(userID, testID int) error {
+	err := s.TestRepository.Delete(userID, testID)
+
+	if err != nil {
+		return TestDeleteError
 	}
 
 	return nil

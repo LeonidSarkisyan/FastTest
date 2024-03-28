@@ -36,6 +36,7 @@ type GroupService interface {
 	GetAll(userID int) ([]models.GroupOut, error)
 	Get(groupID, userID int) (models.GroupOut, error)
 	UpdateTitle(userID, groupID int, title string) error
+	Delete(userID, groupID int) error
 }
 
 type AnswerService interface {
@@ -60,6 +61,7 @@ type TestService interface {
 	Get(testID, userID int) (models.TestOut, error)
 	GetAll(userID int) ([]models.TestOut, error)
 	UpdateTitle(userID, testID int, title string) error
+	Delete(userID, testID int) error
 
 	CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error)
 	GetAccess(userID, accessID int) (models.AccessOut, error)
@@ -159,6 +161,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		tests.POST("/:test_id/access/:group_id", h.CreateAccess)
 		tests.GET("/:test_id", h.GetTest)
 		tests.PATCH("/:test_id", h.UpdateTestTitle)
+		tests.DELETE("/:test_id", h.DeleteTest)
 
 		questions := tests.Group("/:test_id/questions")
 		{
@@ -184,6 +187,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		groups.GET("", h.GetGroups)
 		groups.GET("/:group_id", h.GetGroup)
 		groups.PATCH("/:group_id", h.UpdateGroupTitle)
+		groups.DELETE("/:group_id", h.DeleteGroup)
 
 		students := groups.Group("/:group_id/students")
 		{

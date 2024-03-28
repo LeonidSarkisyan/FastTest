@@ -82,3 +82,18 @@ func (h *Handler) UpdateGroupTitle(c *gin.Context) {
 
 	c.AbortWithStatusJSON(http.StatusNoContent, gin.H{})
 }
+
+func (h *Handler) DeleteGroup(c *gin.Context) {
+	userID := c.GetInt("userID")
+	groupID := MustID(c, "group_id")
+
+	err := h.GroupService.Delete(userID, groupID)
+
+	if err != nil {
+		SendErrorResponse(c, 422, err.Error())
+		c.Abort()
+		return
+	}
+
+	c.AbortWithStatusJSON(http.StatusNoContent, gin.H{})
+}

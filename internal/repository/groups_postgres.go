@@ -103,3 +103,27 @@ func (r *GroupPostgres) UpdateTitle(groupID, userID int, name string) error {
 
 	return nil
 }
+
+func (r *GroupPostgres) Delete(userID, groupID int) error {
+	query := "DELETE FROM groups WHERE user_id = $1 AND id = $2"
+
+	res, err := r.conn.Exec(query, userID, groupID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	count, err := res.RowsAffected()
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	if count == 0 {
+		return NotDeleteRow
+	}
+
+	return nil
+}
