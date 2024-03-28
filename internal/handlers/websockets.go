@@ -28,14 +28,6 @@ type Client struct {
 	passID int
 }
 
-func (manager *ClientManager) Start() {
-	for {
-		message := <-manager.Broadcast
-
-		log.Info().Any("message пришёл", message).Send()
-	}
-}
-
 func (manager *ClientManager) SendToBroadcast(message Message) {
 	manager.Mutex.Lock()
 	for _, client := range manager.Clients {

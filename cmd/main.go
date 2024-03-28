@@ -42,8 +42,6 @@ func main() {
 		ResetMap:  make(map[int]chan int),
 	}
 
-	go manager.Start()
-
 	handler := handlers.NewHandler(
 		manager, userService, testService, questionService, answerService, groupService, studentService, resultService,
 		aiService,

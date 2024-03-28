@@ -16,7 +16,7 @@
 <body>
     <embed src="/p/header" width="100%" height="100"/>
     <div class="container" x-data x-subscribe>
-        <h1 class="title title__span">Открыть доступ: <a :href="'{{ .url }}'" class="title__name">{{ .title }}</a></h1>
+        <h1 class="title title__span">Открыть доступ: <a :href="'{{ .url }}'" class="title__name" target="_blank">{{ .title }}</a></h1>
         <div class="question__form">
             <div class="question__form__title">Выберите группу, которую хотите протестировать:</div>
             <div x-text="$store.data.selectedGroup.name" class="question__form__title choose__group__name"></div>

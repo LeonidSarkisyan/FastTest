@@ -151,7 +151,13 @@ let needProtect = true
 let socket;
 
 function connectWebSocket() {
-    socket = new WebSocket(`wss://фаст-тест.рф/passing/${RESULT_ID}/ws/student/${PASS_ID}`);
+    let socket
+    if (window.location.hostname === "localhost") {
+        socket = new WebSocket(`ws://${window.location.hostname}/results/${RESULT_ID}/ws`);
+    } else {
+        socket = new WebSocket(`wss://${window.location.hostname}/results/${RESULT_ID}/ws`);
+    }
+
 
     socket.onopen = function(event) {
         console.log('WebSocket connected');

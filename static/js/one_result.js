@@ -61,8 +61,14 @@ $store.data.results = response.data.results
 $store.data.passes = response.data.passes
 $store.data.students = response.data.students
 
+let socket
 
-const socket = new WebSocket(`wss://фаст-тест.рф/results/${RESULT_ID}/ws`);
+if (window.location.hostname === "localhost") {
+    socket = new WebSocket(`ws://${window.location.hostname}/results/${RESULT_ID}/ws`);
+} else {
+    socket = new WebSocket(`wss://${window.location.hostname}/results/${RESULT_ID}/ws`);
+}
+
 
 socket.onopen = async function(event) {
     console.log('WebSocket connected');
