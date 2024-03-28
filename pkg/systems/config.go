@@ -16,6 +16,13 @@ type AppConfig struct {
 	Database DBConfig
 
 	OpenAIUrl string
+
+	SMTP
+}
+
+type SMTP struct {
+	Host string
+	Port string
 }
 
 type DBConfig struct {
@@ -55,6 +62,10 @@ func getConfig() (*AppConfig, error) {
 	cfg := AppConfig{
 		Debug:     viper.GetBool("debug"),
 		OpenAIUrl: viper.GetString("open_ai_url"),
+		SMTP: SMTP{
+			Host: viper.GetString("smtp.host"),
+			Port: viper.GetString("smtp.port"),
+		},
 	}
 
 	if cfg.Debug {

@@ -33,7 +33,7 @@ Spruce.store("methods", {
 
                 try {
                     const response = await axios.post(REGISTER_URL, user)
-                    await this.login()
+                    console.log(response)
                 } catch (e) {
                     alert(e.response.data)
                     return null

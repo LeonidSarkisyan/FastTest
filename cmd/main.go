@@ -1,13 +1,16 @@
 package main
 
 import (
+	"App/internal/email"
 	"App/internal/handlers"
+	"App/internal/models"
 	"App/internal/repository"
 	"App/internal/service"
 	"App/pkg/server"
 	"App/pkg/systems"
 	"context"
 	"github.com/rs/zerolog/log"
+	"net/smtp"
 	"os"
 	"os/signal"
 	"syscall"
@@ -42,6 +45,9 @@ func main() {
 		ResetMap:  make(map[int]chan int),
 	}
 
+	auth := smtp.PlainAuth("", os.Getenv("SMTP_EMAIL"), os.Getenv("SMTP_PASSWORD"), cfg.SMTP.Host)
+	emailClient := email.NewEmailClient(auth, cfg)
+
 	handler := handlers.NewHandler(
 		manager, userService, testService, questionService, answerService, groupService, studentService, resultService,
 		aiService,
@@ -53,6 +59,9 @@ func main() {
 		TimesMap:          make(map[int]*chan int),
 		ResetMap:          make(map[int]*chan int),
 	}
+
+	handler.EmailClient = emailClient
+	handler.EmailCodeMap = make(map[int64]models.UserIn)
 
 	server_ := new(server.Server)
 

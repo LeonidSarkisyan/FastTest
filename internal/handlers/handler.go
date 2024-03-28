@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"App/internal/ai"
+	"App/internal/email"
 	"App/internal/middlewares"
 	"App/internal/models"
 	"App/pkg/systems"
@@ -81,6 +82,8 @@ type TestService interface {
 type UserService interface {
 	Register(in models.UserIn) error
 	Login(in models.UserIn) (string, error)
+
+	Exist(email string) bool
 }
 
 type Channels struct {
@@ -91,6 +94,8 @@ type Channels struct {
 }
 
 type Handler struct {
+	*email.EmailClient
+	EmailCodeMap map[int64]models.UserIn
 	*ClientManager
 	*Channels
 	AiService
@@ -138,8 +143,11 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	auth := router.Group("/auth", middlewares.IsNotEmptyRequestBody)
 	{
-		auth.POST("/register", h.Register)
+		auth.POST("/register", h.CreateAccount)
 		auth.POST("/login", h.Login)
+
+		// router - специально
+		router.GET("/auth/confirm/:code", h.ConfirmAccount)
 	}
 
 	pages := router.Group("/p", middlewares.AuthProtect)

@@ -76,3 +76,14 @@ func (s *UserService) Login(in models.UserIn) (string, error) {
 
 	return token, nil
 }
+
+func (s *UserService) Exist(email string) bool {
+	userExist, err := s.UserRepository.GetByEmail(email)
+
+	if err != nil {
+		log.Err(err).Send()
+		return true
+	}
+
+	return userExist.ID != 0
+}
