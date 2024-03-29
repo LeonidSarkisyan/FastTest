@@ -105,7 +105,6 @@ func (h *Handler) ConfirmAccount(c *gin.Context) {
 			return
 		}
 
-		c.SetCookie("Authorization", token, 2592000, "/", Domain, false, true)
 		c.HTML(200, "success_register.html", gin.H{})
 		return
 	}
