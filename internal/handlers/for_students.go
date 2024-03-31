@@ -178,7 +178,6 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		}
 	}()
 }
-}
 
 func (h *Handler) CreateResult(c *gin.Context) {
 	studentIDCookie, err := c.Cookie("StudentID")
