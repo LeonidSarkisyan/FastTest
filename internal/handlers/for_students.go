@@ -7,7 +7,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"math/rand/v2"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -110,10 +109,9 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 
 	resetChannel := make(chan int)
 	timesChannel := make(chan int)
-	h.ClientManager.Mutex.Lock()
-	h.ClientManager.ResetMap[passID] = resetChannel
-	h.ClientManager.TimesMap[passID] = timesChannel
-	h.ClientManager.Mutex.Unlock()
+
+	h.ClientManager.ResetMap.Store(passID, resetChannel)
+	h.ClientManager.TimesMap.Store(passID, timesChannel)
 
 	go func() {
 		timeout := time.Duration(access.PassageTime)*time.Minute + 5*time.Second
@@ -135,10 +133,8 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 					Result: resultStudent,
 				})
 
-				h.ClientManager.Mutex.Lock()
-				delete(h.ClientManager.ResetMap, passID)
-				delete(h.ClientManager.TimesMap, passID)
-				h.ClientManager.Mutex.Unlock()
+				h.ClientManager.ResetMap.Delete(passID)
+				h.ClientManager.TimesMap.Delete(passID)
 				return
 			case <-resetChannel:
 				log.Info().Msg("тест прерван или завершён, выключаем принудельную двойку")
@@ -272,12 +268,19 @@ func (h *Handler) CreateResult(c *gin.Context) {
 
 		h.ClientManager.SendToBroadcast(message)
 
-		var mu sync.Mutex
-		mu.Lock()
-		h.ClientManager.TimesMap[passID] <- 1
-		h.ClientManager.ResetMap[passID] <- 1
-		mu.Unlock()
+		if val, ok := h.ClientManager.TimesMap.Load(passID); ok {
+			if timesChannel, ok := val.(chan int); ok {
+				timesChannel <- 1
+			}
+		}
+
+		if val, ok := h.ClientManager.ResetMap.Load(passID); ok {
+			if resetChannel, ok := val.(chan int); ok {
+				resetChannel <- 1
+			}
+		}
 	}()
+
 }
 
 func (h *Handler) AbortPage(c *gin.Context) {

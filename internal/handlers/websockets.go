@@ -14,11 +14,10 @@ type Message struct {
 }
 
 type ClientManager struct {
-	Clients   []*Client
-	Broadcast chan Message
-	TimesMap  map[int]chan int
-	ResetMap  map[int]chan int
-	Mutex     sync.Mutex
+	Clients  sync.Map
+	TimesMap sync.Map
+	ResetMap sync.Map
+	Mutex    sync.Mutex
 }
 
 type Client struct {
@@ -29,31 +28,24 @@ type Client struct {
 }
 
 func (manager *ClientManager) SendToBroadcast(message Message) {
-	for _, client := range manager.Clients {
-		if client.userID != message.UserID || client.passID != message.PassID {
-			continue
-		}
+	manager.Clients.Range(func(key, value interface{}) bool {
+		client := key.(*Client)
 
-		manager.Mutex.Lock()
 		err := client.socket.WriteJSON(message.Result)
-		manager.Mutex.Unlock()
 
 		if err != nil {
 			log.Err(err).Send()
 			manager.RemoveClient(client)
 		}
-	}
+
+		return true
+	})
 }
 
 func (manager *ClientManager) AddClient(client *Client) {
-	manager.Clients = append(manager.Clients, client)
+	manager.Clients.Store(client, true)
 }
 
 func (manager *ClientManager) RemoveClient(client *Client) {
-	for i, c := range manager.Clients {
-		if c == client {
-			manager.Clients = append(manager.Clients[:i], manager.Clients[i+1:]...)
-			break
-		}
-	}
+	manager.Clients.Delete(client)
 }

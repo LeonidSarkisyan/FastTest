@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
-	"sync"
 	"time"
 )
 
@@ -95,10 +94,16 @@ func (h *Handler) ResetResult(c *gin.Context) {
 
 		h.SendToBroadcast(message)
 
-		var mu sync.Mutex
-		mu.Lock()
-		h.ClientManager.TimesMap[passID] <- 1
-		h.ClientManager.ResetMap[passID] <- 1
-		mu.Unlock()
+		if val, ok := h.ClientManager.TimesMap.Load(passID); ok {
+			if timesChannel, ok := val.(chan int); ok {
+				timesChannel <- 1
+			}
+		}
+
+		if val, ok := h.ClientManager.ResetMap.Load(passID); ok {
+			if resetChannel, ok := val.(chan int); ok {
+				resetChannel <- 1
+			}
+		}
 	}()
 }

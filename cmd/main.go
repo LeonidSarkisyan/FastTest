@@ -13,6 +13,7 @@ import (
 	"net/smtp"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 )
 
@@ -39,10 +40,9 @@ func main() {
 	aiService := service.NewAiService(questionRepo, testRepo)
 
 	manager := &handlers.ClientManager{
-		Clients:   make([]*handlers.Client, 0),
-		Broadcast: make(chan handlers.Message),
-		TimesMap:  make(map[int]chan int),
-		ResetMap:  make(map[int]chan int),
+		Clients:  sync.Map{},
+		TimesMap: sync.Map{},
+		ResetMap: sync.Map{},
 	}
 
 	auth := smtp.PlainAuth("", os.Getenv("SMTP_EMAIL"), os.Getenv("SMTP_PASSWORD"), cfg.SMTP.Host)
