@@ -30,8 +30,7 @@ type Client struct {
 
 func (manager *ClientManager) SendToBroadcast(message Message) {
 	go func() {
-		var mu sync.Mutex
-		mu.Lock()
+		manager.Mutex.Lock()
 		clients := make([]*Client, len(manager.Clients))
 		copy(clients, manager.Clients)
 
@@ -46,7 +45,7 @@ func (manager *ClientManager) SendToBroadcast(message Message) {
 			}
 		}
 
-		mu.Unlock()
+		manager.Mutex.Unlock()
 	}()
 }
 
