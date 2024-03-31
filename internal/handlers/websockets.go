@@ -33,7 +33,11 @@ func (manager *ClientManager) SendToBroadcast(message Message) {
 		if client.userID != message.UserID || client.passID != message.PassID {
 			continue
 		}
+
+		manager.Mutex.Lock()
 		err := client.socket.WriteJSON(message.Result)
+		manager.Mutex.Unlock()
+
 		if err != nil {
 			log.Err(err).Send()
 			manager.RemoveClient(client)
