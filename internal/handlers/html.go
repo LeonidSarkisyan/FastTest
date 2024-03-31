@@ -62,6 +62,10 @@ func (h *Handler) OneGroupPage(c *gin.Context) {
 }
 
 func (h *Handler) TestPage(c *gin.Context) {
+	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+	c.Header("Pragma", "no-cache")
+	c.Header("Expires", "0")
+
 	c.HTML(http.StatusOK, "tests.html", gin.H{})
 }
 
@@ -172,4 +176,44 @@ func (h *Handler) OneResultPage(c *gin.Context) {
 
 func (h *Handler) PassingPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "passing.html", gin.H{})
+}
+
+func (h *Handler) Account(c *gin.Context) {
+	userID := c.GetInt("userID")
+
+	user, err := h.UserService.GetByID(userID)
+
+	if err != nil {
+		c.HTML(404, "error.html", gin.H{
+			"error": "Ошибка 404, такой аккаунт не найден",
+		})
+		c.Abort()
+		return
+	}
+
+	var emailCensored string
+
+	emailChapters := strings.Split(user.Email, "@")
+
+	if len(emailChapters) <= 1 {
+		c.HTML(http.StatusOK, "account.html", gin.H{
+			"email": user.Email,
+		})
+		c.Abort()
+		return
+	}
+
+	lenEmail := len(emailChapters[0])
+
+	for i := 0; i < lenEmail; i++ {
+		if i < lenEmail/2 {
+			emailCensored += string(user.Email[i])
+		} else {
+			emailCensored += "*"
+		}
+	}
+
+	c.HTML(http.StatusOK, "account.html", gin.H{
+		"email": emailCensored + "@" + emailChapters[1],
+	})
 }

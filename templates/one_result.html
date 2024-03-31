@@ -18,7 +18,7 @@
     <embed src="/p/header" width="100%" height="100"/>
     <div class="container result__container" x-data x-subscribe>
         <div id="notification" class="notification">
-            Код скопирован!
+            Скопировано!
         </div>
         <h1 class="title title__span result__title">Результаты: <a target="_blank"
                 :href="'{{ .url }}'" class="title__name">{{ .test.Title }}</a></h1>
@@ -46,12 +46,19 @@
         <div class="date__event last">
             Ссылка для прохождения -
             <a
+                    id="link"
                     target="_blank"
                     :href="'{{ .hrefPass }}'"
                     class="date__event__date"
             >
                 {{ .urlPass }}
             </a>
+            <span>
+                -
+            </span>
+            <span class="copy" @click="$store.methods.CopyLink()" id="copy">
+                скопировать
+            </span>
         </div>
         <div class="student__table">
             <template x-if="$store.data.students.length">

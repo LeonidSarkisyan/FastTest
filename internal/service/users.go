@@ -11,13 +11,17 @@ var (
 	UserAlreadyExists      = errors.New("пользователь с таким email уже существует")
 	UserBadLoginOrPassword = errors.New("неверный логин или пароль")
 
-	UserTokenError         = errors.New("ошибка при генерации токена")
-	UserNotCorrectPassword = errors.New("невозможно захешировать пароль")
+	UserTokenError          = errors.New("ошибка при генерации токена")
+	UserNotCorrectPassword  = errors.New("невозможно захешировать пароль")
+	UserGetError            = errors.New("ошибка при получении пользователя")
+	UserChangePasswordError = errors.New("ошибка при обновлении пароля пользователя")
 )
 
 type UserRepository interface {
 	Create(userIn models.UserIn) error
 	GetByEmail(email string) (models.User, error)
+	GetByID(userID int) (models.User, error)
+	ChangePassword(userID int, newPassword models.NewPassword) error
 }
 
 type UserService struct {
@@ -93,8 +97,37 @@ func (s *UserService) GetByEmail(email string) (models.User, error) {
 
 	if err != nil {
 		log.Err(err).Send()
-		return models.User{}, err
+		return models.User{}, UserGetError
 	}
 
 	return userExist, nil
+}
+
+func (s *UserService) GetByID(userID int) (models.User, error) {
+	userExist, err := s.UserRepository.GetByID(userID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.User{}, UserGetError
+	}
+
+	return userExist, nil
+}
+
+func (s *UserService) ChangePassword(userID int, newPassword models.NewPassword) error {
+	hashPassword, err := utils.HashPassword(newPassword.Password)
+
+	if err != nil {
+		return UserChangePasswordError
+	}
+
+	newPassword.Password = hashPassword
+
+	err = s.UserRepository.ChangePassword(userID, newPassword)
+
+	if err != nil {
+		return UserChangePasswordError
+	}
+
+	return nil
 }

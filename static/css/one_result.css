@@ -138,3 +138,14 @@
 .active:hover {
     background: #ffc75b;
 }
+
+.copy {
+    color: var(--color-text-other);
+    font-weight: 400;
+
+    cursor: pointer;
+}
+
+.copy:hover {
+    text-decoration: underline;
+}

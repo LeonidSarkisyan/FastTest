@@ -57,3 +57,32 @@ func (c *EmailClient) SendCodeToEmail(emailTo string, code int64) error {
 
 	return nil
 }
+
+func (c *EmailClient) SendCodeToEmailForResetPassword(emailTo string, code int64) error {
+	from := os.Getenv("SMTP_EMAIL")
+	to := []string{emailTo}
+
+	subject := "Сброс пароля"
+	body := fmt.Sprintf(`
+	<h1>Здравствуйте!</h1>
+	<p>Вы решили изменить свой пароль? Тогда вам понадобиться этот код:</p>
+	<h3>%d</h3>
+	`, code)
+
+	message := []byte("From: " + from + "\r\n" +
+		"To: " + to[0] + "\r\n" +
+		"Subject: " + subject + "\r\n" +
+		"MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\r\n\r\n" +
+		body + "\r\n")
+
+	err := smtp.SendMail(
+		c.cfg.SMTP.Host+":"+c.cfg.SMTP.Port, c.Auth, from, to, message,
+	)
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	return nil
+}

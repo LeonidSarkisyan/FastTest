@@ -62,6 +62,7 @@ func main() {
 
 	handler.EmailClient = emailClient
 	handler.EmailCodeMap = make(map[int64]models.UserIn)
+	handler.ResetPasswordMap = make(map[int64]models.User)
 
 	server_ := new(server.Server)
 

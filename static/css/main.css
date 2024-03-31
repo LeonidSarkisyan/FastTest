@@ -131,3 +131,19 @@ body {
         transform: rotate(360deg);
     }
 }
+
+.fw700 {
+    font-weight: 700;
+}
+
+.fz20 {
+    font-size: 20px;
+}
+
+.other-color {
+    color: var(--color-text-other);
+}
+
+.width100 {
+    width: 100%;
+}

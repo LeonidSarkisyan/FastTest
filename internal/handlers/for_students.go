@@ -16,6 +16,14 @@ const (
 	RadioButton = "radio"
 )
 
+func shuffleAnswers(questions []models.QuestionWithAnswers) {
+	for i := range questions {
+		rand.Shuffle(len(questions[i].Answers), func(j, k int) {
+			questions[i].Answers[j], questions[i].Answers[k] = questions[i].Answers[k], questions[i].Answers[j]
+		})
+	}
+}
+
 func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 	studentIDCookie, err := c.Cookie("StudentID")
 
@@ -91,6 +99,8 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		SendErrorResponse(c, 401, err.Error())
 		return
 	}
+
+	shuffleAnswers(questions)
 
 	c.JSON(200, gin.H{
 		"test_id":   access.TestID,

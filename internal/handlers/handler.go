@@ -83,6 +83,8 @@ type UserService interface {
 	Register(in models.UserIn) error
 	Login(in models.UserIn) (string, error)
 	GetByEmail(email string) (models.User, error)
+	GetByID(userID int) (models.User, error)
+	ChangePassword(userID int, newPassword models.NewPassword) error
 
 	Exist(email string) bool
 }
@@ -96,7 +98,8 @@ type Channels struct {
 
 type Handler struct {
 	*email.EmailClient
-	EmailCodeMap map[int64]models.UserIn
+	EmailCodeMap     map[int64]models.UserIn
+	ResetPasswordMap map[int64]models.User
 	*ClientManager
 	*Channels
 	AiService
@@ -149,6 +152,9 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 		// router - специально
 		router.GET("/auth/confirm/:code", h.ConfirmAccount)
+		router.POST("/auth/reset", middlewares.AuthProtect, h.CreateResetPasswordCode)
+		router.POST("/auth/change/:code", middlewares.AuthProtect, h.ResetPassword)
+		router.GET("/auth/logout", h.LogOut)
 	}
 
 	pages := router.Group("/p", middlewares.AuthProtect)
@@ -161,6 +167,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		pages.GET("/groups/:group_id", h.OneGroupPage)
 		pages.GET("/results", h.ResultPage)
 		pages.GET("/results/:result_id", h.OneResultPage)
+		pages.GET("/account", h.Account)
 	}
 
 	tests := router.Group("/tests", middlewares.AuthProtect)

@@ -1,5 +1,9 @@
 package models
 
+type NewPassword struct {
+	Password string `json:"password"`
+}
+
 type UserIn struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`

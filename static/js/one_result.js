@@ -49,6 +49,30 @@ Spruce.store("methods", {
         }, 3000);
     },
 
+    CopyLink(link) {
+        let tempInput = document.createElement("input");
+        tempInput.value = document.getElementById("link").href;
+        document.body.appendChild(tempInput);
+
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+
+        let copy = document.getElementById("copy")
+        copy.innerText = "скопировано!"
+        copy.style.fontWeight = 700
+        setTimeout(function () {
+            copy.innerText = "скопировать"
+            copy.style.fontWeight = 400
+        }, 750)
+        // let notification = document.getElementById("notification");
+        // notification.style.display = "block";
+        // setTimeout(function(){
+        //     notification.style.display = "none";
+        // }, 3000);
+    },
+
     ToggleHideCodes() {
         $store.data.hideCodes = !$store.data.hideCodes
     }
