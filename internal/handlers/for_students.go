@@ -110,8 +110,8 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 	resetChannel := make(chan int)
 	timesChannel := make(chan int)
 
-	h.ClientManager.ResetMap.Store(passID, resetChannel)
-	h.ClientManager.TimesMap.Store(passID, timesChannel)
+	h.ClientManager.ResetMap.Store(passID, &resetChannel)
+	h.ClientManager.TimesMap.Store(passID, &timesChannel)
 
 	go func() {
 		timeout := time.Duration(access.PassageTime)*time.Minute + 5*time.Second
