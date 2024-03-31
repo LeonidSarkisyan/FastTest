@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"App/internal/models"
+	"encoding/json"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
 	"sync"
@@ -14,7 +15,7 @@ type Message struct {
 }
 
 type ClientManager struct {
-	Clients   []*Client
+	Clients   map[*Client]struct{}
 	Broadcast chan Message
 	TimesMap  map[int]chan int
 	ResetMap  map[int]chan int
@@ -29,31 +30,71 @@ type Client struct {
 }
 
 func (manager *ClientManager) SendToBroadcast(message Message) {
-	for _, client := range manager.Clients {
+	manager.Mutex.Lock()
+	defer manager.Mutex.Unlock()
+
+	for client := range manager.Clients {
 		if client.userID != message.UserID || client.passID != message.PassID {
 			continue
 		}
 
-		manager.Mutex.Lock()
-		err := client.socket.WriteJSON(message.Result)
-		manager.Mutex.Unlock()
-
+		jsonData, err := json.Marshal(message.Result)
 		if err != nil {
-			log.Err(err).Send()
+			log.Error().Err(err).Msg("Error marshaling message")
+			continue
+		}
+
+		select {
+		case client.send <- jsonData:
+		default:
+			log.Error().Msg("Failed to send message to client")
 			manager.RemoveClient(client)
 		}
 	}
 }
 
 func (manager *ClientManager) AddClient(client *Client) {
-	manager.Clients = append(manager.Clients, client)
+	manager.Mutex.Lock()
+	defer manager.Mutex.Unlock()
+
+	manager.Clients[client] = struct{}{}
 }
 
 func (manager *ClientManager) RemoveClient(client *Client) {
-	for i, c := range manager.Clients {
-		if c == client {
-			manager.Clients = append(manager.Clients[:i], manager.Clients[i+1:]...)
+	manager.Mutex.Lock()
+	defer manager.Mutex.Unlock()
+
+	delete(manager.Clients, client)
+}
+
+func (client *Client) Read() {
+	defer func() {
+		client.socket.Close()
+	}()
+
+	for {
+		_, _, err := client.socket.ReadMessage()
+		if err != nil {
 			break
+		}
+	}
+}
+
+func (client *Client) Write() {
+	defer func() {
+		client.socket.Close()
+	}()
+
+	for {
+		select {
+		case message, ok := <-client.send:
+			if !ok {
+				return
+			}
+			err := client.socket.WriteMessage(websocket.TextMessage, message)
+			if err != nil {
+				return
+			}
 		}
 	}
 }
