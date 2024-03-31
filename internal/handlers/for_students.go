@@ -4,10 +4,8 @@ import (
 	"App/internal/handlers/responses"
 	"App/internal/models"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 	"math/rand/v2"
 	"strconv"
-	"time"
 )
 
 const (
@@ -106,82 +104,6 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		"access":    access,
 		"questions": responses.NewListResponse(questions),
 	})
-
-	resetChannel := make(chan int)
-	timesChannel := make(chan int)
-	stopSecondTimeChannel := make(chan int)
-
-	h.ClientManager.ResetMap.Store(passID, resetChannel)
-	h.ClientManager.TimesMap.Store(passID, timesChannel)
-
-	go func() {
-		timeout := time.Duration(access.PassageTime)*time.Minute + 5*time.Second
-		ticker := time.NewTicker(timeout)
-		defer ticker.Stop()
-
-		for {
-			resetCh, _ := h.ClientManager.ResetMap.Load(passID)
-
-			select {
-			case <-ticker.C:
-				resultStudent, err := h.ResultService.SaveResult(
-					studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
-				)
-				if err != nil {
-					log.Err(err).Send()
-					return
-				}
-				h.SendToBroadcast(Message{
-					UserID: access.UserID,
-					Result: resultStudent,
-				})
-
-				stopSecondTimeChannel <- 1
-
-				log.Info().Msg("тест завершён принудительно")
-				return
-			case <-resetCh.(chan int):
-				log.Info().Msg("тест прерван или завершён, выключаем принудельную двойку")
-				return
-			}
-		}
-	}()
-
-	go func() {
-		ticker := time.NewTicker(time.Second)
-		defer ticker.Stop()
-
-		msg := Message{
-			UserID: access.UserID,
-			PassID: passID,
-			Result: models.ResultStudent{
-				Mark:         -1,
-				DateTimePass: time.Time{},
-				PassID:       passID,
-				TimePass:     1,
-			},
-		}
-
-		for {
-			timesCh, _ := h.ClientManager.TimesMap.Load(passID)
-
-			select {
-			case <-ticker.C:
-				log.Info().Msg("прошла секунда, отправляю...")
-				h.ClientManager.SendToBroadcast(msg)
-				msg.PassID = 0
-				h.ClientManager.SendToBroadcast(msg)
-				msg.Result.TimePass++
-				msg.PassID = passID
-			case <-timesCh.(chan int):
-				log.Info().Msg("тест завершён, выключает посекундное обновление")
-				return
-			case <-stopSecondTimeChannel:
-				log.Info().Msg("тест завершён, выключает посекундное обновление")
-				return
-			}
-		}
-	}()
 }
 
 func (h *Handler) CreateResult(c *gin.Context) {
@@ -265,31 +187,21 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		return
 	}
 
+	ch, ok := h.ClientManager.PassesMap.Load(passID)
+
+	if ok {
+		ch.(chan models.ResultStudent) <- result
+	}
+
+	resultCh, ok := h.ClientManager.ResultsMap.Load(accessID)
+
+	if ok {
+		resultCh.(chan models.ResultStudent) <- result
+	}
+
 	c.JSON(201, gin.H{
 		"result": result,
 	})
-
-	go func() {
-		message := Message{
-			UserID: access.UserID,
-			Result: result,
-		}
-
-		h.ClientManager.SendToBroadcast(message)
-
-		if val, ok := h.ClientManager.TimesMap.Load(passID); ok {
-			if timesChannel, ok := val.(chan int); ok {
-				timesChannel <- 1
-			}
-		}
-
-		if val, ok := h.ClientManager.ResetMap.Load(passID); ok {
-			if resetChannel, ok := val.(chan int); ok {
-				resetChannel <- 1
-			}
-		}
-	}()
-
 }
 
 func (h *Handler) AbortPage(c *gin.Context) {
