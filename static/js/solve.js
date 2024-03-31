@@ -121,6 +121,7 @@ startButton.onclick = async () => {
         document.getElementById('timer').innerText = TimeProcess(totalSeconds)
         localStorage.setItem("questions", JSON.stringify(response.data.questions))
         $store.data.isPass = true
+        connectWebSocket()
         console.log(response.data)
     } catch (e) {
         alert(e.response.data)
@@ -151,7 +152,6 @@ let needProtect = true
 let socket;
 
 function connectWebSocket() {
-    let socket
     if (window.location.hostname === "localhost") {
         socket = new WebSocket(`ws://${window.location.hostname}/passing/${RESULT_ID}/ws/student/${PASS_ID}`);
     } else {
@@ -186,6 +186,7 @@ function connectWebSocket() {
 
         if (totalSeconds - newResult.time_pass < 0) {
             await $store.methods.completeTest();
+            socket.close(1000)
         }
 
         if (newResult.mark === -1) {
@@ -202,7 +203,6 @@ function connectWebSocket() {
     };
 }
 
-connectWebSocket();
 
 function TimeProcess(seconds) {
     let hours = Math.floor(seconds / 3600);
