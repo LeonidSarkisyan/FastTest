@@ -108,52 +108,49 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		"questions": responses.NewListResponse(questions),
 	})
 
+	resetChannel := make(chan int)
+	timesChannel := make(chan int)
+	h.ClientManager.Mutex.Lock()
+	h.ClientManager.ResetMap[passID] = resetChannel
+	h.ClientManager.TimesMap[passID] = timesChannel
+	h.ClientManager.Mutex.Unlock()
+
 	go func() {
-		var mu sync.Mutex
-
-		mu.Lock()
-		h.ClientManager.ResetMap[passID] = make(chan int)
-		mu.Unlock()
-
 		timeout := time.Duration(access.PassageTime)*time.Minute + 5*time.Second
+		ticker := time.NewTicker(timeout)
+		defer ticker.Stop()
 
 		for {
 			select {
-			case <-time.After(timeout):
+			case <-ticker.C:
 				resultStudent, err := h.ResultService.SaveResult(
 					studentID, accessID, passID, questions, []models.QuestionWithAnswers{}, access, access.PassageTime*60,
 				)
-
 				if err != nil {
 					log.Err(err).Send()
 					return
 				}
-
 				h.SendToBroadcast(Message{
 					UserID: access.UserID,
 					Result: resultStudent,
 				})
 
-				go func() {
-					var mu sync.Mutex
-					mu.Lock()
-					h.ClientManager.TimesMap[passID] <- 1
-					h.ClientManager.ResetMap[passID] <- 1
-					mu.Unlock()
-				}()
-			case <-h.ClientManager.ResetMap[passID]:
-				var mu sync.Mutex
-				log.Info().Msg("тест прерван или завершён, выключаем принудельную двойку")
-				mu.Lock()
+				h.ClientManager.Mutex.Lock()
+				delete(h.ClientManager.ResetMap, passID)
 				delete(h.ClientManager.TimesMap, passID)
-				mu.Unlock()
+				h.ClientManager.Mutex.Unlock()
+				return
+			case <-resetChannel:
+				log.Info().Msg("тест прерван или завершён, выключаем принудельную двойку")
 				return
 			}
 		}
-
 	}()
 
 	go func() {
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+
 		msg := Message{
 			UserID: access.UserID,
 			PassID: passID,
@@ -165,30 +162,22 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 			},
 		}
 
-		var mu sync.Mutex
-
-		mu.Lock()
-		h.ClientManager.TimesMap[passID] = make(chan int)
-		mu.Unlock()
-
 		for {
 			select {
-			case <-time.After(time.Second):
+			case <-ticker.C:
 				log.Info().Msg("прошла секунда, отправляю...")
 				h.ClientManager.SendToBroadcast(msg)
 				msg.PassID = 0
 				h.ClientManager.SendToBroadcast(msg)
 				msg.Result.TimePass++
 				msg.PassID = passID
-			case <-h.ClientManager.TimesMap[passID]:
+			case <-timesChannel:
 				log.Info().Msg("тест завершён, выключает посекундное обновление")
-				mu.Lock()
-				delete(h.ClientManager.TimesMap, passID)
-				mu.Unlock()
 				return
 			}
 		}
 	}()
+}
 }
 
 func (h *Handler) CreateResult(c *gin.Context) {
