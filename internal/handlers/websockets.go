@@ -31,6 +31,10 @@ func (manager *ClientManager) SendToBroadcast(message Message) {
 	manager.Clients.Range(func(key, value interface{}) bool {
 		client := key.(*Client)
 
+		if client.userID != message.UserID || client.passID != message.PassID {
+			return true
+		}
+
 		err := client.socket.WriteJSON(message.Result)
 
 		if err != nil {
