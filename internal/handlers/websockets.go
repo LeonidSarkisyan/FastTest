@@ -34,7 +34,6 @@ func (manager *ClientManager) SendToBroadcast(message Message) {
 		mu.Lock()
 		clients := make([]*Client, len(manager.Clients))
 		copy(clients, manager.Clients)
-		mu.Unlock()
 
 		for _, client := range clients {
 			if client.userID != message.UserID || client.passID != message.PassID {
@@ -46,6 +45,8 @@ func (manager *ClientManager) SendToBroadcast(message Message) {
 				go manager.RemoveClient(client)
 			}
 		}
+
+		mu.Unlock()
 	}()
 }
 
