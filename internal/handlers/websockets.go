@@ -34,6 +34,8 @@ func (manager *ClientManager) SendToBroadcast(message Message) {
 		clients := make([]*Client, len(manager.Clients))
 		copy(clients, manager.Clients)
 
+		log.Info().Any("clients", clients).Send()
+
 		for _, client := range clients {
 			if client.userID != message.UserID || client.passID != message.PassID {
 				continue
