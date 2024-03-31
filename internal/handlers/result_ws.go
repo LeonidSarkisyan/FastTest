@@ -221,13 +221,17 @@ func (h *Handler) ResetResult(c *gin.Context) {
 		return
 	}
 
-	defer func() {
+	c.AbortWithStatus(204)
+
+	go func() {
 		ch, ok := h.ClientManager.PassesMap.Load(passID)
 
 		if ok {
-			ch.(chan models.ResultStudent) <- models.ResultStudent{Mark: -2}
+			select {
+			case ch.(chan models.ResultStudent) <- models.ResultStudent{Mark: -2}:
+			default:
+				log.Info().Msg("прерываем без участия")
+			}
 		}
 	}()
-
-	c.AbortWithStatus(204)
 }
