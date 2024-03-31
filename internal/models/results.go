@@ -4,7 +4,7 @@ import "time"
 
 type Result struct {
 	Questions []QuestionWithAnswersWithOutIsCorrect `json:"questions" binding:"required"`
-	TimePass  int                                   `json:"time_pass" binding:"required"`
+	TimePass  int                                   `json:"time_pass"`
 }
 
 type ResultStudentIn struct {
