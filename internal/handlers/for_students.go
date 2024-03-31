@@ -119,6 +119,8 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		defer ticker.Stop()
 
 		for {
+			resetCh, _ := h.ClientManager.ResetMap.Load(passID)
+
 			select {
 			case <-ticker.C:
 				resultStudent, err := h.ResultService.SaveResult(
@@ -142,7 +144,7 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 					timesCh.(chan int) <- 1
 				}
 				return
-			case <-resetChannel:
+			case <-resetCh.(chan int):
 				log.Info().Msg("тест прерван или завершён, выключаем принудельную двойку")
 				return
 			}
@@ -165,6 +167,8 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		}
 
 		for {
+			timesCh, _ := h.ClientManager.TimesMap.Load(passID)
+
 			select {
 			case <-ticker.C:
 				log.Info().Msg("прошла секунда, отправляю...")
@@ -173,7 +177,7 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 				h.ClientManager.SendToBroadcast(msg)
 				msg.Result.TimePass++
 				msg.PassID = passID
-			case <-timesChannel:
+			case <-timesCh.(chan int):
 				log.Info().Msg("тест завершён, выключает посекундное обновление")
 				return
 			}
