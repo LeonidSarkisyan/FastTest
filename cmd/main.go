@@ -39,7 +39,7 @@ func main() {
 	aiService := service.NewAiService(questionRepo, testRepo)
 
 	manager := &handlers.ClientManager{
-		Clients:   make(map[*handlers.Client]struct{}),
+		Clients:   make([]*handlers.Client, 0),
 		Broadcast: make(chan handlers.Message),
 		TimesMap:  make(map[int]chan int),
 		ResetMap:  make(map[int]chan int),
