@@ -109,6 +109,7 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 
 	resetChannel := make(chan int)
 	timesChannel := make(chan int)
+	stopSecondTimeChannel := make(chan int)
 
 	h.ClientManager.ResetMap.Store(passID, resetChannel)
 	h.ClientManager.TimesMap.Store(passID, timesChannel)
@@ -135,14 +136,9 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 					Result: resultStudent,
 				})
 
-				resetCh, ok := h.ClientManager.ResetMap.Load(passID)
-				if ok {
-					resetCh.(chan int) <- 1
-				}
-				timesCh, ok := h.ClientManager.TimesMap.Load(passID)
-				if ok {
-					timesCh.(chan int) <- 1
-				}
+				stopSecondTimeChannel <- 1
+
+				log.Info().Msg("тест завершён принудительно")
 				return
 			case <-resetCh.(chan int):
 				log.Info().Msg("тест прерван или завершён, выключаем принудельную двойку")
@@ -178,6 +174,9 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 				msg.Result.TimePass++
 				msg.PassID = passID
 			case <-timesCh.(chan int):
+				log.Info().Msg("тест завершён, выключает посекундное обновление")
+				return
+			case <-stopSecondTimeChannel:
 				log.Info().Msg("тест завершён, выключает посекундное обновление")
 				return
 			}
