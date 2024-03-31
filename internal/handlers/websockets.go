@@ -29,31 +29,23 @@ type Client struct {
 }
 
 func (manager *ClientManager) SendToBroadcast(message Message) {
-	manager.Mutex.Lock()
-	defer manager.Mutex.Unlock()
-
 	for _, client := range manager.Clients {
-		if client.userID == message.UserID && client.passID == message.PassID {
-			err := client.socket.WriteJSON(message.Result)
-			if err != nil {
-				log.Err(err).Send()
-				manager.RemoveClient(client)
-			}
+		if client.userID != message.UserID || client.passID != message.PassID {
+			continue
+		}
+		err := client.socket.WriteJSON(message.Result)
+		if err != nil {
+			log.Err(err).Send()
+			manager.RemoveClient(client)
 		}
 	}
 }
 
 func (manager *ClientManager) AddClient(client *Client) {
-	manager.Mutex.Lock()
-	defer manager.Mutex.Unlock()
-
 	manager.Clients = append(manager.Clients, client)
 }
 
 func (manager *ClientManager) RemoveClient(client *Client) {
-	manager.Mutex.Lock()
-	defer manager.Mutex.Unlock()
-
 	for i, c := range manager.Clients {
 		if c == client {
 			manager.Clients = append(manager.Clients[:i], manager.Clients[i+1:]...)
