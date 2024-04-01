@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+const (
+	CountTryReconnect = 15
+)
+
 var (
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -103,7 +107,7 @@ func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
 	h.ClientManager.PassesMap.Store(passID, make(chan models.ResultStudent))
 	ch, _ := h.ClientManager.PassesMap.Load(passID)
 
-	try := 5
+	try := CountTryReconnect
 
 	for {
 		resultCh, ok := h.ClientManager.ResultsMap.Load(resultID)
