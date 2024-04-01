@@ -127,7 +127,12 @@
 }
 
 .reload {
-    height: 30px;
+    width: 22px;
+    height: 22px;
+
+    padding: 5px;
+
+    display: block;
 }
 
 .active {
@@ -148,4 +153,18 @@
 
 .copy:hover {
     text-decoration: underline;
+}
+
+.loading__reset {
+    animation: rotate 0.25s linear infinite;
+    transform-origin: center center; /* Фиксированная точка вращения в центре элемента */
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }

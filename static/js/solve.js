@@ -103,7 +103,7 @@ Spruce.store("methods", {
             $store.data.isPass = false
             $store.data.showModal = false
             $store.data.isComplete = true
-            clearInterval(timer)
+            socket.close(1000)
         } catch (e) {
             $store.data.error = e.response.data
         }
@@ -186,7 +186,6 @@ function connectWebSocket() {
 
         if (totalSeconds - newResult.time_pass < 0) {
             await $store.methods.completeTest();
-            socket.close(1000)
         }
 
         if (newResult.mark === -1) {
