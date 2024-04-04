@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	CountTryReconnect = 15
+	CountTryReconnect = 120
 )
 
 var (

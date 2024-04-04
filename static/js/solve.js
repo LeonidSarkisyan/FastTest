@@ -151,7 +151,7 @@ let needProtect = true
 
 let socket;
 
-let tryCount = 15
+let tryCount = 45
 
 function connectWebSocket() {
     if (window.location.hostname === "localhost") {
@@ -169,7 +169,7 @@ function connectWebSocket() {
         if (tryCount !== 0) {
             console.log('WebSocket disconnected');
             if (!$store.data.isPass) {
-                setTimeout(connectWebSocket, 3000);
+                setTimeout(connectWebSocket, 5000);
             }
         }
     };
