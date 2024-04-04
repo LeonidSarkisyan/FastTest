@@ -175,7 +175,6 @@ function connectWebSocket() {
     };
 
     socket.onerror = function(error) {
-        tryCount--
 
         if (tryCount !== 0) {
             console.error('WebSocket error:', error);
@@ -183,6 +182,7 @@ function connectWebSocket() {
             if (!$store.data.isPass) {
                 setTimeout(connectWebSocket, 5000);
             }
+            tryCount--
         }
     };
 
