@@ -151,6 +151,8 @@ let needProtect = true
 
 let socket;
 
+let tryCount = 15
+
 function connectWebSocket() {
     if (window.location.hostname === "localhost") {
         socket = new WebSocket(`ws://${window.location.hostname}/passing/${RESULT_ID}/ws/student/${PASS_ID}`);
@@ -164,17 +166,23 @@ function connectWebSocket() {
     };
 
     socket.onclose = function(event) {
-        console.log('WebSocket disconnected');
-        if (!$store.data.isPass) {
-            setTimeout(connectWebSocket, 3000);
+        if (tryCount !== 0) {
+            console.log('WebSocket disconnected');
+            if (!$store.data.isPass) {
+                setTimeout(connectWebSocket, 3000);
+            }
         }
     };
 
     socket.onerror = function(error) {
-        console.error('WebSocket error:', error);
-        // Попытка переподключения через 5 секунд
-        if (!$store.data.isPass) {
-            setTimeout(connectWebSocket, 5000);
+        tryCount--
+
+        if (tryCount !== 0) {
+            console.error('WebSocket error:', error);
+            // Попытка переподключения через 5 секунд
+            if (!$store.data.isPass) {
+                setTimeout(connectWebSocket, 5000);
+            }
         }
     };
 
