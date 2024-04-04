@@ -158,7 +158,6 @@ function connectWebSocket() {
         socket = new WebSocket(`wss://фаст-тест.рф/passing/${RESULT_ID}/ws/student/${PASS_ID}`);
     }
 
-
     socket.onopen = function(event) {
         console.log('WebSocket connected');
         socket.send('Hello, server!');
@@ -166,13 +165,17 @@ function connectWebSocket() {
 
     socket.onclose = function(event) {
         console.log('WebSocket disconnected');
-        setTimeout(connectWebSocket, 3000);
+        if (!$store.data.isPass) {
+            setTimeout(connectWebSocket, 3000);
+        }
     };
 
     socket.onerror = function(error) {
         console.error('WebSocket error:', error);
         // Попытка переподключения через 5 секунд
-        setTimeout(connectWebSocket, 5000);
+        if (!$store.data.isPass) {
+            setTimeout(connectWebSocket, 5000);
+        }
     };
 
     socket.onmessage = async function(event) {
