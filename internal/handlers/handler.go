@@ -22,6 +22,7 @@ type ResultService interface {
 	) (models.ResultStudent, error)
 
 	Reset(passID int, access models.AccessOut) error
+	GetResultByPassID(passID int) (models.ResultStudent, error)
 }
 
 type StudentService interface {

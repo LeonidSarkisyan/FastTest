@@ -23,6 +23,8 @@ type ResultRepository interface {
 	Get(resultID int) (models.ResultStudent, error)
 	GetAll(accessID int) ([]models.ResultStudent, error)
 	ResetPass(passID int, access models.AccessOut) error
+
+	GetByPassID(passID int) (models.ResultStudent, error)
 }
 
 type ResultService struct {
@@ -31,6 +33,16 @@ type ResultService struct {
 
 func NewResultService(r ResultRepository) *ResultService {
 	return &ResultService{r}
+}
+
+func (s *ResultService) GetResultByPassID(passID int) (models.ResultStudent, error) {
+	result, err := s.ResultRepository.GetByPassID(passID)
+
+	if err != nil {
+		return models.ResultStudent{}, ResultCreateAlreadyError
+	}
+
+	return result, nil
 }
 
 func (s *ResultService) SaveResult(

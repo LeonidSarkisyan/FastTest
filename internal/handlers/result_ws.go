@@ -65,6 +65,19 @@ func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
 	}
 
 	passID := MustID(c, "pass_id")
+
+	resultS, err := h.ResultService.GetResultByPassID(passID)
+
+	if err != nil {
+		SendErrorResponse(c, 401, err.Error())
+		return
+	}
+
+	if resultS.PassID == passID {
+		SendErrorResponse(c, 401, "подключение по websocket отказано, так как результат уже есть")
+		return
+	}
+
 	resultID := MustID(c, "result_id")
 
 	result, err := h.TestService.GetResult(resultID)

@@ -36,6 +36,28 @@ func (r *ResultPostgres) Save(studentID, accessID, passID int, result models.Res
 	return id, nil
 }
 
+func (r *ResultPostgres) GetByPassID(passID int) (models.ResultStudent, error) {
+	stmt := `
+	SELECT mark, score, max_score, pass_id, access_id, student_id, time_pass
+	FROM results
+	WHERE pass_id = $1;
+	`
+
+	var result models.ResultStudent
+
+	row := r.db.QueryRow(stmt, passID)
+	err := row.Scan(
+		&result.Mark, &result.Score, &result.MaxScore, &result.PassID, &result.AccessID, &result.StudentID,
+		&result.TimePass,
+	)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		log.Err(err).Send()
+		return result, err
+	}
+
+	return result, nil
+}
+
 func (r *ResultPostgres) Get(resultID int) (models.ResultStudent, error) {
 	stmt := `
 	SELECT mark, score, max_score, pass_id, access_id, student_id, time_pass
