@@ -1,4 +1,12 @@
+.new {
+    margin-bottom: 200px;
+}
+
 .new__image {
     border-radius: 20px;
     border: 2px solid var(--color-text)
+}
+
+li {
+    font-weight: 700;
 }
