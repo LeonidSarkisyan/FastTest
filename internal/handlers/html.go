@@ -46,7 +46,7 @@ func (h *Handler) OneGroupPage(c *gin.Context) {
 		return
 	}
 
-	group, err := h.GroupService.Get(groupID, userID)
+	group, err := h.GroupService.GetIfNotDelete(groupID, userID)
 
 	if err != nil {
 		c.HTML(404, "error.html", gin.H{
@@ -83,7 +83,7 @@ func (h *Handler) OneTestPage(c *gin.Context) {
 		return
 	}
 
-	test, err := h.TestService.Get(testID, userID)
+	test, err := h.TestService.GetIfNotDelete(testID, userID)
 
 	if err != nil {
 		c.HTML(404, "error.html", gin.H{

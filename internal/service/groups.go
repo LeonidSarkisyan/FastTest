@@ -18,6 +18,7 @@ type GroupRepository interface {
 	Create(title string, userID int) (int, error)
 	GetAll(userID int) ([]models.GroupOut, error)
 	Get(groupID, userID int) (models.GroupOut, error)
+	GetIfNotDelete(groupID, userID int) (models.GroupOut, error)
 	UpdateTitle(groupID, userID int, title string) error
 	Delete(userID, groupID int) error
 }
@@ -54,6 +55,17 @@ func (s *GroupService) GetAll(userID int) ([]models.GroupOut, error) {
 
 func (s *GroupService) Get(groupID, userID int) (models.GroupOut, error) {
 	group, err := s.GroupRepository.Get(groupID, userID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.GroupOut{}, GroupGetError
+	}
+
+	return group, nil
+}
+
+func (s *GroupService) GetIfNotDelete(groupID, userID int) (models.GroupOut, error) {
+	group, err := s.GroupRepository.GetIfNotDelete(groupID, userID)
 
 	if err != nil {
 		log.Err(err).Send()

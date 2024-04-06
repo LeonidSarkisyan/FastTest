@@ -34,6 +34,7 @@ var (
 type TestRepository interface {
 	Create(test models.Test) (int, error)
 	Get(testID, userID int) (models.TestOut, error)
+	GetIfNotDelete(testID, userID int) (models.TestOut, error)
 	GetAll(userID int) ([]models.TestOut, error)
 	UpdateTitle(testID, userID int, title string) error
 	Delete(userID, testID int) error
@@ -91,6 +92,17 @@ func (s *TestService) Create(title string, userID int) (int, error) {
 
 func (s *TestService) Get(testID, userID int) (models.TestOut, error) {
 	test, err := s.TestRepository.Get(testID, userID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.TestOut{}, TestGetError
+	}
+
+	return test, nil
+}
+
+func (s *TestService) GetIfNotDelete(testID, userID int) (models.TestOut, error) {
+	test, err := s.TestRepository.GetIfNotDelete(testID, userID)
 
 	if err != nil {
 		log.Err(err).Send()

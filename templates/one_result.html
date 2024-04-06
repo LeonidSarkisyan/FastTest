@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="/../static/css/main.css">
     <link rel="stylesheet" href="/../static/css/modal.css">
     <link rel="stylesheet" href="/../static/css/one_test.css">
     <link rel="stylesheet" href="/../static/css/tests.css">
     <link rel="stylesheet" href="/../static/css/access.css">
     <link rel="stylesheet" href="/../static/css/one_result.css">
     <link rel="icon" href="/../static/img/logo.png">
+    <link rel="stylesheet" href="/../static/css/main.css">
     <script src="https://cdn.jsdelivr.net/gh/ryangjchandler/spruce@0.6.0/dist/spruce.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.3.5/dist/alpine.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
@@ -20,20 +20,38 @@
         <div id="notification" class="notification">
             Скопировано!
         </div>
-        <h1 class="title title__span result__title">Результаты: <a target="_blank"
-                :href="'{{ .url }}'" class="title__name">{{ .test.Title }}</a></h1>
+        <h1 class="title title__span result__title">
+            Результаты:
+            {{ if .test.IsDeleted }}
+                <span class="title__name is_deleted">
+                    {{ .test.Title }} (удалено)
+                </span>
+            {{ else }}
+                <a target="_blank" :href="'{{ .url }}'" class="title__name">
+                    {{ .test.Title }}
+                </a>
+            {{ end }}
+        </h1>
         <div class="date__event">
             Дата проведения: <span class="date__event__date">{{.access.DateStart }} - {{.access.DateEnd}}</span>
         </div>
         <div class="date__event">
             Группа:
+            {{ if .group.IsDeleted }}
+                <span
+                        class="date__group__name is_deleted"
+                >
+                    {{ .group.Name }} (удалено)
+                </span>
+            {{ else }}
             <a
-                :href="'/p/groups/{{ .group.ID }}'"
-                class="date__group__name"
-                target="_blank"
+                    :href="'/p/groups/{{ .group.ID }}'"
+                    class="date__group__name"
+                    target="_blank"
             >
                 {{ .group.Name }}
             </a>
+            {{ end }}
         </div>
         <div class="date__event last">
             Время прохождения:
@@ -59,6 +77,12 @@
             <span class="copy" @click="$store.methods.CopyLink()" id="copy">
                 скопировать
             </span>
+        </div>
+        <div
+                @click="$store.methods.CopyAllCode()"
+                class="copy__all__code__button margin__button16"
+        >
+            Скопировать все коды с фамилиями
         </div>
         <div class="student__table">
             <template x-if="$store.data.students.length">

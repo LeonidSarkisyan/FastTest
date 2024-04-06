@@ -180,3 +180,13 @@ body {
 .dev {
     opacity: 0.5;
 }
+
+.is_deleted {
+    color: gray;
+
+    cursor: default;
+}
+
+.is_deleted:hover {
+    text-decoration: none;
+}

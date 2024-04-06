@@ -33,7 +33,7 @@ func (r *TestPostgres) Create(test models.Test) (int, error) {
 
 func (r *TestPostgres) Get(testID, userID int) (models.TestOut, error) {
 	query := `
-	SELECT t.id, t.title, COALESCE(COUNT(q.id), 0)
+	SELECT t.id, t.title, COALESCE(COUNT(q.id), 0), is_deleted
 	FROM tests t 
 	LEFT JOIN questions q ON t.id = q.test_id
 	WHERE t.id = $1 AND t.user_id = $2
@@ -42,7 +42,28 @@ func (r *TestPostgres) Get(testID, userID int) (models.TestOut, error) {
 
 	var testOut models.TestOut
 
-	err := r.conn.QueryRow(query, testID, userID).Scan(&testOut.ID, &testOut.Title, &testOut.Count)
+	err := r.conn.QueryRow(query, testID, userID).Scan(&testOut.ID, &testOut.Title, &testOut.Count, &testOut.IsDeleted)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.TestOut{}, err
+	}
+
+	return testOut, nil
+}
+
+func (r *TestPostgres) GetIfNotDelete(testID, userID int) (models.TestOut, error) {
+	query := `
+	SELECT t.id, t.title, COALESCE(COUNT(q.id), 0), is_deleted
+	FROM tests t 
+	LEFT JOIN questions q ON t.id = q.test_id
+	WHERE t.id = $1 AND t.user_id = $2 AND is_deleted = false
+	GROUP BY t.id, t.title
+	`
+
+	var testOut models.TestOut
+
+	err := r.conn.QueryRow(query, testID, userID).Scan(&testOut.ID, &testOut.Title, &testOut.Count, &testOut.IsDeleted)
 
 	if err != nil {
 		log.Err(err).Send()
@@ -57,7 +78,7 @@ func (r *TestPostgres) GetAll(userID int) ([]models.TestOut, error) {
 	SELECT t.id, t.title, EXTRACT(EPOCH FROM t.datetime_create)::BIGINT, COALESCE(COUNT(questions.id), 0)
 	FROM tests t
 	LEFT JOIN questions ON t.id = questions.test_id
-	WHERE user_id = $1
+	WHERE user_id = $1 AND is_deleted = false
 	GROUP BY t.id, t.title
 	ORDER BY datetime_create DESC;
 	`
@@ -116,7 +137,7 @@ func (r *TestPostgres) UpdateTitle(testID, userID int, title string) error {
 }
 
 func (r *TestPostgres) Delete(userID, testID int) error {
-	query := "DELETE FROM tests WHERE user_id = $1 AND id = $2"
+	query := "UPDATE tests SET is_deleted = true WHERE user_id = $1 AND id = $2"
 
 	res, err := r.conn.Exec(query, userID, testID)
 

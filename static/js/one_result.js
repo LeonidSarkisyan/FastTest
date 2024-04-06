@@ -36,6 +36,26 @@ Spruce.store("methods", {
         return hours + ':' + minutes + ':' + remainingSeconds;
     },
 
+    CopyAllCode() {
+        let content = "";
+
+        for (let i = 0; i < $store.data.passes.length; i++) {
+            content += `${$store.data.passes[i].code} ${$store.data.students[i].surname} ${$store.data.students[i].name}`;
+
+            if (i !== $store.data.passes.length - 1) {
+                content += "\n"
+            }
+        }
+
+        navigator.clipboard.writeText(content)
+
+        let notification = document.getElementById("notification");
+        notification.style.display = "block";
+        setTimeout(function(){
+            notification.style.display = "none";
+        }, 3000);
+    },
+
     CopyCode(code) {
         let tempInput = document.createElement("input");
         tempInput.value = code;

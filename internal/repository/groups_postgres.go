@@ -33,7 +33,7 @@ func (r *GroupPostgres) GetAll(userID int) ([]models.GroupOut, error) {
 	SELECT g.id, g.name, COUNT(s.id)
 	FROM groups g
 	LEFT JOIN students s ON g.id = s.group_id
-	WHERE user_id = $1
+	WHERE user_id = $1 AND is_deleted = false
 	GROUP BY g.id, g.name
 	ORDER BY g.id DESC;
 	`
@@ -71,11 +71,26 @@ func (r *GroupPostgres) GetAll(userID int) ([]models.GroupOut, error) {
 }
 
 func (r *GroupPostgres) Get(groupID, userID int) (models.GroupOut, error) {
-	query := "SELECT id, name FROM groups WHERE id = $1 AND user_id = $2"
+	query := "SELECT id, name, is_deleted FROM groups WHERE id = $1 AND user_id = $2"
 
 	var group models.GroupOut
 
-	err := r.conn.QueryRow(query, groupID, userID).Scan(&group.ID, &group.Name)
+	err := r.conn.QueryRow(query, groupID, userID).Scan(&group.ID, &group.Name, &group.IsDeleted)
+
+	if err != nil {
+		log.Err(err).Send()
+		return models.GroupOut{}, err
+	}
+
+	return group, nil
+}
+
+func (r *GroupPostgres) GetIfNotDelete(groupID, userID int) (models.GroupOut, error) {
+	query := "SELECT id, name, is_deleted FROM groups WHERE id = $1 AND user_id = $2 AND is_deleted = false"
+
+	var group models.GroupOut
+
+	err := r.conn.QueryRow(query, groupID, userID).Scan(&group.ID, &group.Name, &group.IsDeleted)
 
 	if err != nil {
 		log.Err(err).Send()
@@ -105,7 +120,7 @@ func (r *GroupPostgres) UpdateTitle(groupID, userID int, name string) error {
 }
 
 func (r *GroupPostgres) Delete(userID, groupID int) error {
-	query := "DELETE FROM groups WHERE user_id = $1 AND id = $2"
+	query := "UPDATE groups SET is_deleted = true WHERE user_id = $1 AND id = $2"
 
 	res, err := r.conn.Exec(query, userID, groupID)
 

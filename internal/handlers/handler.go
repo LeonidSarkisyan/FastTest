@@ -37,6 +37,7 @@ type GroupService interface {
 	Create(in models.GroupIn, userID int) (int, error)
 	GetAll(userID int) ([]models.GroupOut, error)
 	Get(groupID, userID int) (models.GroupOut, error)
+	GetIfNotDelete(groupID, userID int) (models.GroupOut, error)
 	UpdateTitle(userID, groupID int, title string) error
 	Delete(userID, groupID int) error
 }
@@ -63,6 +64,7 @@ type QuestionService interface {
 type TestService interface {
 	Create(title string, userID int) (int, error)
 	Get(testID, userID int) (models.TestOut, error)
+	GetIfNotDelete(testID, userID int) (models.TestOut, error)
 	GetAll(userID int) ([]models.TestOut, error)
 	UpdateTitle(userID, testID int, title string) error
 	Delete(userID, testID int) error

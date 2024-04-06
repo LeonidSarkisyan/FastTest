@@ -9,7 +9,8 @@ type GroupUpdate struct {
 }
 
 type GroupOut struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Count int    `json:"count"`
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	Count     int    `json:"count"`
+	IsDeleted bool   `json:"is_deleted"`
 }
