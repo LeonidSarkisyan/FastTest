@@ -409,11 +409,7 @@ async function init () {
 
 function renderQuestionsList() {
     while (lists.questions.firstChild) {
-        if (lists.questions.children.length > 2) {
-            lists.questions.removeChild(lists.questions.firstChild);
-        } else {
-            break
-        }
+        lists.questions.removeChild(lists.questions.firstChild);
     }
 
     for (let i = data.questions.length - 1; i >= 0; i--) {
@@ -441,6 +437,15 @@ function renderQuestionsList() {
 
         lists.questions.prepend(div);
     }
+
+    //             <div class="question__list__point plus" id="plus">
+    //                 +
+    //             </div>
+
+    const addQuestionButton = document.createElement("div")
+    addQuestionButton.classList.add("question__list__point", "plus")
+    addQuestionButton
+    addQuestionButton.innerText = "+"
 }
 
 function renderCurrentQuestion(index) {

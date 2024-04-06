@@ -3,7 +3,7 @@ const dropDown = document.getElementById("myDropdown")
 
 plus.addEventListener("mouseenter", toggleDropdown)
 
-function toggleDropdown() {
+export function toggleDropdown() {
     let dropdown = document.getElementById("myDropdown");
     dropdown.classList.toggle("show");
 }
