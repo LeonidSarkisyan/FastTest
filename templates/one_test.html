@@ -55,7 +55,8 @@
             <div class="tests__form">
                 <div class="tests__form__title">Удалить тест {{ .title }}?</div>
                 <div class="tests__form__body">
-                    <label for="test__title__delete" class="test__title__label">Чтобы удалить тест, напишите его название:</label>
+                    <label for="test__title__delete" class="test__title__label">Чтобы удалить тест, напишите его
+                        название:</label>
                     <input
                             placeholder="Например, Windows формы"
                             type="text"
@@ -138,7 +139,8 @@
             <div id="myDropdown" class="dropdown-content">
                 <div id="choose">
                     <h3>Выбор</h3>
-                    <p class="question__type__description">Вопрос, который может иметь один / несколько правильных ответов</p>
+                    <p class="question__type__description">Вопрос, который может иметь один / несколько правильных
+                        ответов</p>
                 </div>
                 <div id="groupCreate">
                     <h3>Соответствие</h3>
@@ -154,63 +156,61 @@
                 </div>
             </div>
         </div>
-<!--        <div class="question__list__point plus chat__gpt__button" @click="$store.methods.showChatModal()">-->
-<!--            <img src="/../static/img/chatgpt.png" alt="Открыть нейросеть" class="chat__gpt__icon">-->
-<!--        </div>-->
+        <div class="question__list__point plus chat__gpt__button" @click="$store.methods.showChatModal()">
+            <img src="/../static/img/chatgpt.png" alt="Открыть нейросеть" class="chat__gpt__icon">
+        </div>
     </div>
-            <template
-                    x-if="$store.data.questions[$store.data.currentIndex].type === 'group' &&
+    <template
+            x-if="$store.data.questions[$store.data.currentIndex].type === 'group' &&
                           $store.data.questions[$store.data.currentIndex].data"
-            >
-                <template x-if="$store.data.render">
-                    <div>
-                        <div>
-                            <div class="question__form__title" id="group__name">Группы:</div>
-                            <template x-for="(group, index) in $store.data.questions[$store.data.currentIndex].data.groups">
-                                <div class="group" id="group">
-                                    <div class="question__form">
-                                        <div class="question__form__title delete">Название группы:</div>
+    >
+        <template x-if="$store.data.render">
+            <div>
+                <div>
+                    <div class="question__form__title" id="group__name">Группы:</div>
+                    <template x-for="(group, index) in $store.data.questions[$store.data.currentIndex].data.groups">
+                        <div class="group" id="group">
+                            <div class="question__form">
+                                <div class="question__form__title delete">Название группы:</div>
+                                <input
+                                        @change="$store.methods.SaveGroup()"
+                                        class="base__input text margin__button16"
+                                        x-model="$store.data.questions[$store.data.currentIndex].data.groups[index].name"
+                                >
+                                <div class="question__form__title fz18">Соответствия:</div>
+                                <template
+                                        x-for="(answer, indexA) in $store.data.questions[$store.data.currentIndex].data.groups[index].answers"
+                                >
+                                    <div class="answer__point">
                                         <input
                                                 @change="$store.methods.SaveGroup()"
-                                                class="base__input text margin__button16"
-                                                x-model="$store.data.questions[$store.data.currentIndex].data.groups[index].name"
+                                                class="base__input text answer__input fz18 group__input"
+                                                x-model="$store.data.questions[$store.data.currentIndex].data.groups[index].answers[indexA]"
                                         >
-                                        <div class="question__form__title fz18">Соответствия:</div>
-                                        <template
-                                                x-for="(answer, indexA) in $store.data.questions[$store.data.currentIndex].data.groups[index].answers"
+                                        <div
+                                                @click="$store.methods.deleteAnswer(answer.id)"
+                                                class="answer__point__delete group__delete"
+                                                :class="{ 'answer__point__delete__disable': group.answers.length === 1}"
                                         >
-                                            <div class="answer__point">
-                                                <input
-                                                        @change="$store.methods.SaveGroup()"
-                                                        class="base__input text answer__input fz18 group__input"
-                                                        x-model="$store.data.questions[$store.data.currentIndex].data.groups[index].answers[indexA]"
-                                                >
-                                                <div
-                                                        @click="$store.methods.deleteAnswer(answer.id)"
-                                                        class="answer__point__delete group__delete"
-                                                        :class="{ 'answer__point__delete__disable': group.answers.length === 1}"
-                                                >
-                                                    &#10006;
-                                                </div>
-                                            </div>
-                                        </template>
-                                        <div class="base__button edit" @click="$store.methods.AddAnswerToGroup(index)">
-                                            Добавить соответствие
+                                            &#10006;
                                         </div>
                                     </div>
+                                </template>
+                                <div class="base__button edit" @click="$store.methods.AddAnswerToGroup(index)">
+                                    Добавить соответствие
                                 </div>
-                            </template>
-                            <div class="base__button margin__button16" @click="$store.methods.addAnswer()">
-                                Добавить группу
                             </div>
                         </div>
+                    </template>
+                    <div class="base__button margin__button16" @click="$store.methods.addAnswer()">
+                        Добавить группу
                     </div>
-                </template>
-            </template>
-            <template x-if="$store.data.questions[$store.data.currentIndex].type === 'range'">
-                <h1>Тут ранжирование!</h1>
-            </template>
-        </div>
+                </div>
+            </div>
+        </template>
+    </template>
+    <template x-if="$store.data.questions[$store.data.currentIndex].type === 'range'">
+        <h1>Тут ранжирование!</h1>
     </template>
 </div>
 <script type="module" src="/../static/js/one_test.js">
