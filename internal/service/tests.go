@@ -214,29 +214,54 @@ func (s *TestService) CheckTest(testID int) error {
 
 	for i, q := range questions {
 		n := i + 1
-
 		if len(q.Text) == 0 {
 			return fmt.Errorf("у вопроса с номером %d нет текста, проверьте тест", n)
 		}
+		switch q.Type {
+		case Group:
+			var countAnswers int
 
-		if len(q.Answers) < 2 {
-			return fmt.Errorf("у вопроса с номером %d меньше двух вариантов ответа, проверьте тест", n)
-		}
-
-		var isCorrect bool
-
-		for _, a := range q.Answers {
-			if len(a.Text) == 0 {
-				return fmt.Errorf("у варианта ответа под вопросом с номером %d нет текста, проверьте тест", n)
+			if len(q.Data.(models.QuestionGroupData).Groups) < 2 {
+				return fmt.Errorf("у вопроса с номером %d должно быть хотя бы 2 группы", n)
 			}
 
-			if a.IsCorrect {
-				isCorrect = a.IsCorrect
-			}
-		}
+			for _, g := range q.Data.(models.QuestionGroupData).Groups {
+				if len(g.Name) == 0 {
+					return fmt.Errorf("у вопроса с номером %d группа не имеет текста, проверьте тест", n)
+				}
 
-		if !isCorrect {
-			return fmt.Errorf("у вопроса с номером %d нет хотя бы одного правильного ответа, проверьте тест", n)
+				countAnswers += len(g.Answers)
+
+				for _, a := range g.Answers {
+					if len(a) == 0 {
+						return fmt.Errorf("у вопроса с номером %d один из ответов не имеет текста, проверьте тест", n)
+					}
+				}
+			}
+
+			if countAnswers == 0 {
+				return fmt.Errorf("у вопроса с номером %d нет ответов, проверьте тест", n)
+			}
+		default:
+			if len(q.Answers) < 2 {
+				return fmt.Errorf("у вопроса с номером %d меньше двух вариантов ответа, проверьте тест", n)
+			}
+
+			var isCorrect bool
+
+			for _, a := range q.Answers {
+				if len(a.Text) == 0 {
+					return fmt.Errorf("у варианта ответа под вопросом с номером %d нет текста, проверьте тест", n)
+				}
+
+				if a.IsCorrect {
+					isCorrect = a.IsCorrect
+				}
+			}
+
+			if !isCorrect {
+				return fmt.Errorf("у вопроса с номером %d нет хотя бы одного правильного ответа, проверьте тест", n)
+			}
 		}
 	}
 

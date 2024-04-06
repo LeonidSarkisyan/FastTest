@@ -1,3 +1,7 @@
+body {
+    user-select: none;
+}
+
 .solve__container {
 
 }
@@ -98,4 +102,20 @@
     font-size: 26px;
 
     cursor: pointer;
+}
+
+.group__text {
+    background: white;
+
+    padding: 6px 9px;
+
+    font-size: 22px;
+    font-weight: 700;
+
+    border: 2px solid var(--color-text);
+    border-radius: 10px;
+
+    min-width: 320px;
+
+    text-align: center;
 }

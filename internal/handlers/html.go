@@ -95,6 +95,7 @@ func (h *Handler) OneTestPage(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "one_test.html", gin.H{
 		"title": test.Title,
+		"id":    test.ID,
 	})
 }
 
@@ -216,4 +217,8 @@ func (h *Handler) Account(c *gin.Context) {
 	c.HTML(http.StatusOK, "account.html", gin.H{
 		"email": emailCensored + "@" + emailChapters[1],
 	})
+}
+
+func (h *Handler) NewsPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "news.html", gin.H{})
 }

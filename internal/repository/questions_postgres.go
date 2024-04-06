@@ -2,6 +2,7 @@ package repository
 
 import (
 	"App/internal/models"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
@@ -10,10 +11,22 @@ import (
 
 const DefaultTextQuestion = ""
 
+const (
+	Choose = "choose"
+	Group  = "group"
+	Range  = "range"
+
+	CountGroups        = 3
+	CountAnswerInGroup = 1
+	CountRanges        = 3
+)
+
 var (
 	NotDeleteRow = errors.New("ресурс не был удалён, хотя должен")
 	NotUpdateRow = errors.New("ресурс не был обновлён, хотя должен")
 	NotSaveError = errors.New("в слайсе нечего сохранять, len = 0")
+
+	NotFoundTypeError = errors.New("неизвестный тип вопроса")
 )
 
 type QuestionPostgres struct {
@@ -22,6 +35,47 @@ type QuestionPostgres struct {
 
 func NewQuestionPostgres(conn *sqlx.DB) *QuestionPostgres {
 	return &QuestionPostgres{conn}
+}
+
+func (r *QuestionPostgres) CreateWithType(testID int, type_ string, data []byte) (int, error) {
+	text := models.GetTextFromType(type_)
+
+	stmt := "INSERT INTO questions (text, test_id, data, type) VALUES ($1, $2, $3, $4) RETURNING id"
+
+	var id int
+
+	err := r.conn.QueryRow(stmt, text, testID, data, type_).Scan(&id)
+
+	if err != nil {
+		log.Err(err).Send()
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (r *QuestionPostgres) Save(testID, questionID int, type_ string, data []byte) error {
+	stmt := "UPDATE questions SET data = $1 WHERE id = $2 AND test_id = $3 AND type = $4"
+
+	result, err := r.conn.Exec(stmt, data, questionID, testID, type_)
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	count, err := result.RowsAffected()
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	if count == 0 {
+		return NotUpdateRow
+	}
+
+	return nil
 }
 
 func (r *QuestionPostgres) Create(testID int) (int, error) {
@@ -40,7 +94,7 @@ func (r *QuestionPostgres) Create(testID int) (int, error) {
 
 func (r *QuestionPostgres) GetAll(testID int) ([]models.Question, error) {
 	query := `
-	SELECT id, text
+	SELECT id, text, data, type
 	FROM questions
 	WHERE test_id = $1
 	ORDER BY id ASC
@@ -60,8 +114,10 @@ func (r *QuestionPostgres) GetAll(testID int) ([]models.Question, error) {
 	for rows.Next() {
 		var id int
 		var text string
+		var json string
+		var type_ string
 
-		if err := rows.Scan(&id, &text); err != nil {
+		if err := rows.Scan(&id, &text, &json, &type_); err != nil {
 			log.Err(err).Send()
 			continue
 		}
@@ -69,6 +125,8 @@ func (r *QuestionPostgres) GetAll(testID int) ([]models.Question, error) {
 		result := models.Question{
 			ID:   id,
 			Text: text,
+			Data: json,
+			Type: type_,
 		}
 		questions = append(questions, result)
 	}
@@ -134,8 +192,14 @@ func (r *QuestionPostgres) Delete(questionID, testID int) error {
 }
 
 func (r *QuestionPostgres) GetAllWithAnswers(testID int) ([]models.QuestionWithAnswers, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Info().Msg("возника паника при получении вопросов")
+		}
+	}()
+
 	query := `
-	SELECT q.id, q.text, a.id, a.text, a.is_correct
+	SELECT q.id, q.text, q.type, q.data, a.id, a.text, a.is_correct
 	FROM questions q
 	LEFT JOIN answers a ON q.id = a.question_id
 	WHERE q.test_id = $1
@@ -156,54 +220,99 @@ func (r *QuestionPostgres) GetAllWithAnswers(testID int) ([]models.QuestionWithA
 	for rows.Next() {
 		var questionID int
 		var questionText string
-		var answerID int
-		var answerText string
-		var isCorrect bool
+		var questionType string
+		var questionData []byte
 
-		if err := rows.Scan(&questionID, &questionText, &answerID, &answerText, &isCorrect); err != nil {
+		var answerID *int
+		var answerText *string
+		var isCorrect *bool
+
+		if err := rows.Scan(&questionID, &questionText, &questionType, &questionData, &answerID, &answerText, &isCorrect); err != nil {
 			log.Err(err).Send()
 			continue
 		}
 
-		exists := false
-		var q models.QuestionWithAnswers
-		for _, item := range questions {
-			if item.ID == questionID {
-				q = item
-				exists = true
-				break
+		switch questionType {
+		case Group:
+			var data models.QuestionGroupData
+
+			err = json.Unmarshal(questionData, &data)
+
+			if err != nil {
+				log.Err(err).Send()
+				return nil, err
 			}
-		}
 
-		if !exists {
-			q = models.QuestionWithAnswers{
-				ID:   questionID,
-				Text: questionText,
+			questions = append(questions, models.QuestionWithAnswers{
+				ID:      questionID,
+				Text:    questionText,
+				Type:    questionType,
+				Data:    data,
+				Answers: []models.Answer{{ID: 0, Text: ""}},
+			})
+
+			continue
+		case Range:
+			var data models.QuestionRangeData
+
+			err = json.Unmarshal(questionData, &data)
+
+			if err != nil {
+				log.Err(err).Send()
+				return nil, err
 			}
-		}
 
-		q.Answers = append(q.Answers, models.Answer{
-			ID:        answerID,
-			Text:      answerText,
-			IsCorrect: isCorrect,
-		})
+			questions = append(questions, models.QuestionWithAnswers{
+				ID:      questionID,
+				Text:    questionText,
+				Type:    questionType,
+				Data:    data,
+				Answers: make([]models.Answer, 0),
+			})
 
-		if exists {
-			for i, item := range questions {
+			continue
+		default:
+			exists := false
+			var q models.QuestionWithAnswers
+			for _, item := range questions {
 				if item.ID == questionID {
-					questions[i] = q
+					q = item
+					exists = true
 					break
 				}
 			}
-		} else {
-			questions = append(questions, q)
-		}
 
-		answersMap[questionID] = append(answersMap[questionID], models.Answer{
-			ID:        answerID,
-			Text:      answerText,
-			IsCorrect: isCorrect,
-		})
+			if !exists {
+				q = models.QuestionWithAnswers{
+					ID:   questionID,
+					Text: questionText,
+					Type: questionType,
+				}
+			}
+
+			q.Answers = append(q.Answers, models.Answer{
+				ID:        *answerID,
+				Text:      *answerText,
+				IsCorrect: *isCorrect,
+			})
+
+			if exists {
+				for i, item := range questions {
+					if item.ID == questionID {
+						questions[i] = q
+						break
+					}
+				}
+			} else {
+				questions = append(questions, q)
+			}
+
+			answersMap[questionID] = append(answersMap[questionID], models.Answer{
+				ID:        *answerID,
+				Text:      *answerText,
+				IsCorrect: *isCorrect,
+			})
+		}
 	}
 
 	return questions, nil

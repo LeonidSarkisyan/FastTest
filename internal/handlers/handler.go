@@ -51,6 +51,8 @@ type AnswerService interface {
 
 type QuestionService interface {
 	Create(testID, userID int) (int, []int, error)
+	CreateWithType(testID, userID int, type_ string) (int, any, error)
+	Save(testID, userID, questionID int, type_ string, data []byte) error
 	GetAll(testID, userID int) ([]models.Question, error)
 	Update(userID, testID, questionID int, question models.QuestionUpdate) error
 	Delete(userID, testID, questionID int) error
@@ -183,8 +185,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		questions := tests.Group("/:test_id/questions")
 		{
 			questions.POST("", h.CreateQuestion)
-			questions.GET("", h.GetAllQuestion)
 			questions.POST("/chat-gpt", h.CreateQuestionsFromGPT)
+			questions.POST("/type/:type", h.CreateQuestionWithType)
+			questions.PATCH("/type/:type/:question_id", h.SaveQuestionWithType)
+			questions.GET("", h.GetAllQuestion)
 			questions.PATCH("/:question_id", h.UpdateQuestion)
 			questions.DELETE("/:question_id", h.DeleteQuestion)
 
@@ -234,6 +238,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		studentsPage.GET("/:result_id/ws/student/:pass_id", h.CreateWSStudentConnect)
 		studentsPage.GET("/abort", h.AbortPage)
 	}
+
+	router.GET("/news", h.NewsPage)
 
 	return router
 }

@@ -154,6 +154,10 @@
     margin-bottom: 16px;
 }
 
+.margin__left16 {
+    margin-left: 16px;
+}
+
 .chat__gpt__icon {
     width: 36px;
     height: 36px;
@@ -249,4 +253,61 @@
     margin-left: auto;
 
     padding: 0;
+}
+
+.group__input {
+    width: 122.5%;
+}
+
+.group__input__ {
+
+}
+
+.group {
+    margin-bottom: 32px;
+}
+
+.group__delete {
+    font-size: 24px;
+
+    height: 34px;
+}
+
+.question__type__description {
+    font-weight: 400;
+}
+
+.groups {
+    margin-right: 60px;
+}
+
+.choose__group {
+    margin-left: 16px;
+    height: 44px;
+
+    cursor: pointer;
+}
+
+.number__group {
+    font-size: 26px;
+    font-weight: 700;
+
+    margin-right: 16px;
+
+    width: 40px;
+}
+
+.groups__names {
+    width: 40%;
+}
+
+.variants {
+    width: 125%;
+}
+
+.test__header__menu {
+    margin-left: auto;
+
+    display: flex;
+    align-items: center;
 }

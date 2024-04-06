@@ -63,6 +63,13 @@
 .complete {
     color: green;
     font-weight: 700;
+
+    cursor: pointer;
+    user-select: none;
+}
+
+.complete:hover {
+    text-decoration: underline;
 }
 
 .green {

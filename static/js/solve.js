@@ -4,6 +4,23 @@ const PASS_ID = URL_CHAPTERS[URL_CHAPTERS.length - 1]
 
 console.log(RESULT_ID, PASS_ID)
 
+document.oncontextmenu = function() {
+    return false;
+};
+
+window.addEventListener('keydown', function(event) {
+    blockKey(event);
+});
+
+document.addEventListener('keydown', function(event) {
+    blockKey(event);
+});
+
+function blockKey(event) {
+    event.preventDefault()
+}
+
+
 Spruce.store("data", {
     emptyQuestions: null,
     questions: [],
@@ -22,6 +39,26 @@ Spruce.store("data", {
 
 
 Spruce.store("methods", {
+    ChooseGroup(gIndex, aIndex, event) {
+        const questions = JSON.parse(localStorage.getItem("questions"))
+
+        console.log(`gIndex = ${gIndex}, aIndex=${aIndex}, event=${event.target.value}`)
+
+        const newAnswer = questions[$store.data.currentQuestionIndex].data.groups[gIndex].answers[aIndex]
+
+        for (let i = 1; i < questions[$store.data.currentQuestionIndex].data.groups.length; i++) {
+            for (let j = 0; j < questions[$store.data.currentQuestionIndex].data.groups[i].answers.length; j++) {
+                if (questions[$store.data.currentQuestionIndex].data.groups[i].answers[j] === newAnswer) {
+                    questions[$store.data.currentQuestionIndex].data.groups[i].answers.splice(j, 1)
+                }
+            }
+        }
+
+        questions[$store.data.currentQuestionIndex].data.groups[event.target.value].answers.push(newAnswer)
+
+        localStorage.setItem("questions", JSON.stringify(questions))
+    },
+
     ChangeIndex(index){
         let newIndex = $store.data.currentQuestionIndex + index
 
@@ -63,16 +100,29 @@ Spruce.store("methods", {
 
         let index = 0
         for (let q of questions) {
-            let completeQ = false
+            switch (q.type) {
+                case "group":
+                    const needCountAnswers = q.data.groups[0].answers.length
+                    let countAnswers = 0
+                    for (let group of q.data.groups.splice(1)) {
+                        countAnswers += group.answers.length
+                    }
+                    if (needCountAnswers !== countAnswers) {
+                        need.push(index + 1)
+                    }
+                    break
+                default:
+                    let completeQ = false
 
-            for (let a of q.answers) {
-                if (a.is_correct === true) {
-                    completeQ = true
-                }
-            }
+                    for (let a of q.answers) {
+                        if (a.is_correct === true) {
+                            completeQ = true
+                        }
+                    }
 
-            if (!completeQ) {
-                need.push(index + 1)
+                    if (!completeQ) {
+                        need.push(index + 1)
+                    }
             }
             index++
         }
@@ -113,19 +163,31 @@ Spruce.store("methods", {
 const startButton = document.getElementById("startButton")
 
 startButton.onclick = async () => {
+    let response
     try {
-        const response = await axios.get(`/passing/${RESULT_ID}/solving/${PASS_ID}/questions`)
-        $store.data.questions = response.data.questions
-        totalSeconds = response.data.access.passage_time * 60
-        startTotalSeconds = totalSeconds
-        document.getElementById('timer').innerText = TimeProcess(totalSeconds)
-        localStorage.setItem("questions", JSON.stringify(response.data.questions))
-        $store.data.isPass = true
-        connectWebSocket()
-        console.log(response.data)
+        response = await axios.get(`/passing/${RESULT_ID}/solving/${PASS_ID}/questions`)
     } catch (e) {
         alert(e.response.data)
     }
+
+    let questions = response.data.questions
+    for (let i = 0; i < response.data.questions.length; i++) {
+        if (questions[i].data === null) {
+            questions[i].data = {
+                groups: [],
+                ranges: []
+            }
+        }
+    }
+
+    $store.data.questions = questions
+    totalSeconds = response.data.access.passage_time * 60
+    startTotalSeconds = totalSeconds
+    document.getElementById('timer').innerText = TimeProcess(totalSeconds)
+    localStorage.setItem("questions", JSON.stringify(questions))
+    $store.data.isPass = true
+    connectWebSocket()
+    console.log(response.data)
 }
 
 let totalSeconds;

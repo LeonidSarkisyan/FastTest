@@ -3,9 +3,14 @@ package handlers
 import (
 	"App/internal/handlers/responses"
 	"App/internal/models"
+	"App/internal/service"
+	"App/pkg/utils"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"math/rand/v2"
 	"strconv"
+	"time"
 )
 
 const (
@@ -53,6 +58,23 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		return
 	}
 
+	startDate, err := time.Parse(time.RFC3339, access.DateStart)
+	if err != nil {
+		fmt.Println("Ошибка при разборе даты начала:", err)
+		return
+	}
+
+	endDate, err := time.Parse(time.RFC3339, access.DateEnd)
+	if err != nil {
+		fmt.Println("Ошибка при разборе даты конца:", err)
+		return
+	}
+
+	if err = utils.CheckDateLimit(startDate, endDate); err != nil {
+		SendErrorResponse(c, 401, err.Error())
+		return
+	}
+
 	test, err := h.TestService.Get(access.TestID, access.UserID)
 
 	if err != nil {
@@ -77,16 +99,47 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 	}
 
 	for i, q := range questions {
-		var countRight int
-		for _, a := range q.Answers {
-			if a.IsCorrect {
-				countRight++
+		switch q.Type {
+		case service.Group:
+			log.Info().Msg("группа!!!")
+
+			data := q.Data.(models.QuestionGroupData)
+
+			var groups = make([]models.Group, len(data.Groups)+1)
+
+			groups[0] = models.Group{
+				Name:    "all",
+				Answers: []string{},
 			}
-		}
-		if countRight >= 2 {
-			questions[i].Type = CheckBox
-		} else {
-			questions[i].Type = RadioButton
+
+			for ig, g := range q.Data.(models.QuestionGroupData).Groups {
+				for _, a := range g.Answers {
+					groups[0].Answers = append(groups[0].Answers, a)
+				}
+				g.Answers = []string{}
+				groups[ig+1] = g
+			}
+
+			rand.Shuffle(len(groups[0].Answers), func(i, j int) {
+				groups[0].Answers[i], groups[0].Answers[j] = groups[0].Answers[j], groups[0].Answers[i]
+			})
+
+			data.Groups = groups
+
+			questions[i].Data = data
+
+		default:
+			var countRight int
+			for _, a := range q.Answers {
+				if a.IsCorrect {
+					countRight++
+				}
+			}
+			if countRight >= 2 {
+				questions[i].Type = CheckBox
+			} else {
+				questions[i].Type = RadioButton
+			}
 		}
 	}
 
@@ -165,6 +218,8 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		newQ := models.QuestionWithAnswers{
 			ID:   q.ID,
 			Text: q.Text,
+			Data: q.Data,
+			Type: q.Type,
 		}
 
 		for _, a := range q.Answers {

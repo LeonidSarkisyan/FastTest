@@ -5,6 +5,7 @@ import (
 	"App/internal/models"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	"io"
 	"net/http"
 	"strconv"
 )
@@ -35,6 +36,53 @@ func (h *Handler) CreateQuestion(c *gin.Context) {
 	})
 }
 
+func (h *Handler) CreateQuestionWithType(c *gin.Context) {
+	userID := c.GetInt("userID")
+	testID := MustID(c, "test_id")
+	type_ := c.Param("type")
+
+	id, data, err := h.QuestionService.CreateWithType(testID, userID, type_)
+
+	if err != nil {
+		SendErrorResponse(c, 422, err.Error())
+		c.Abort()
+		return
+	}
+
+	text := models.GetTextFromType(type_)
+
+	c.JSON(201, gin.H{
+		"id":   id,
+		"data": data,
+		"type": type_,
+		"text": text,
+	})
+}
+
+func (h *Handler) SaveQuestionWithType(c *gin.Context) {
+	userID := c.GetInt("userID")
+	testID := MustID(c, "test_id")
+	type_ := c.Param("type")
+	questionID := MustID(c, "question_id")
+
+	data, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		SendErrorResponse(c, 422, err.Error())
+		c.Abort()
+		return
+	}
+
+	err = h.QuestionService.Save(testID, userID, questionID, type_, data)
+
+	if err != nil {
+		SendErrorResponse(c, 422, err.Error())
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{})
+}
+
 func (h *Handler) GetAllQuestion(c *gin.Context) {
 	userID := c.GetInt("userID")
 
@@ -60,6 +108,8 @@ func (h *Handler) GetAllQuestion(c *gin.Context) {
 		questionWithAnswer := models.QuestionWithAnswersWithOutIsCorrect{
 			ID:   question.ID,
 			Text: question.Text,
+			Data: question.Data,
+			Type: question.Type,
 		}
 
 		for _, answer := range question.Answers {

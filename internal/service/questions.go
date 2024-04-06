@@ -2,6 +2,7 @@ package service
 
 import (
 	"App/internal/models"
+	"encoding/json"
 	"errors"
 	"github.com/rs/zerolog/log"
 )
@@ -14,6 +15,19 @@ var (
 	QuestionNotFound    = errors.New("вопрос не найден")
 
 	TestForbidden = errors.New("тест не найден")
+
+	NotFountQuestionType = errors.New("неизвестный тип вопроса")
+
+	InCorrectStructureError = errors.New("некорректная структура")
+)
+
+const (
+	Group = "group"
+	Range = "range"
+
+	CountGroups        = 2
+	CountAnswerInGroup = 1
+	CountRanges        = 3
 )
 
 type QuestionRepository interface {
@@ -22,6 +36,8 @@ type QuestionRepository interface {
 	Update(questionID, testID int, question models.QuestionUpdate) error
 	Get(questionID, testID int) (models.Question, error)
 	Delete(questionID, testID int) error
+	CreateWithType(testID int, type_ string, data []byte) (int, error)
+	Save(testID, questionID int, type_ string, data []byte) error
 
 	GetAllWithAnswers(testID int) ([]models.QuestionWithAnswers, error)
 	CreateManyQuestions(
@@ -40,6 +56,116 @@ func NewQuestionService(r QuestionRepository, rt TestRepository, sa *AnswerServi
 		QuestionRepository: r,
 		TestRepository:     rt,
 		AnswerService:      sa,
+	}
+}
+
+func (s *QuestionService) CreateWithType(testID, userID int, type_ string) (int, any, error) {
+	_, err := s.TestRepository.Get(testID, userID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return 0, make([]byte, 0), TestForbidden
+	}
+
+	switch type_ {
+	case Group:
+		data := models.QuestionGroupData{Groups: make([]models.Group, CountGroups)}
+
+		for i := range CountGroups {
+			data.Groups[i].Name = ""
+			data.Groups[i].Answers = make([]string, CountAnswerInGroup)
+		}
+
+		jsonData, err := json.Marshal(data)
+
+		if err != nil {
+			log.Err(err).Send()
+			return 0, make([]byte, 0), InCorrectStructureError
+		}
+
+		id, err := s.QuestionRepository.CreateWithType(testID, type_, jsonData)
+
+		if err != nil {
+			log.Err(err).Send()
+			return 0, make([]byte, 0), TestForbidden
+		}
+
+		return id, data.Groups, nil
+	case Range:
+		data := models.QuestionRangeData{Ranges: make([]models.Range, CountRanges)}
+
+		for i := range CountRanges {
+			data.Ranges[i].Text = ""
+			data.Ranges[i].Index = i
+		}
+
+		jsonData, err := json.Marshal(data)
+
+		if err != nil {
+			log.Err(err).Send()
+			return 0, make([]byte, 0), InCorrectStructureError
+		}
+
+		id, err := s.QuestionRepository.CreateWithType(testID, type_, jsonData)
+
+		if err != nil {
+			log.Err(err).Send()
+			return 0, make([]byte, 0), TestForbidden
+		}
+
+		return id, data.Ranges, nil
+	default:
+		return 0, make([]byte, 0), NotFountQuestionType
+	}
+}
+
+func (s *QuestionService) Save(testID, userID, questionID int, type_ string, data []byte) error {
+	_, err := s.TestRepository.Get(testID, userID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return TestForbidden
+	}
+
+	switch type_ {
+	case Group:
+		var group models.QuestionGroupData
+
+		err = json.Unmarshal(data, &group)
+
+		if err != nil {
+			log.Err(err).Send()
+			return InCorrectStructureError
+		}
+
+		err = s.QuestionRepository.Save(testID, questionID, type_, data)
+
+		if err != nil {
+			log.Err(err).Send()
+			return InCorrectStructureError
+		}
+
+		return nil
+	case Range:
+		var range_ models.QuestionRangeData
+
+		err = json.Unmarshal(data, &range_)
+
+		if err != nil {
+			log.Err(err).Send()
+			return InCorrectStructureError
+		}
+
+		err = s.QuestionRepository.Save(testID, questionID, type_, data)
+
+		if err != nil {
+			log.Err(err).Send()
+			return InCorrectStructureError
+		}
+
+		return nil
+	default:
+		return NotFountQuestionType
 	}
 }
 

@@ -17,30 +17,31 @@
     <title>Тест: {{ .test.Title }}</title>
 </head>
 <body>
-    <div class="container solve__container" x-data x-subscribe>
-        <div class="solve" x-show="!$store.data.isPass && !$store.data.isComplete">
-            <h1 class="question__form__title">Название теста: <span class="solve__char">{{ .test.Title }}</span></h1>
-            <h3 class="solve__subtitle">
-                Время прохождения: <span class="solve__char">{{ .access.PassageTime }} мин.</span>
-            </h3>
-            <h3 class="solve__subtitle">
-                Количество вопросов: <span class="solve__char">{{ .test.Count }}</span>
-            </h3>
-            <div class="base__button edit" id="startButton">
-                Начать прохождение
-            </div>
+<div class="container solve__container" x-data x-subscribe>
+    <div class="solve" x-show="!$store.data.isPass && !$store.data.isComplete">
+        <h1 class="question__form__title">Название теста: <span class="solve__char">{{ .test.Title }}</span></h1>
+        <h3 class="solve__subtitle">
+            Время прохождения: <span class="solve__char">{{ .access.PassageTime }} мин.</span>
+        </h3>
+        <h3 class="solve__subtitle">
+            Количество вопросов: <span class="solve__char">{{ .test.Count }}</span>
+        </h3>
+        <div class="base__button edit" id="startButton">
+            Начать прохождение
         </div>
-        <div x-show="$store.data.isPass && !$store.data.isComplete">
-            <div class="solve__test">
-                <div class="solve__test__title"> {{ .test.Title }}</div>
-                <div id="timer" class="timer">00:00:00</div>
-            </div>
-            <template x-for="(question, index) in $store.data.questions">
-                <div class="solve answer" x-show="$store.data.currentQuestionIndex === index">
-                    <div class="solve__answer__number">
-                        Вопрос <span x-text="index + 1"></span> / <span x-text="$store.data.questions.length"></span>
-                    </div>
-                    <div class="question__form__title last solve__char" x-text="question.text"></div>
+    </div>
+    <div x-show="$store.data.isPass && !$store.data.isComplete">
+        <div class="solve__test">
+            <div class="solve__test__title"> {{ .test.Title }}</div>
+            <div id="timer" class="timer">00:00:00</div>
+        </div>
+        <template x-for="(question, index) in $store.data.questions">
+            <div class="solve answer" x-show="$store.data.currentQuestionIndex === index">
+                <div class="solve__answer__number">
+                    Вопрос <span x-text="index + 1"></span> / <span x-text="$store.data.questions.length"></span>
+                </div>
+                <div class="question__form__title last solve__char" x-text="question.text"></div>
+                <template x-if="question.type === 'radio' || question.type === 'checkbox'">
                     <div class="answer__list">
                         <template x-for="(answer, aIndex) in question.answers">
                             <div class="answer__item">
@@ -54,84 +55,133 @@
                                 <label :for="answer.id" x-text="answer.text"></label>
                             </div>
                         </template>
-                        <div class="answer__item__buttons">
-                            <div
-                                    @click="$store.methods.ChangeIndex(-1)"
-                                    x-show="$store.data.currentQuestionIndex !== 0"
-                                    class="base__button edit"
-                            >
-                                Назад
-                            </div>
-                            <div
-                                    @click="$store.methods.ChangeIndex(1)"
-                                    x-show="$store.data.currentQuestionIndex !== $store.data.questions.length - 1"
-                                    class="base__button edit continue"
-                            >
-                                К следующему вопросу
-                            </div>
-                            <div
-                                    x-show="$store.data.currentQuestionIndex === $store.data.questions.length - 1"
-                                    class="base__button edit continue"
-                                    @click="$store.methods.ShowModal()"
-                            >
-                                Завершить тест
-                            </div>
-                        </div>
                     </div>
-                </div>
-            </template>
-        </div>
-        <div id="myModal" class="modal" x-show="$store.data.showModal">
-            <template x-if="$store.data.showModal">
-                <div class="modal-content solve__modal">
-                    <div class="tests__form">
-                        <div class="complete__title__container tests__form__title">
-                            <div>Завершить тест</div>
-                            <div class="close" @click="$store.methods.CloseModal()">&#10006;</div>
-                        </div>
-                        <div class="tests__form__body" x-show="!$store.methods.CanCompleteTest()[0]">
-                            <h3 class="not-complete">Вы не можете завершить тест, пока не ответите на все вопросы</h3>
-                            <h4 class="not-complete">Номера вопросов, на которые вы не дали ответа:</h4>
-                            <template x-for="q in $store.methods.CanCompleteTest()[1]">
-                                <h5 x-text="q" class="number"></h5>
+                </template>
+                <template x-if="question.type === 'group'">
+                    <div class="display-flex justify-between">
+                        <div id="variants">
+                            <template x-for="(group, gIndex) in question.data.groups">
+                                <div>
+                                    <template x-for="(answer, aIndex) in group.answers">
+                                        <div class="answer__point variants groups__names">
+                                            <div
+                                                    x-text="answer"
+                                                    class="group__text"
+                                            >
+                                            </div>
+                                            <label>
+                                                <select
+                                                        class="base__input choose__group"
+                                                        @change="$store.methods.ChooseGroup(gIndex, aIndex, event)"
+                                                >
+                                                    <option selected disabled hidden>
+                                                        0
+                                                    </option>
+                                                    <template x-for="(group, index) in question.data.groups.slice(1)">
+                                                        <option :value="index + 1" x-text="index + 1">
+
+                                                        </option>
+                                                    </template>
+                                                </select>
+                                            </label>
+                                        </div>
+                                    </template>
+                                </div>
                             </template>
                         </div>
-                        <div class="tests__form__body" x-show="$store.methods.CanCompleteTest()[0]">
-                            <h3 class="last">Вы точно хотите завершить тест?</h3>
-                            <div class="solve__error" x-text="$store.data.error" x-show="$store.data.error">
+                        <div>
+                            <template x-for="(group, index) in question.data.groups.slice(1)">
+                                <div class="answer__point align-items justify-between">
+                                    <div class="number__group" x-text="index + 1 + '.'">
 
-                            </div>
-                            <div
-                                    class="tests__navbar__create"
-                                    @click="$store.methods.completeTest()"
-                            >
-                                Завершить
-                            </div>
+                                    </div>
+                                    <div
+                                            class="group__text"
+                                            x-text="group.name"
+                                    ></div>
+                                </div>
+                            </template>
                         </div>
                     </div>
+                </template>
+                <div class="answer__item__buttons">
+                    <div
+                            @click="$store.methods.ChangeIndex(-1)"
+                            x-show="$store.data.currentQuestionIndex !== 0"
+                            class="base__button edit"
+                    >
+                        Назад
+                    </div>
+                    <div
+                            @click="$store.methods.ChangeIndex(1)"
+                            x-show="$store.data.currentQuestionIndex !== $store.data.questions.length - 1"
+                            class="base__button edit continue"
+                    >
+                        К следующему вопросу
+                    </div>
+                    <div
+                            x-show="$store.data.currentQuestionIndex === $store.data.questions.length - 1"
+                            class="base__button edit continue"
+                            @click="$store.methods.ShowModal()"
+                    >
+                        Завершить тест
+                    </div>
                 </div>
-            </template>
-        </div>
-        <template x-if="$store.data.isComplete">
-            <div class="solve result">
-                <h1 class="question__form__title">
-                    Поздравляем! Вы прошли тест <span class="solve__char">"{{ .test.Title }}"</span>!
-                </h1>
-                <h2 class="solve__subtitle">
-                    Оценка: <span class="solve__char" x-text="$store.data.result.mark"></span>
-                </h2>
-                <h2 class="solve__subtitle">
-                    Баллы: <span class="solve__char" x-text="$store.data.result.score"></span>
-                    <span class="solve__char"> / {{ .test.Count }}</span>
-                </h2>
-                <h2 class="solve__subtitle solve__subtitle__last">
-                    ФИО: <span class="solve__char">{{ .student.Surname }} {{ .student.Name }} {{ .student.Patronymic }}</span>
-                </h2>
             </div>
         </template>
     </div>
-    <script type="module" src="/../static/js/solve.js">
+    <div id="myModal" class="modal" x-show="$store.data.showModal">
+        <template x-if="$store.data.showModal">
+            <div class="modal-content solve__modal">
+                <div class="tests__form">
+                    <div class="complete__title__container tests__form__title">
+                        <div>Завершить тест</div>
+                        <div class="close" @click="$store.methods.CloseModal()">&#10006;</div>
+                    </div>
+                    <div class="tests__form__body" x-show="!$store.methods.CanCompleteTest()[0]">
+                        <h3 class="not-complete">Вы не можете завершить тест, пока не ответите на все вопросы</h3>
+                        <h4 class="not-complete">Номера вопросов, на которые вы не дали ответа:</h4>
+                        <template x-for="q in $store.methods.CanCompleteTest()[1]">
+                            <h5 x-text="q" class="number"></h5>
+                        </template>
+                    </div>
+                    <div class="tests__form__body" x-show="$store.methods.CanCompleteTest()[0]">
+                        <h3 class="last">Вы точно хотите завершить тест?</h3>
+                        <div class="solve__error" x-text="$store.data.error" x-show="$store.data.error">
 
-    </script>
+                        </div>
+                        <div
+                                class="tests__navbar__create"
+                                @click="$store.methods.completeTest()"
+                        >
+                            Завершить
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+    <template x-if="$store.data.isComplete">
+        <div class="solve result">
+            <h1 class="question__form__title">
+                Поздравляем! Вы прошли тест <span class="solve__char">"{{ .test.Title }}"</span>!
+            </h1>
+            <h2 class="solve__subtitle">
+                Оценка: <span class="solve__char" x-text="$store.data.result.mark"></span>
+            </h2>
+            <h2 class="solve__subtitle">
+                Баллы: <span class="solve__char" x-text="$store.data.result.score"></span>
+                <span class="solve__char"> / {{ .test.Count }}</span>
+            </h2>
+            <h2 class="solve__subtitle solve__subtitle__last">
+                ФИО: <span
+                    class="solve__char">{{ .student.Surname }} {{ .student.Name }} {{ .student.Patronymic }}</span>
+            </h2>
+        </div>
+    </template>
+</div>
+<script type="module" src="/../static/js/solve.js">
+
+</script>
 </body>
 </html>

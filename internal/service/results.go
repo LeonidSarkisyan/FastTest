@@ -3,7 +3,9 @@ package service
 import (
 	"App/internal/models"
 	"errors"
+	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
+	"slices"
 	"strings"
 )
 
@@ -60,7 +62,7 @@ func (s *ResultService) SaveResult(
 			answerMap[a.ID] = a
 		}
 		questionMap[q.ID] = models.QuestionForMap{
-			Question:   models.Question{ID: q.ID, Text: q.Text},
+			Question:   models.Question{ID: q.ID, Text: q.Text, Data: q.Data, Type: q.Type},
 			AnswersMap: answerMap,
 		}
 	}
@@ -76,16 +78,44 @@ func (s *ResultService) SaveResult(
 
 		var wasMistake bool
 
-		for _, aFromUser := range qFromUser.Answers {
-			a, ok := q.AnswersMap[aFromUser.ID]
+		switch qFromUser.Type {
+		case Group:
+			var data models.QuestionGroupData
 
-			if !ok {
-				return models.ResultStudent{}, AnswerNotFoundError
+			if err := mapstructure.Decode(qFromUser.Data, &data); err != nil {
+				return models.ResultStudent{}, InCorrectStructureError
 			}
 
-			if a.IsCorrect != aFromUser.IsCorrect {
-				wasMistake = true
-				break
+			data.Groups = data.Groups[1:]
+
+		Loop:
+			for i, group := range data.Groups {
+				groupFromDB := q.Data.(models.QuestionGroupData).Groups[i]
+
+				if len(groupFromDB.Answers) != len(group.Answers) {
+					wasMistake = true
+					break Loop
+				}
+
+				for _, answer := range group.Answers {
+					if !slices.Contains(groupFromDB.Answers, answer) {
+						wasMistake = true
+						break
+					}
+				}
+			}
+		default:
+			for _, aFromUser := range qFromUser.Answers {
+				a, ok := q.AnswersMap[aFromUser.ID]
+
+				if !ok {
+					return models.ResultStudent{}, AnswerNotFoundError
+				}
+
+				if a.IsCorrect != aFromUser.IsCorrect {
+					wasMistake = true
+					break
+				}
 			}
 		}
 
