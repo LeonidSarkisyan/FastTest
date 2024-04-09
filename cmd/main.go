@@ -36,7 +36,7 @@ func main() {
 	groupService := service.NewGroupService(groupRepo)
 	testService := service.NewTestService(testRepo, studentRepo, questionService, groupService, resultRepo)
 	studentService := service.NewStudentService(studentRepo, groupRepo)
-	resultService := service.NewResultService(resultRepo)
+	resultService := service.NewResultService(questionService, resultRepo)
 	aiService := service.NewAiService(questionRepo, testRepo)
 
 	manager := &handlers.ClientManager{

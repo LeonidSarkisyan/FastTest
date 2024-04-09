@@ -9,6 +9,7 @@ type AccessOut struct {
 	UserID      int    `json:"user_id"`
 	Shuffle     bool   `json:"shuffle"`
 	PassageTime int    `json:"passage_time" binding:"required"`
+	Questions   any    `json:"questions"`
 
 	Criteria     `json:"criteria" binding:"required"`
 	CriteriaJson []byte

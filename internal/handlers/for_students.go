@@ -7,6 +7,7 @@ import (
 	"App/pkg/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
 	"math/rand/v2"
 	"strconv"
@@ -75,14 +76,16 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 		return
 	}
 
-	test, err := h.TestService.Get(access.TestID, access.UserID)
+	_, err = h.TestService.Get(access.TestID, access.UserID)
 
 	if err != nil {
 		SendErrorResponse(c, 401, err.Error())
 		return
 	}
 
-	questions, err := h.QuestionService.GetAllQuestionsWithAnswers(test.ID)
+	log.Info().Any("question", access.Questions).Send()
+
+	questions := access.Questions.([]models.QuestionWithAnswers)
 
 	if err != nil {
 		SendErrorResponse(c, 401, err.Error())
@@ -101,9 +104,18 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 	for i, q := range questions {
 		switch q.Type {
 		case service.Group:
-			log.Info().Msg("группа!!!")
+			log.Info().Type("data", q.Data).Msg("группа!!!")
 
-			data := q.Data.(models.QuestionGroupData)
+			var data models.QuestionGroupData
+
+			err = mapstructure.Decode(q.Data, &data)
+			if err != nil {
+				log.Err(err).Send()
+				SendErrorResponse(c, 401, err.Error())
+				return
+			}
+
+			groupsRead := data
 
 			var groups = make([]models.Group, len(data.Groups)+1)
 
@@ -112,7 +124,7 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 				Answers: []string{},
 			}
 
-			for ig, g := range q.Data.(models.QuestionGroupData).Groups {
+			for ig, g := range groupsRead.Groups {
 				for _, a := range g.Answers {
 					groups[0].Answers = append(groups[0].Answers, a)
 				}
@@ -130,10 +142,11 @@ func (h *Handler) GetQuestionsForStudent(c *gin.Context) {
 
 		default:
 			var countRight int
-			for _, a := range q.Answers {
+			for j, a := range q.Answers {
 				if a.IsCorrect {
 					countRight++
 				}
+				questions[i].Answers[j].IsCorrect = false
 			}
 			if countRight >= 2 {
 				questions[i].Type = CheckBox
@@ -191,14 +204,14 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		return
 	}
 
-	test, err := h.TestService.Get(access.TestID, access.UserID)
+	_, err = h.TestService.Get(access.TestID, access.UserID)
 
 	if err != nil {
 		SendErrorResponse(c, 401, err.Error())
 		return
 	}
 
-	questions, err := h.QuestionService.GetAllQuestionsWithAnswers(test.ID)
+	questions := access.Questions
 
 	if err != nil {
 		SendErrorResponse(c, 401, err.Error())
@@ -233,8 +246,10 @@ func (h *Handler) CreateResult(c *gin.Context) {
 		questionWithAnswer = append(questionWithAnswer, newQ)
 	}
 
+	log.Info().Any("questions тут!", questions).Send()
+
 	result, err := h.ResultService.SaveResult(
-		studentID, accessID, passID, questions, questionWithAnswer, access, r.TimePass,
+		studentID, accessID, passID, questionWithAnswer, access, r.TimePass,
 	)
 
 	if err != nil {

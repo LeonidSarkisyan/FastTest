@@ -4,7 +4,6 @@ import (
 	"App/internal/models"
 	"errors"
 	"github.com/mitchellh/mapstructure"
-	"github.com/rs/zerolog/log"
 	"slices"
 	"strings"
 )
@@ -30,11 +29,12 @@ type ResultRepository interface {
 }
 
 type ResultService struct {
+	*QuestionService
 	ResultRepository
 }
 
-func NewResultService(r ResultRepository) *ResultService {
-	return &ResultService{r}
+func NewResultService(qs *QuestionService, r ResultRepository) *ResultService {
+	return &ResultService{qs, r}
 }
 
 func (s *ResultService) GetResultByPassID(passID int) (models.ResultStudent, error) {
@@ -48,12 +48,11 @@ func (s *ResultService) GetResultByPassID(passID int) (models.ResultStudent, err
 }
 
 func (s *ResultService) SaveResult(
-	studentID, accessID, passID int, questions, questionsFromUser []models.QuestionWithAnswers,
+	studentID, accessID, passID int, questionsFromUser []models.QuestionWithAnswers,
 	access models.AccessOut, timePass int,
 ) (models.ResultStudent, error) {
 
-	log.Info().Any("questionsFromUser", questionsFromUser).Send()
-
+	questions := access.Questions.([]models.QuestionWithAnswers)
 	questionMap := make(map[int]models.QuestionForMap, len(questions))
 
 	for _, q := range questions {
@@ -68,8 +67,10 @@ func (s *ResultService) SaveResult(
 	}
 
 	var score int
+	var maxScore int
 
 	for _, qFromUser := range questionsFromUser {
+		maxScore++
 		q, ok := questionMap[qFromUser.ID]
 
 		if !ok {
@@ -88,9 +89,14 @@ func (s *ResultService) SaveResult(
 
 			data.Groups = data.Groups[1:]
 
+			var qData models.QuestionGroupData
+
+			if err := mapstructure.Decode(q.Data, &qData); err != nil {
+				return models.ResultStudent{}, InCorrectStructureError
+			}
 		Loop:
 			for i, group := range data.Groups {
-				groupFromDB := q.Data.(models.QuestionGroupData).Groups[i]
+				groupFromDB := qData.Groups[i]
 
 				if len(groupFromDB.Answers) != len(group.Answers) {
 					wasMistake = true
@@ -139,7 +145,7 @@ func (s *ResultService) SaveResult(
 	r := models.ResultStudentIn{
 		Mark:     mark,
 		Score:    score,
-		MaxScore: len(questions),
+		MaxScore: maxScore,
 		TimePass: timePass,
 	}
 

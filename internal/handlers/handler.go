@@ -17,7 +17,7 @@ type AiService interface {
 
 type ResultService interface {
 	SaveResult(
-		studentID, accessID, passID int, questions, questionsFromUser []models.QuestionWithAnswers,
+		studentID, accessID, passID int, questionsFromUser []models.QuestionWithAnswers,
 		access models.AccessOut, timePass int,
 	) (models.ResultStudent, error)
 

@@ -150,6 +150,8 @@ func (h *Handler) IssueTestPage(c *gin.Context) {
 		return
 	}
 
+	test.Count = len(result.Questions.([]models.QuestionWithAnswers))
+
 	c.HTML(200, "solve.html", gin.H{
 		"title":   "Прохождение теста",
 		"access":  result,

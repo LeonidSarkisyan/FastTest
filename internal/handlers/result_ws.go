@@ -87,26 +87,6 @@ func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
 		return
 	}
 
-	test, err := h.TestService.Get(result.TestID, result.UserID)
-
-	if err != nil {
-		SendErrorResponse(c, 401, err.Error())
-		return
-	}
-
-	questions, err := h.QuestionService.GetAllQuestionsWithAnswers(test.ID)
-
-	if err != nil {
-		SendErrorResponse(c, 401, err.Error())
-		return
-	}
-
-	if err != nil {
-		SendErrorResponse(c, 422, err.Error())
-		c.Abort()
-		return
-	}
-
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 
 	if err != nil {
@@ -142,7 +122,7 @@ func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
 
 					if try == 0 {
 						resultStudent, err := h.ResultService.SaveResult(
-							studentID, resultID, passID, questions, []models.QuestionWithAnswers{}, result, 0,
+							studentID, resultID, passID, []models.QuestionWithAnswers{}, result, 0,
 						)
 
 						if err != nil {
@@ -179,7 +159,7 @@ func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
 			} else {
 				log.Info().Msg("ну всё приплыли")
 				resultStudent, err := h.ResultService.SaveResult(
-					studentID, resultID, passID, questions, []models.QuestionWithAnswers{}, result, result.PassageTime*60,
+					studentID, resultID, passID, []models.QuestionWithAnswers{}, result, result.PassageTime*60,
 				)
 
 				if err != nil {

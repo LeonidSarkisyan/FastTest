@@ -160,17 +160,26 @@ func (r *TestPostgres) Delete(userID, testID int) error {
 	return nil
 }
 
-func (r *TestPostgres) CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error) {
+func (r *TestPostgres) CreateAccess(userID, testID, groupID int, accessIn models.Access, questions []models.QuestionWithAnswersWithOutIsCorrect) (int, error) {
 	stmt := `
-	INSERT INTO accesses (shuffle, date_start, date_end, passage_time, criteria, user_id, test_id, group_id)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;
+	INSERT INTO accesses (
+	    shuffle, date_start, date_end, passage_time, criteria, user_id, test_id, group_id, questions
+	)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id;
 	`
+
+	jsonQuestions, err := json.Marshal(questions)
+
+	if err != nil {
+		log.Err(err).Send()
+		return 0, err
+	}
 
 	var id int
 
-	err := r.conn.QueryRow(
+	err = r.conn.QueryRow(
 		stmt, accessIn.Shuffle, accessIn.DateStart, accessIn.DateEnd,
-		accessIn.PassageTime, accessIn.CriteriaJson, userID, testID, groupID,
+		accessIn.PassageTime, accessIn.CriteriaJson, userID, testID, groupID, jsonQuestions,
 	).Scan(&id)
 
 	if err != nil {
@@ -319,7 +328,7 @@ func (r *TestPostgres) GetPass(resultID int, code int64) (models.Passes, error) 
 
 func (r *TestPostgres) GetResult(resultID int) (models.AccessOut, error) {
 	query := `
-	SELECT id, test_id, group_id, date_start, date_end, passage_time, shuffle, user_id, criteria
+	SELECT id, test_id, group_id, date_start, date_end, passage_time, shuffle, user_id, criteria, questions
 	FROM accesses
 	WHERE id = $1;
 	`
@@ -328,6 +337,7 @@ func (r *TestPostgres) GetResult(resultID int) (models.AccessOut, error) {
 
 	err := r.conn.QueryRow(query, resultID).Scan(
 		&a.ID, &a.TestID, &a.GroupID, &a.DateStart, &a.DateEnd, &a.PassageTime, &a.Shuffle, &a.UserID, &a.CriteriaJson,
+		&a.Questions,
 	)
 
 	if err != nil {

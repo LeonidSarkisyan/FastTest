@@ -39,7 +39,7 @@ type TestRepository interface {
 	UpdateTitle(testID, userID int, title string) error
 	Delete(userID, testID int) error
 
-	CreateAccess(userID, testID, groupID int, accessIn models.Access) (int, error)
+	CreateAccess(userID, testID, groupID int, accessIn models.Access, questions []models.QuestionWithAnswersWithOutIsCorrect) (int, error)
 	GetAccess(userID, accessID int) (models.AccessOut, error)
 	GetAllAccesses(userID int) ([]models.AccessOut, error)
 	GetResult(resultID int) (models.AccessOut, error)
@@ -171,7 +171,34 @@ func (s *TestService) CreateAccess(userID, testID, groupID int, accessIn models.
 		return 0, err
 	}
 
-	id, err := s.TestRepository.CreateAccess(userID, testID, groupID, accessIn)
+	questions, err := s.QuestionService.GetAllQuestionsWithAnswers(testID)
+
+	var questionsWithAnswers []models.QuestionWithAnswersWithOutIsCorrect
+
+	for _, question := range questions {
+		questionWithAnswer := models.QuestionWithAnswersWithOutIsCorrect{
+			ID:   question.ID,
+			Text: question.Text,
+			Data: question.Data,
+			Type: question.Type,
+		}
+
+		for _, answer := range question.Answers {
+			questionWithAnswer.Answers = append(questionWithAnswer.Answers, models.AnswerWithCorrect{
+				ID:        answer.ID,
+				Text:      answer.Text,
+				IsCorrect: answer.IsCorrect,
+			})
+		}
+
+		questionsWithAnswers = append(questionsWithAnswers, questionWithAnswer)
+	}
+
+	if err != nil {
+		return 0, QuestionGetCreate
+	}
+
+	id, err := s.TestRepository.CreateAccess(userID, testID, groupID, accessIn, questionsWithAnswers)
 
 	if err != nil {
 		log.Err(err).Send()
@@ -379,6 +406,15 @@ func (s *TestService) GetPassByCode(resultID int, code int64) (models.Passes, er
 
 func (s *TestService) GetResult(resultID int) (models.AccessOut, error) {
 	r, err := s.TestRepository.GetResult(resultID)
+
+	var questions []models.QuestionWithAnswers
+
+	if err := json.Unmarshal(r.Questions.([]byte), &questions); err != nil {
+		log.Err(err).Send()
+		return models.AccessOut{}, InCorrectStructureError
+	}
+
+	r.Questions = questions
 
 	if err != nil {
 		return models.AccessOut{}, AccessGetError
