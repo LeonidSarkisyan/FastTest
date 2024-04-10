@@ -826,9 +826,12 @@ elements.change.addEventListener("click", function () {
 })
 
 window.onmousedown = function(event) {
-    if (event.target === elements.modal || event.target === elements.deleteModal) {
+    console.log("qwe")
+
+    if (event.target === elements.modal || event.target === elements.deleteModal || event.target === modalChat) {
         elements.modal.style.display = "none"
         elements.deleteModal.style.display = "none"
+        modalChat.style.display = "none"
 
         inputs.testTitle.value = data.title
     }
