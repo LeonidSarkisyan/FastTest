@@ -100,8 +100,6 @@ func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
 	h.ClientManager.PassesMap.Store(passID, make(chan models.ResultStudent))
 	ch, _ := h.ClientManager.PassesMap.Load(passID)
 
-	try := CountTryReconnect
-
 	for {
 		resultCh, ok := h.ClientManager.ResultsMap.Load(resultID)
 
@@ -115,29 +113,6 @@ func (h *Handler) CreateWSStudentConnect(c *gin.Context) {
 
 				if err != nil {
 					log.Err(err).Send()
-
-					try--
-
-					log.Error().Int("try", try).Msg("осталось попыток")
-
-					if try == 0 {
-						resultStudent, err := h.ResultService.SaveResult(
-							studentID, resultID, passID, []models.QuestionWithAnswers{}, result, 0,
-						)
-
-						if err != nil {
-							log.Err(err).Send()
-							return
-						}
-
-						if ok {
-							if resultChannel, ok := resultCh.(chan models.ResultStudent); ok {
-								resultChannel <- resultStudent
-							}
-						}
-
-						return
-					}
 				}
 
 				if ok {
