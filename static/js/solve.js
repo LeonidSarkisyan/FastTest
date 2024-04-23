@@ -4,21 +4,21 @@ const PASS_ID = URL_CHAPTERS[URL_CHAPTERS.length - 1]
 
 console.log(RESULT_ID, PASS_ID)
 
-document.oncontextmenu = function() {
-    return false;
-};
-
-window.addEventListener('keydown', function(event) {
-    blockKey(event);
-});
-
-document.addEventListener('keydown', function(event) {
-    blockKey(event);
-});
-
-function blockKey(event) {
-    event.preventDefault()
-}
+// document.oncontextmenu = function() {
+//     return false;
+// };
+//
+// window.addEventListener('keydown', function(event) {
+//     blockKey(event);
+// });
+//
+// document.addEventListener('keydown', function(event) {
+//     blockKey(event);
+// });
+//
+// function blockKey(event) {
+//     event.preventDefault()
+// }
 
 
 Spruce.store("data", {
@@ -39,6 +39,12 @@ Spruce.store("data", {
 
 
 Spruce.store("methods", {
+    ToggleZoom(questionID) {
+        const img = document.getElementById(`output_${questionID}`)
+
+        img.classList.toggle("q_image_large")
+    },
+
     ChooseGroup(aIndex, event) {
         const questions = JSON.parse(localStorage.getItem("questions"))
 

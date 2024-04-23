@@ -129,6 +129,14 @@ body {
 
     display: block;
     margin-bottom: 16px;
+
+    cursor: zoom-in;
+}
+
+.q_image_large {
+    height: 400px;
+
+    cursor: zoom-out;
 }
 
 .solve__mb {

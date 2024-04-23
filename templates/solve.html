@@ -17,7 +17,7 @@
     <title>Тест: {{ .test.Title }}</title>
 </head>
 <body>
-<div class="container solve__container" x-data x-subscribe>
+<div class="solve__container" x-data x-subscribe>
     <div class="solve" x-show="!$store.data.isPass && !$store.data.isComplete">
         <h1 class="question__form__title">Название теста: <span class="solve__char">{{ .test.Title }}</span></h1>
         <h3 class="solve__subtitle">
@@ -46,7 +46,8 @@
                 <div class="question__form__title last solve__char" x-text="question.text"></div>
                 <template x-if="question.image_url">
                     <img
-                            id="output"
+                            @click="$store.methods.ToggleZoom(question.id)"
+                            :id="`output_${question.id}`"
                             :src="question.image_url"
                             alt="Изображение к тесту"
                             class="q_image"
