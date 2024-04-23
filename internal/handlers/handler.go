@@ -58,6 +58,9 @@ type QuestionService interface {
 	Update(userID, testID, questionID int, question models.QuestionUpdate) error
 	Delete(userID, testID, questionID int) error
 
+	UploadImage(userID, testID, questionID int, filename string) (string, error)
+	DeleteImage(userID, testID, questionID int) error
+
 	GetAllQuestionsWithAnswers(testID int) ([]models.QuestionWithAnswers, error)
 }
 
@@ -193,6 +196,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			questions.GET("", h.GetAllQuestion)
 			questions.PATCH("/:question_id", h.UpdateQuestion)
 			questions.DELETE("/:question_id", h.DeleteQuestion)
+			questions.POST("/:question_id/image", h.UploadImageQuestion)
+			questions.DELETE("/:question_id/image", h.DeleteImageQuestion)
 
 			answers := questions.Group("/:question_id/answers")
 			{

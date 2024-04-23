@@ -2,9 +2,9 @@ package service
 
 import (
 	"App/internal/models"
+	questions2 "App/internal/questions"
 	"errors"
-	"github.com/mitchellh/mapstructure"
-	"slices"
+	"github.com/rs/zerolog/log"
 	"strings"
 )
 
@@ -53,82 +53,14 @@ func (s *ResultService) SaveResult(
 ) (models.ResultStudent, error) {
 
 	questions := access.Questions.([]models.QuestionWithAnswers)
-	questionMap := make(map[int]models.QuestionForMap, len(questions))
+	score, err := questions2.Score(questions, questionsFromUser)
 
-	for _, q := range questions {
-		answerMap := make(map[int]models.Answer, len(q.Answers))
-		for _, a := range q.Answers {
-			answerMap[a.ID] = a
-		}
-		questionMap[q.ID] = models.QuestionForMap{
-			Question:   models.Question{ID: q.ID, Text: q.Text, Data: q.Data, Type: q.Type},
-			AnswersMap: answerMap,
-		}
+	if err != nil {
+		log.Err(err).Send()
+		return models.ResultStudent{}, err
 	}
 
-	var score int
-	var maxScore int
-
-	for _, qFromUser := range questionsFromUser {
-		maxScore++
-		q, ok := questionMap[qFromUser.ID]
-
-		if !ok {
-			return models.ResultStudent{}, QuestionNotFoundError
-		}
-
-		var wasMistake bool
-
-		switch qFromUser.Type {
-		case Group:
-			var data models.QuestionGroupData
-
-			if err := mapstructure.Decode(qFromUser.Data, &data); err != nil {
-				return models.ResultStudent{}, InCorrectStructureError
-			}
-
-			data.Groups = data.Groups[1:]
-
-			var qData models.QuestionGroupData
-
-			if err := mapstructure.Decode(q.Data, &qData); err != nil {
-				return models.ResultStudent{}, InCorrectStructureError
-			}
-		Loop:
-			for i, group := range data.Groups {
-				groupFromDB := qData.Groups[i]
-
-				if len(groupFromDB.Answers) != len(group.Answers) {
-					wasMistake = true
-					break Loop
-				}
-
-				for _, answer := range group.Answers {
-					if !slices.Contains(groupFromDB.Answers, answer) {
-						wasMistake = true
-						break
-					}
-				}
-			}
-		default:
-			for _, aFromUser := range qFromUser.Answers {
-				a, ok := q.AnswersMap[aFromUser.ID]
-
-				if !ok {
-					return models.ResultStudent{}, AnswerNotFoundError
-				}
-
-				if a.IsCorrect != aFromUser.IsCorrect {
-					wasMistake = true
-					break
-				}
-			}
-		}
-
-		if !wasMistake {
-			score += 1
-		}
-	}
+	maxScore := len(questionsFromUser)
 
 	var mark int
 

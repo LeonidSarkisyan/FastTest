@@ -86,65 +86,9 @@ export const methods = {
     },
 
     async addQuestionWithType(type) {
-        const response = await axios.post(`/tests/${TEST_ID}/questions/type/${type}`);
-        console.log(response);
-
-        let newQuestion;
-
-        switch (type) {
-            case "group":
-                newQuestion = {
-                    id: response.data.id,
-                    text: response.data.text,
-                    type: response.data.type,
-                    data: {
-                        groups: response.data.data,
-                    },
-                    answers: [],
-                };
-
-                data.questions = [...data.questions, newQuestion];
-                this.chooseIndex(data.questions.length - 1);
-                break;
-            case "range":
-                newQuestion = {
-                    id: response.data.id,
-                    text: response.data.text,
-                    type: response.data.type,
-                    data: {
-                        ranges: response.data.data,
-                    },
-                    answers: [],
-                };
-
-                data.questions = [...data.questions, newQuestion];
-                this.chooseIndex(data.questions.length - 1);
-                break;
-        }
     },
 
     async addQuestion() {
-        const response = await axios.post(QUESTION_URL);
-
-        let newQuestion = {
-            id: response.data.id,
-            text: "",
-            type: "choose",
-            answers: [],
-        };
-
-        for (let answerID of response.data.answers_ids) {
-            newQuestion.answers.push({
-                id: answerID,
-                text: "",
-                is_correct: false,
-            });
-        }
-
-        data.questions = [...data.questions, newQuestion];
-        this.chooseIndex(data.questions.length - 1);
-        const input = document.getElementById("input");
-        input.focus();
     },
 
     async deleteQuestion(index, questionID) {
@@ -223,6 +167,22 @@ export const methods = {
         const body = {
             text: answer.text,
             is_correct: answer.is_correct,
+        };
+
+        const response = await axios.patch(
+            QUESTION_WITH_ID_URL(questionID) + "/" + answer.id,
+            body
+        );
+        console.log(response.data);
+    },
+
+    async UpdateIsCorrectAnswer(answerIndex) {
+        let questionID = data.questions[data.currentIndex].id;
+        let answer = data.questions[data.currentIndex].answers[answerIndex];
+
+        const body = {
+            text: answer.text,
+            is_correct: !answer.is_correct,
         };
 
         const response = await axios.patch(
@@ -408,67 +368,67 @@ async function init () {
 }
 
 function renderQuestionsList() {
-    while (lists.questions.firstChild) {
-        lists.questions.removeChild(lists.questions.firstChild);
-    }
-
-    for (let i = data.questions.length - 1; i >= 0; i--) {
-        let question = data.questions[i];
-        let index = i;
-
-        let div = document.createElement('div');
-
-        div.title = question.text
-        div.innerText = String(index + 1)
-        div.classList.add("question__list__point")
-
-        div.addEventListener("click", function () {
-            methods.chooseIndex(index)
-        })
-
-        div.addEventListener("contextmenu", async function (event) {
-            event.preventDefault()
-            await methods.deleteQuestion(index, question.id)
-        })
-
-        if (data.currentIndex === index) {
-            div.classList.add('question__list__point__active');
-        }
-
-        lists.questions.prepend(div);
-    }
-
-    //             <div class="question__list__point plus" id="plus">
-    //                 +
-    //             </div>
-
-    const addQuestionButton = document.createElement("div")
-    addQuestionButton.classList.add("question__list__point", "plus")
-    addQuestionButton
-    addQuestionButton.innerText = "+"
+    // while (lists.questions.firstChild) {
+    //     lists.questions.removeChild(lists.questions.firstChild);
+    // }
+    //
+    // for (let i = data.questions.length - 1; i >= 0; i--) {
+    //     let question = data.questions[i];
+    //     let index = i;
+    //
+    //     let div = document.createElement('div');
+    //
+    //     div.title = question.text
+    //     div.innerText = String(index + 1)
+    //     div.classList.add("question__list__point")
+    //
+    //     div.addEventListener("click", function () {
+    //         methods.chooseIndex(index)
+    //     })
+    //
+    //     div.addEventListener("contextmenu", async function (event) {
+    //         event.preventDefault()
+    //         await methods.deleteQuestion(index, question.id)
+    //     })
+    //
+    //     if (data.currentIndex === index) {
+    //         div.classList.add('question__list__point__active');
+    //     }
+    //
+    //     lists.questions.prepend(div);
+    // }
+    //
+    // //             <div class="question__list__point plus" id="plus">
+    // //                 +
+    // //             </div>
+    //
+    // const addQuestionButton = document.createElement("div")
+    // addQuestionButton.classList.add("question__list__point", "plus")
+    // addQuestionButton
+    // addQuestionButton.innerText = "+"
 }
 
 function renderCurrentQuestion(index) {
-    try {
-        document.getElementById("question").remove()
-        document.getElementById("answer__list").remove()
-        document.getElementById("addAnswerButton").remove()
-    } catch (e) {}
-
-    try {
-        document.getElementById("group__name").remove()
-    } catch (e) {}
-
-    const question = data.questions[index]
-
-    switch (question.type) {
-        case "choose":
-            renderChooseQuestions(index, question)
-            break
-        case "group":
-            renderGroupQuestions(index, question)
-            break
-    }
+    // try {
+    //     document.getElementById("question").remove()
+    //     document.getElementById("answer__list").remove()
+    //     document.getElementById("addAnswerButton").remove()
+    // } catch (e) {}
+    //
+    // try {
+    //     document.getElementById("group__name").remove()
+    // } catch (e) {}
+    //
+    // const question = data.questions[index]
+    //
+    // switch (question.type) {
+    //     case "choose":
+    //         renderChooseQuestions(index, question)
+    //         break
+    //     case "group":
+    //         renderGroupQuestions(index, question)
+    //         break
+    // }
 }
 
 function renderAnswer(index, answer, i) {

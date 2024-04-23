@@ -72,7 +72,7 @@
             </div>
         </div>
     </div>
-    <div id="myModalChat" class="modal">
+    <div id="myModalChat" class="modal" x-show="$store.data.showModalChat">
         <div class="modal-content">
             <div class="tests__form">
                 <div class="tests__form__title chat__color chat__title">Добавить вопросы с помощью ChatGPT</div>
@@ -134,19 +134,29 @@
     </div>
     <div class="question__form display-flex wrap question__list">
         <div class="list" id="questionList">
+            <template x-for="(q, i) in $store.data.questions">
+                <div
+                        @contextmenu="$store.methods.DeleteQuestion(i, q.id, $event)"
+                        @click="$store.methods.ChooseIndex(i)"
+                        x-text="i + 1"
+                        class="question__list__point"
+                        :class="{'question__list__point__active': $store.data.currentIndex === i}"
+                >
 
+                </div>
+            </template>
         </div>
         <div class="question__list__point plus" id="plus">
             +
         </div>
         <div class="dropdown">
             <div id="myDropdown" class="dropdown-content">
-                <div id="choose">
+                <div id="choose" @click="$store.methods.AddQuestion()">
                     <h3>Выбор</h3>
                     <p class="question__type__description">Вопрос, который может иметь один / несколько правильных
                         ответов</p>
                 </div>
-                <div id="groupCreate">
+                <div id="groupCreate" @click="$store.methods.AddQuestionWithType('group')">
                     <h3>Соответствие</h3>
                     <p class="question__type__description">
                         Вопрос, где нужно вариант ответа занести в соответствующую группу
@@ -164,58 +174,197 @@
             <img src="/../static/img/chatgpt.png" alt="Открыть нейросеть" class="chat__gpt__icon">
         </div>
     </div>
-<!--    <template-->
-<!--            x-if="$store.data.questions[$store.data.currentIndex].type === 'group' &&-->
-<!--                          $store.data.questions[$store.data.currentIndex].data"-->
-<!--    >-->
-<!--        <template x-if="$store.data.render">-->
-<!--            <div>-->
-<!--                <div>-->
-<!--                    <div class="question__form__title" id="group__name">Группы:</div>-->
-<!--                    <template x-for="(group, index) in $store.data.questions[$store.data.currentIndex].data.groups">-->
-<!--                        <div class="group" id="group">-->
-<!--                            <div class="question__form">-->
-<!--                                <div class="question__form__title delete">Название группы:</div>-->
-<!--                                <input-->
-<!--                                        @change="$store.methods.SaveGroup()"-->
-<!--                                        class="base__input text margin__button16"-->
-<!--                                        x-model="$store.data.questions[$store.data.currentIndex].data.groups[index].name"-->
-<!--                                >-->
-<!--                                <div class="question__form__title fz18">Соответствия:</div>-->
-<!--                                <template-->
-<!--                                        x-for="(answer, indexA) in $store.data.questions[$store.data.currentIndex].data.groups[index].answers"-->
-<!--                                >-->
-<!--                                    <div class="answer__point">-->
-<!--                                        <input-->
-<!--                                                @change="$store.methods.SaveGroup()"-->
-<!--                                                class="base__input text answer__input fz18 group__input"-->
-<!--                                                x-model="$store.data.questions[$store.data.currentIndex].data.groups[index].answers[indexA]"-->
-<!--                                        >-->
-<!--                                        <div-->
-<!--                                                @click="$store.methods.deleteAnswer(answer.id)"-->
-<!--                                                class="answer__point__delete group__delete"-->
-<!--                                                :class="{ 'answer__point__delete__disable': group.answers.length === 1}"-->
-<!--                                        >-->
-<!--                                            &#10006;-->
-<!--                                        </div>-->
-<!--                                    </div>-->
-<!--                                </template>-->
-<!--                                <div class="base__button edit" @click="$store.methods.AddAnswerToGroup(index)">-->
-<!--                                    Добавить соответствие-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </template>-->
-<!--                    <div class="base__button margin__button16" @click="$store.methods.addAnswer()">-->
-<!--                        Добавить группу-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </template>-->
-<!--    </template>-->
-<!--    <template x-if="$store.data.questions[$store.data.currentIndex].type === 'range'">-->
-<!--        <h1>Тут ранжирование!</h1>-->
-<!--    </template>-->
+    <template x-if="$store.data.questions[$store.data.currentIndex]">
+        <div class="question__form" id="question">
+            <div class="display-flex align-items justify-between">
+                <label class="question__form__title" for="input">Текст вопроса:</label>
+                <div class="base__button edit margin__button16" @click="$store.methods.OpenFileWindow()">
+                    Прикрепить изображение
+                </div>
+            </div>
+            <input type="file" id="file" x-show="false" @change="$store.methods.ShowUploadImage()">
+            <input
+                    @change="$store.methods.UpdateTextQuestion()"
+                    id="input"
+                    class="base__input text"
+                    x-model="$store.data.questions[$store.data.currentIndex].text"
+            >
+        </div>
+    </template>
+    <template x-if="$store.data.questions[$store.data.currentIndex] && $store.data.questions[$store.data.currentIndex].image_url">
+        <div class="question__form">
+            <div class="display-flex align-items justify-between">
+                <div class="question__form__title">
+                    Изображение к вопросу:
+                </div>
+                <div class="base__button edit margin__button16" @click="$store.methods.DeleteImage()">
+                    Удалить
+                </div>
+            </div>
+            <img id="output" :src="$store.data.questions[$store.data.currentIndex].image_url" alt="Изображение к тесту" class="loaded__image">
+        </div>
+    </template>
+    <template x-if="$store.data.questions[$store.data.currentIndex] && $store.data.questions[$store.data.currentIndex].type === 'choose'">
+        <div class="question__form" id="answer__list">
+            <div class="question__form__title">Варианты ответов:</div>
+            <template
+                    x-for="(a, i) in $store.data.questions[$store.data.currentIndex].answers">
+                <div class="answer__point" :id="`answer_${a.id}`">
+                    <input
+                            @change="$store.methods.UpdateIsCorrectAnswer(i)"
+                            class="answer__point__checkbox"
+                            type="checkbox"
+                            x-model="a.is_correct"
+                    >
+                    <input
+                            @change="$store.methods.UpdateAnswer(i)"
+                            class="base__input text answer__input"
+                            x-model="a.text"
+                    >
+                    <div
+                            @click="$store.methods.DeleteAnswer(a.id)"
+                            :class="{'answer__point__delete__disable': $store.data.questions[$store.data.currentIndex].answers.length < 3}"
+                            class="answer__point__delete">
+                        ✖
+                    </div>
+                </div>
+            </template>
+            <div class="base__button edit" @click="$store.methods.AddAnswer()">
+                Добавить вариант ответа
+            </div>
+        </div>
+    </template>
+    <template x-if="$store.data.questions[$store.data.currentIndex] && $store.data.questions[$store.data.currentIndex].type === 'group'">
+        <div class="question__form">
+            <div class="display-flex justify-between">
+                <div id="variants">
+                    <div class="question__form__title">Варианты:</div>
+                    <template x-for="(a, i) in $store.data.questions[$store.data.currentIndex].data.answers">
+                        <div class="answer__point variants groups__names">
+                            <label>
+                                <input
+                                        @change="$store.methods.SaveGroup()"
+                                        @keydown.enter="if (i === $store.data.questions[$store.data.currentIndex].data.answers.length - 1) {
+                                            $store.methods.AddAnswerToGroup()
+                                        } else {
+                                            const inputs = document.getElementsByClassName('answers__inputs')
+                                            inputs[i + 1].focus()
+                                        }"
+                                        class="base__input answers__inputs"
+                                        x-model="a.text"
+                                >
+                            </label>
+                            <label>
+                                <select class="base__input choose__group" @change="$store.methods.ChangeGroupIndex(i, $event)">
+                                    <template x-for="(grp, ig) in $store.data.questions[$store.data.currentIndex].data.groups">
+                                        <option
+                                                :selected="ig === a.group_index"
+                                                :value="ig"
+                                                x-text="ig + 1"
+                                        ></option>
+                                    </template>
+                                </select>
+                            </label>
+                            <div
+                                    @click="$store.methods.DeleteAnswerFromGroup(i)"
+                                    class="answer__point__delete group__delete"
+                            >
+                                ✖
+                            </div>
+                        </div>
+                    </template>
+                    <div
+                            @click="$store.methods.AddAnswerToGroup()"
+                            class="base__button edit margin__button16">
+                        Добавить вариант
+                    </div>
+                </div>
+                <div class="groups__names">
+                    <div class="question__form__title groups">Группы:</div>
+                    <template x-for="(g, i) in $store.data.questions[$store.data.currentIndex].data.groups">
+                        <div class="answer__point align-items justify-between">
+                            <div class="number__group" x-text="i + 1 + '.'"></div>
+                            <input
+                                    type="text"
+                                    class="base__input group__input__"
+                                    x-model="g.title"
+                                    @change="$store.methods.SaveGroup()"
+                                    @keydown.enter="if (i === $store.data.questions[$store.data.currentIndex].data.groups.length - 1) {
+                                        $store.methods.AddGroup()
+                                    } else {
+                                        const inputs = document.getElementsByClassName('group__input__')
+                                        inputs[i + 1].focus()
+                                    }"
+                            >
+                            <div
+                                @click="$store.methods.DeleteGroup(i)"
+                                class="answer__point__delete group__delete"
+                            >
+                                ✖
+                            </div>
+                        </div>
+                    </template>
+                    <div
+                            @click="$store.methods.AddGroup()"
+                            class="base__button edit">
+                        Добавить группу
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <!--    <template-->
+    <!--            x-if="$store.data.questions[$store.data.currentIndex].type === 'group' &&-->
+    <!--                          $store.data.questions[$store.data.currentIndex].data"-->
+    <!--    >-->
+    <!--        <template x-if="$store.data.render">-->
+    <!--            <div>-->
+    <!--                <div>-->
+    <!--                    <div class="question__form__title" id="group__name">Группы:</div>-->
+    <!--                    <template x-for="(group, index) in $store.data.questions[$store.data.currentIndex].data.groups">-->
+    <!--                        <div class="group" id="group">-->
+    <!--                            <div class="question__form">-->
+    <!--                                <div class="question__form__title delete">Название группы:</div>-->
+    <!--                                <input-->
+    <!--                                        @change="$store.methods.SaveGroup()"-->
+    <!--                                        class="base__input text margin__button16"-->
+    <!--                                        x-model="$store.data.questions[$store.data.currentIndex].data.groups[index].name"-->
+    <!--                                >-->
+    <!--                                <div class="question__form__title fz18">Соответствия:</div>-->
+    <!--                                <template-->
+    <!--                                        x-for="(answer, indexA) in $store.data.questions[$store.data.currentIndex].data.groups[index].answers"-->
+    <!--                                >-->
+    <!--                                    <div class="answer__point">-->
+    <!--                                        <input-->
+    <!--                                                @change="$store.methods.SaveGroup()"-->
+    <!--                                                class="base__input text answer__input fz18 group__input"-->
+    <!--                                                x-model="$store.data.questions[$store.data.currentIndex].data.groups[index].answers[indexA]"-->
+    <!--                                        >-->
+    <!--                                        <div-->
+    <!--                                                @click="$store.methods.deleteAnswer(answer.id)"-->
+    <!--                                                class="answer__point__delete group__delete"-->
+    <!--                                                :class="{ 'answer__point__delete__disable': group.answers.length === 1}"-->
+    <!--                                        >-->
+    <!--                                            &#10006;-->
+    <!--                                        </div>-->
+    <!--                                    </div>-->
+    <!--                                </template>-->
+    <!--                                <div class="base__button edit" @click="$store.methods.AddAnswerToGroup(index)">-->
+    <!--                                    Добавить соответствие-->
+    <!--                                </div>-->
+    <!--                            </div>-->
+    <!--                        </div>-->
+    <!--                    </template>-->
+    <!--                    <div class="base__button margin__button16" @click="$store.methods.addAnswer()">-->
+    <!--                        Добавить группу-->
+    <!--                    </div>-->
+    <!--                </div>-->
+    <!--            </div>-->
+    <!--        </template>-->
+    <!--    </template>-->
+    <!--    <template x-if="$store.data.questions[$store.data.currentIndex].type === 'range'">-->
+    <!--        <h1>Тут ранжирование!</h1>-->
+    <!--    </template>-->
 </div>
 <script type="module" src="/../static/js/one_test.js">
 

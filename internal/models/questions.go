@@ -8,11 +8,12 @@ type Question struct {
 }
 
 type QuestionWithAnswers struct {
-	ID      int      `json:"id"`
-	Text    string   `json:"text"`
-	Type    string   `json:"type"`
-	Data    any      `json:"data"`
-	Answers []Answer `json:"answers"`
+	ID       int      `json:"id"`
+	Text     string   `json:"text"`
+	Type     string   `json:"type"`
+	Data     any      `json:"data"`
+	ImageURL string   `json:"image_url"`
+	Answers  []Answer `json:"answers"`
 }
 
 type QuestionsFromChatGPT struct {
@@ -20,11 +21,12 @@ type QuestionsFromChatGPT struct {
 }
 
 type QuestionWithAnswersWithOutIsCorrect struct {
-	ID      int                 `json:"id"`
-	Text    string              `json:"text"`
-	Type    string              `json:"type"`
-	Data    any                 `json:"data"`
-	Answers []AnswerWithCorrect `json:"answers"`
+	ID       int                 `json:"id"`
+	Text     string              `json:"text"`
+	Type     string              `json:"type"`
+	Data     any                 `json:"data"`
+	ImageURL string              `json:"image_url"`
+	Answers  []AnswerWithCorrect `json:"answers"`
 }
 
 type QuestionUpdate struct {

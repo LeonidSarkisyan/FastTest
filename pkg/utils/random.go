@@ -1,8 +1,12 @@
 package utils
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"math/rand/v2"
+	"path/filepath"
 	"slices"
+	"time"
 )
 
 func GenerateSixDigitNumber(n int) []int64 {
@@ -20,4 +24,11 @@ func GenerateSixDigitNumber(n int) []int64 {
 	}
 
 	return uniqueNumbers
+}
+
+func GenerateUniqueFilename(originalFilename string) string {
+	hash := sha1.New()
+	hash.Write([]byte(time.Now().String() + originalFilename))
+	sha1Hash := hex.EncodeToString(hash.Sum(nil))
+	return sha1Hash + filepath.Ext(originalFilename)
 }

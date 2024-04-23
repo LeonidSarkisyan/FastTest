@@ -2,9 +2,9 @@ package service
 
 import (
 	"App/internal/models"
+	questions2 "App/internal/questions"
 	"App/pkg/utils"
 	"errors"
-	"fmt"
 	"github.com/goccy/go-json"
 	"github.com/rs/zerolog/log"
 	"strings"
@@ -252,56 +252,61 @@ func (s *TestService) CheckTest(testID int) error {
 	}
 
 	for i, q := range questions {
-		n := i + 1
-		if len(q.Text) == 0 {
-			return fmt.Errorf("у вопроса с номером %d нет текста, проверьте тест", n)
+		err := questions2.Check(q, i+1)
+
+		if err != nil {
+			log.Err(err).Send()
+			return err
 		}
-		switch q.Type {
-		case Group:
-			var countAnswers int
-
-			if len(q.Data.(models.QuestionGroupData).Groups) < 2 {
-				return fmt.Errorf("у вопроса с номером %d должно быть хотя бы 2 группы", n)
-			}
-
-			for _, g := range q.Data.(models.QuestionGroupData).Groups {
-				if len(g.Name) == 0 {
-					return fmt.Errorf("у вопроса с номером %d группа не имеет текста, проверьте тест", n)
-				}
-
-				countAnswers += len(g.Answers)
-
-				for _, a := range g.Answers {
-					if len(a) == 0 {
-						return fmt.Errorf("у вопроса с номером %d один из ответов не имеет текста, проверьте тест", n)
-					}
-				}
-			}
-
-			if countAnswers == 0 {
-				return fmt.Errorf("у вопроса с номером %d нет ответов, проверьте тест", n)
-			}
-		default:
-			if len(q.Answers) < 2 {
-				return fmt.Errorf("у вопроса с номером %d меньше двух вариантов ответа, проверьте тест", n)
-			}
-
-			var isCorrect bool
-
-			for _, a := range q.Answers {
-				if len(a.Text) == 0 {
-					return fmt.Errorf("у варианта ответа под вопросом с номером %d нет текста, проверьте тест", n)
-				}
-
-				if a.IsCorrect {
-					isCorrect = a.IsCorrect
-				}
-			}
-
-			if !isCorrect {
-				return fmt.Errorf("у вопроса с номером %d нет хотя бы одного правильного ответа, проверьте тест", n)
-			}
-		}
+		//if len(q.Text) == 0 {
+		//	return fmt.Errorf("у вопроса с номером %d нет текста, проверьте тест", n)
+		//}
+		//switch q.Type {
+		//case Group:
+		//	var countAnswers int
+		//
+		//	if len(q.Data.(models.QuestionGroupData).Groups) < 2 {
+		//		return fmt.Errorf("у вопроса с номером %d должно быть хотя бы 2 группы", n)
+		//	}
+		//
+		//	for _, g := range q.Data.(models.QuestionGroupData).Groups {
+		//		if len(g.Name) == 0 {
+		//			return fmt.Errorf("у вопроса с номером %d группа не имеет текста, проверьте тест", n)
+		//		}
+		//
+		//		countAnswers += len(g.Answers)
+		//
+		//		for _, a := range g.Answers {
+		//			if len(a) == 0 {
+		//				return fmt.Errorf("у вопроса с номером %d один из ответов не имеет текста, проверьте тест", n)
+		//			}
+		//		}
+		//	}
+		//
+		//	if countAnswers == 0 {
+		//		return fmt.Errorf("у вопроса с номером %d нет ответов, проверьте тест", n)
+		//	}
+		//default:
+		//	if len(q.Answers) < 2 {
+		//		return fmt.Errorf("у вопроса с номером %d меньше двух вариантов ответа, проверьте тест", n)
+		//	}
+		//
+		//	var isCorrect bool
+		//
+		//	for _, a := range q.Answers {
+		//		if len(a.Text) == 0 {
+		//			return fmt.Errorf("у варианта ответа под вопросом с номером %d нет текста, проверьте тест", n)
+		//		}
+		//
+		//		if a.IsCorrect {
+		//			isCorrect = a.IsCorrect
+		//		}
+		//	}
+		//
+		//	if !isCorrect {
+		//		return fmt.Errorf("у вопроса с номером %d нет хотя бы одного правильного ответа, проверьте тест", n)
+		//	}
+		//}
 	}
 
 	return nil

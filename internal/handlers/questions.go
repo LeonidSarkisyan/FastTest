@@ -3,10 +3,12 @@ package handlers
 import (
 	"App/internal/handlers/responses"
 	"App/internal/models"
+	"App/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"io"
 	"net/http"
+	"path/filepath"
 	"strconv"
 )
 
@@ -106,10 +108,11 @@ func (h *Handler) GetAllQuestion(c *gin.Context) {
 
 	for _, question := range questions {
 		questionWithAnswer := models.QuestionWithAnswersWithOutIsCorrect{
-			ID:   question.ID,
-			Text: question.Text,
-			Data: question.Data,
-			Type: question.Type,
+			ID:       question.ID,
+			Text:     question.Text,
+			Data:     question.Data,
+			Type:     question.Type,
+			ImageURL: question.ImageURL,
 		}
 
 		for _, answer := range question.Answers {
@@ -165,6 +168,49 @@ func (h *Handler) DeleteQuestion(c *gin.Context) {
 	if err != nil {
 		SendErrorResponse(c, 400, err.Error())
 		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{})
+}
+
+func (h *Handler) UploadImageQuestion(c *gin.Context) {
+	userID := c.GetInt("userID")
+	testID := MustID(c, "test_id")
+	questionID := MustID(c, "question_id")
+
+	file, err := c.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	filename := utils.GenerateUniqueFilename(file.Filename)
+
+	err = c.SaveUploadedFile(file, filepath.Join("static/media/questions/", filename))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	s, err := h.QuestionService.UploadImage(userID, testID, questionID, filename)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"filename": s})
+}
+
+func (h *Handler) DeleteImageQuestion(c *gin.Context) {
+	userID := c.GetInt("userID")
+	testID := MustID(c, "test_id")
+	questionID := MustID(c, "question_id")
+
+	err := h.QuestionService.DeleteImage(userID, testID, questionID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

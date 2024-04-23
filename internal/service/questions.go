@@ -2,9 +2,11 @@ package service
 
 import (
 	"App/internal/models"
+	"App/internal/questions"
 	"encoding/json"
 	"errors"
 	"github.com/rs/zerolog/log"
+	"os"
 )
 
 var (
@@ -19,15 +21,14 @@ var (
 	NotFountQuestionType = errors.New("неизвестный тип вопроса")
 
 	InCorrectStructureError = errors.New("некорректная структура")
+	ImageErrorCreate        = errors.New("ошибка при сохранении файла")
+	ImageDeleteCreate       = errors.New("ошибка при удалении файла")
 )
 
 const (
-	Group = "group"
-	Range = "range"
+	MediaImagePath = "/static/media/questions/"
 
-	CountGroups        = 2
-	CountAnswerInGroup = 1
-	CountRanges        = 3
+	Group = "group"
 )
 
 type QuestionRepository interface {
@@ -38,6 +39,9 @@ type QuestionRepository interface {
 	Delete(questionID, testID int) error
 	CreateWithType(testID int, type_ string, data []byte) (int, error)
 	Save(testID, questionID int, type_ string, data []byte) error
+
+	UploadImage(userID, testID, questionID int, filename string) error
+	DeleteImage(questionID int) ([]string, error)
 
 	GetAllWithAnswers(testID int) ([]models.QuestionWithAnswers, error)
 	CreateManyQuestions(
@@ -67,56 +71,25 @@ func (s *QuestionService) CreateWithType(testID, userID int, type_ string) (int,
 		return 0, make([]byte, 0), TestForbidden
 	}
 
-	switch type_ {
-	case Group:
-		data := models.QuestionGroupData{Groups: make([]models.Group, CountGroups)}
+	data := questions.CreateDataForType(type_)
 
-		for i := range CountGroups {
-			data.Groups[i].Name = ""
-			data.Groups[i].Answers = make([]string, CountAnswerInGroup)
-		}
+	id, err := s.QuestionRepository.CreateWithType(testID, type_, data)
 
-		jsonData, err := json.Marshal(data)
-
-		if err != nil {
-			log.Err(err).Send()
-			return 0, make([]byte, 0), InCorrectStructureError
-		}
-
-		id, err := s.QuestionRepository.CreateWithType(testID, type_, jsonData)
-
-		if err != nil {
-			log.Err(err).Send()
-			return 0, make([]byte, 0), TestForbidden
-		}
-
-		return id, data.Groups, nil
-	case Range:
-		data := models.QuestionRangeData{Ranges: make([]models.Range, CountRanges)}
-
-		for i := range CountRanges {
-			data.Ranges[i].Text = ""
-			data.Ranges[i].Index = i
-		}
-
-		jsonData, err := json.Marshal(data)
-
-		if err != nil {
-			log.Err(err).Send()
-			return 0, make([]byte, 0), InCorrectStructureError
-		}
-
-		id, err := s.QuestionRepository.CreateWithType(testID, type_, jsonData)
-
-		if err != nil {
-			log.Err(err).Send()
-			return 0, make([]byte, 0), TestForbidden
-		}
-
-		return id, data.Ranges, nil
-	default:
-		return 0, make([]byte, 0), NotFountQuestionType
+	if err != nil {
+		log.Err(err).Send()
+		return 0, make([]byte, 0), TestForbidden
 	}
+
+	var d any
+
+	err = json.Unmarshal(data, &d)
+
+	if err != nil {
+		log.Err(err).Send()
+		return 0, make([]byte, 0), TestForbidden
+	}
+
+	return id, d, nil
 }
 
 func (s *QuestionService) Save(testID, userID, questionID int, type_ string, data []byte) error {
@@ -127,46 +100,23 @@ func (s *QuestionService) Save(testID, userID, questionID int, type_ string, dat
 		return TestForbidden
 	}
 
-	switch type_ {
-	case Group:
-		var group models.QuestionGroupData
+	log.Info().Any("DATA", data).Send()
 
-		err = json.Unmarshal(data, &group)
+	err = questions.CheckJSONStructure(type_, data)
 
-		if err != nil {
-			log.Err(err).Send()
-			return InCorrectStructureError
-		}
-
-		err = s.QuestionRepository.Save(testID, questionID, type_, data)
-
-		if err != nil {
-			log.Err(err).Send()
-			return InCorrectStructureError
-		}
-
-		return nil
-	case Range:
-		var range_ models.QuestionRangeData
-
-		err = json.Unmarshal(data, &range_)
-
-		if err != nil {
-			log.Err(err).Send()
-			return InCorrectStructureError
-		}
-
-		err = s.QuestionRepository.Save(testID, questionID, type_, data)
-
-		if err != nil {
-			log.Err(err).Send()
-			return InCorrectStructureError
-		}
-
-		return nil
-	default:
-		return NotFountQuestionType
+	if err != nil {
+		log.Err(err).Send()
+		return err
 	}
+
+	err = s.QuestionRepository.Save(testID, questionID, type_, data)
+
+	if err != nil {
+		log.Err(err).Send()
+		return InCorrectStructureError
+	}
+
+	return nil
 }
 
 func (s *QuestionService) Create(testID, userID int) (int, []int, error) {
@@ -255,4 +205,55 @@ func (s *QuestionService) GetAllQuestionsWithAnswers(testID int) ([]models.Quest
 	}
 
 	return questions, nil
+}
+
+func (s *QuestionService) UploadImage(userID, testID, questionID int, filename string) (string, error) {
+	err := s.DeleteImage(userID, testID, questionID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return "", ImageDeleteCreate
+	}
+
+	err = s.QuestionRepository.UploadImage(userID, testID, questionID, MediaImagePath+filename)
+
+	if err != nil {
+		return "", ImageErrorCreate
+	}
+
+	return MediaImagePath + filename, nil
+}
+
+func (s *QuestionService) DeleteImage(userID, testID, questionID int) error {
+	_, err := s.TestRepository.Get(testID, userID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return TestForbidden
+	}
+
+	_, err = s.QuestionRepository.Get(questionID, testID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return QuestionGetCreate
+	}
+
+	urls, err := s.QuestionRepository.DeleteImage(questionID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return ImageDeleteCreate
+	}
+
+	log.Info().Strs("urls", urls).Send()
+
+	for _, url := range urls {
+		err = os.Remove(url)
+		if err != nil {
+			log.Err(err).Send()
+		}
+	}
+
+	return nil
 }

@@ -317,3 +317,11 @@
 .question__list {
     padding-top: 0;
 }
+
+.db {
+    display: block;
+}
+
+.loaded__image {
+    width: 10%;
+}

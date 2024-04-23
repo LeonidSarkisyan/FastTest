@@ -4,21 +4,21 @@ const PASS_ID = URL_CHAPTERS[URL_CHAPTERS.length - 1]
 
 console.log(RESULT_ID, PASS_ID)
 
-document.oncontextmenu = function() {
-    return false;
-};
-
-window.addEventListener('keydown', function(event) {
-    blockKey(event);
-});
-
-document.addEventListener('keydown', function(event) {
-    blockKey(event);
-});
-
-function blockKey(event) {
-    event.preventDefault()
-}
+// document.oncontextmenu = function() {
+//     return false;
+// };
+//
+// window.addEventListener('keydown', function(event) {
+//     blockKey(event);
+// });
+//
+// document.addEventListener('keydown', function(event) {
+//     blockKey(event);
+// });
+//
+// function blockKey(event) {
+//     event.preventDefault()
+// }
 
 
 Spruce.store("data", {
@@ -39,22 +39,10 @@ Spruce.store("data", {
 
 
 Spruce.store("methods", {
-    ChooseGroup(gIndex, aIndex, event) {
+    ChooseGroup(aIndex, event) {
         const questions = JSON.parse(localStorage.getItem("questions"))
 
-        console.log(`gIndex = ${gIndex}, aIndex=${aIndex}, event=${event.target.value}`)
-
-        const newAnswer = questions[$store.data.currentQuestionIndex].data.groups[gIndex].answers[aIndex]
-
-        for (let i = 1; i < questions[$store.data.currentQuestionIndex].data.groups.length; i++) {
-            for (let j = 0; j < questions[$store.data.currentQuestionIndex].data.groups[i].answers.length; j++) {
-                if (questions[$store.data.currentQuestionIndex].data.groups[i].answers[j] === newAnswer) {
-                    questions[$store.data.currentQuestionIndex].data.groups[i].answers.splice(j, 1)
-                }
-            }
-        }
-
-        questions[$store.data.currentQuestionIndex].data.groups[event.target.value].answers.push(newAnswer)
+        questions[$store.data.currentQuestionIndex].data.answers[aIndex].group_index = Number(event.target.value)
 
         localStorage.setItem("questions", JSON.stringify(questions))
     },
@@ -102,13 +90,11 @@ Spruce.store("methods", {
         for (let q of questions) {
             switch (q.type) {
                 case "group":
-                    const needCountAnswers = q.data.groups[0].answers.length
-                    let countAnswers = 0
-                    for (let group of q.data.groups.splice(1)) {
-                        countAnswers += group.answers.length
-                    }
-                    if (needCountAnswers !== countAnswers) {
-                        need.push(index + 1)
+                    for (let a of q.data.answers) {
+                        if (a.group_index === 0) {
+                            need.push(index + 1)
+                            break
+                        }
                     }
                     break
                 default:
@@ -169,6 +155,8 @@ startButton.onclick = async () => {
     } catch (e) {
         alert(e.response.data)
     }
+
+    console.log(response.data)
 
     let questions = response.data.questions
     for (let i = 0; i < response.data.questions.length; i++) {

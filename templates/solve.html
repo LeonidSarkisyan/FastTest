@@ -60,44 +60,40 @@
                 <template x-if="question.type === 'group'">
                     <div class="display-flex justify-between">
                         <div id="variants">
-                            <template x-for="(group, gIndex) in question.data.groups">
-                                <div>
-                                    <template x-for="(answer, aIndex) in group.answers">
-                                        <div class="answer__point variants groups__names">
-                                            <div
-                                                    x-text="answer"
-                                                    class="group__text"
-                                            >
-                                            </div>
-                                            <label>
-                                                <select
-                                                        class="base__input choose__group"
-                                                        @change="$store.methods.ChooseGroup(gIndex, aIndex, event)"
-                                                >
-                                                    <option selected disabled hidden>
-                                                        0
-                                                    </option>
-                                                    <template x-for="(group, index) in question.data.groups.slice(1)">
-                                                        <option :value="index + 1" x-text="index + 1">
+                            <template x-for="(a, i) in question.data.answers">
+                                <div class="answer__point variants groups__names">
+                                    <div
+                                            x-text="a.text"
+                                            class="group__text"
+                                    >
+                                    </div>
+                                    <label>
+                                        <select
+                                                class="base__input choose__group"
+                                                @change="$store.methods.ChooseGroup(i, event)"
+                                        >
+                                            <option selected disabled hidden>
+                                                0
+                                            </option>
+                                            <template x-for="(group, index) in question.data.groups">
+                                                <option :value="index + 1" x-text="index + 1">
 
-                                                        </option>
-                                                    </template>
-                                                </select>
-                                            </label>
-                                        </div>
-                                    </template>
+                                                </option>
+                                            </template>
+                                        </select>
+                                    </label>
                                 </div>
                             </template>
                         </div>
                         <div>
-                            <template x-for="(group, index) in question.data.groups.slice(1)">
+                            <template x-for="(group, index) in question.data.groups">
                                 <div class="answer__point align-items justify-between">
                                     <div class="number__group" x-text="index + 1 + '.'">
 
                                     </div>
                                     <div
                                             class="group__text"
-                                            x-text="group.name"
+                                            x-text="group.title"
                                     ></div>
                                 </div>
                             </template>

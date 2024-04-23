@@ -2,7 +2,7 @@ package repository
 
 import (
 	"App/internal/models"
-	"encoding/json"
+	questions2 "App/internal/questions"
 	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
@@ -192,18 +192,40 @@ func (r *QuestionPostgres) Delete(questionID, testID int) error {
 }
 
 func (r *QuestionPostgres) GetAllWithAnswers(testID int) ([]models.QuestionWithAnswers, error) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Info().Msg("возника паника при получении вопросов")
-		}
-	}()
+	//defer func() {
+	//	if r := recover(); r != nil {
+	//		log.Info().Msg("возника паника при получении вопросов")
+	//	}
+	//}()
 
 	query := `
-	SELECT q.id, q.text, q.type, q.data, a.id, a.text, a.is_correct
-	FROM questions q
-	LEFT JOIN answers a ON q.id = a.question_id
-	WHERE q.test_id = $1
-	ORDER BY q.id ASC, a.id ASC;
+	SELECT 
+		q.id, 
+		q.text, 
+		q.type, 
+		q.data, 
+		a.id AS answer_id, 
+		a.text AS answer_text, 
+		a.is_correct AS is_answer_correct, 
+		COALESCE(img.url, '') AS image_url
+	FROM 
+		questions q
+	LEFT JOIN 
+		answers a ON q.id = a.question_id
+	LEFT JOIN (
+		SELECT 
+			id, 
+			url, 
+			question_id,
+			ROW_NUMBER() OVER (PARTITION BY question_id ORDER BY id) AS rn
+		FROM 
+			images
+	) AS img ON q.id = img.question_id AND img.rn = 1
+	WHERE 
+		q.test_id = $1
+	ORDER BY 
+		q.id ASC, 
+		a.id ASC;
 	`
 
 	rows, err := r.conn.Query(query, testID)
@@ -222,97 +244,79 @@ func (r *QuestionPostgres) GetAllWithAnswers(testID int) ([]models.QuestionWithA
 		var questionText string
 		var questionType string
 		var questionData []byte
+		var questionImageURL string
 
 		var answerID *int
 		var answerText *string
 		var isCorrect *bool
 
-		if err := rows.Scan(&questionID, &questionText, &questionType, &questionData, &answerID, &answerText, &isCorrect); err != nil {
+		if err := rows.Scan(
+			&questionID, &questionText, &questionType, &questionData, &answerID, &answerText, &isCorrect, &questionImageURL,
+		); err != nil {
 			log.Err(err).Send()
 			continue
 		}
 
-		switch questionType {
-		case Group:
-			var data models.QuestionGroupData
-
-			err = json.Unmarshal(questionData, &data)
+		if questionType != Choose {
+			data, err := questions2.UnMarshalData(questionType, questionData)
 
 			if err != nil {
-				log.Err(err).Send()
 				return nil, err
 			}
 
 			questions = append(questions, models.QuestionWithAnswers{
-				ID:      questionID,
-				Text:    questionText,
-				Type:    questionType,
-				Data:    data,
-				Answers: []models.Answer{{ID: 0, Text: ""}},
+				ID:       questionID,
+				Text:     questionText,
+				Type:     questionType,
+				Data:     data,
+				ImageURL: questionImageURL,
+				Answers:  []models.Answer{{ID: 0, Text: ""}},
 			})
 
 			continue
-		case Range:
-			var data models.QuestionRangeData
+		}
 
-			err = json.Unmarshal(questionData, &data)
-
-			if err != nil {
-				log.Err(err).Send()
-				return nil, err
+		exists := false
+		var q models.QuestionWithAnswers
+		for _, item := range questions {
+			if item.ID == questionID {
+				q = item
+				exists = true
+				break
 			}
+		}
 
-			questions = append(questions, models.QuestionWithAnswers{
-				ID:      questionID,
-				Text:    questionText,
-				Type:    questionType,
-				Data:    data,
-				Answers: make([]models.Answer, 0),
-			})
+		if !exists {
+			q = models.QuestionWithAnswers{
+				ID:       questionID,
+				Text:     questionText,
+				Type:     questionType,
+				ImageURL: questionImageURL,
+			}
+		}
 
-			continue
-		default:
-			exists := false
-			var q models.QuestionWithAnswers
-			for _, item := range questions {
+		q.Answers = append(q.Answers, models.Answer{
+			ID:        *answerID,
+			Text:      *answerText,
+			IsCorrect: *isCorrect,
+		})
+
+		if exists {
+			for i, item := range questions {
 				if item.ID == questionID {
-					q = item
-					exists = true
+					questions[i] = q
 					break
 				}
 			}
-
-			if !exists {
-				q = models.QuestionWithAnswers{
-					ID:   questionID,
-					Text: questionText,
-					Type: questionType,
-				}
-			}
-
-			q.Answers = append(q.Answers, models.Answer{
-				ID:        *answerID,
-				Text:      *answerText,
-				IsCorrect: *isCorrect,
-			})
-
-			if exists {
-				for i, item := range questions {
-					if item.ID == questionID {
-						questions[i] = q
-						break
-					}
-				}
-			} else {
-				questions = append(questions, q)
-			}
-
-			answersMap[questionID] = append(answersMap[questionID], models.Answer{
-				ID:        *answerID,
-				Text:      *answerText,
-				IsCorrect: *isCorrect,
-			})
+		} else {
+			questions = append(questions, q)
 		}
+
+		answersMap[questionID] = append(answersMap[questionID], models.Answer{
+			ID:        *answerID,
+			Text:      *answerText,
+			IsCorrect: *isCorrect,
+		})
 	}
 
 	return questions, nil
@@ -419,4 +423,63 @@ func (r *QuestionPostgres) CreateManyQuestions(
 	}
 
 	return questions, nil
+}
+
+func (r *QuestionPostgres) UploadImage(userID, testID, questionID int, filename string) error {
+	tx, err := r.conn.Begin()
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	stmt := "DELETE FROM images WHERE question_id = $1"
+
+	_, err = tx.Exec(stmt, questionID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	stmt = "INSERT INTO images (url, question_id) VALUES ($1, $2)"
+
+	_, err = tx.Exec(stmt, filename, questionID)
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	err = tx.Commit()
+
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	return nil
+}
+
+func (r *QuestionPostgres) DeleteImage(questionID int) ([]string, error) {
+	stmt := "DELETE FROM images WHERE question_id = $1 RETURNING url"
+
+	var urls []string
+
+	rows, err := r.conn.Query(stmt, questionID)
+
+	for rows.Next() {
+		var url string
+		if err := rows.Scan(&url); err != nil {
+			return nil, err
+		}
+		urls = append(urls, url)
+	}
+
+	if err != nil {
+		log.Err(err).Send()
+		return nil, err
+	}
+
+	return urls, nil
 }
