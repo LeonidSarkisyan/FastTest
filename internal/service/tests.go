@@ -177,10 +177,11 @@ func (s *TestService) CreateAccess(userID, testID, groupID int, accessIn models.
 
 	for _, question := range questions {
 		questionWithAnswer := models.QuestionWithAnswersWithOutIsCorrect{
-			ID:   question.ID,
-			Text: question.Text,
-			Data: question.Data,
-			Type: question.Type,
+			ID:       question.ID,
+			Text:     question.Text,
+			Data:     question.Data,
+			Type:     question.Type,
+			ImageURL: question.ImageURL,
 		}
 
 		for _, answer := range question.Answers {

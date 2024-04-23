@@ -3,6 +3,10 @@ body {
 }
 
 .solve__container {
+    width: 1070px;
+}
+
+.solve__current {
 
 }
 
@@ -118,4 +122,16 @@ body {
     min-width: 320px;
 
     text-align: center;
+}
+
+.q_image {
+    height: 100px;
+
+    display: block;
+    margin-bottom: 16px;
+}
+
+.solve__mb {
+    margin-top: 200px;
+    margin-bottom: 200px;
 }

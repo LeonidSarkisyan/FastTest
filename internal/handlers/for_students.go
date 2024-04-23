@@ -175,10 +175,11 @@ func (h *Handler) CreateResult(c *gin.Context) {
 
 	for _, q := range r.Questions {
 		newQ := models.QuestionWithAnswers{
-			ID:   q.ID,
-			Text: q.Text,
-			Data: q.Data,
-			Type: q.Type,
+			ID:       q.ID,
+			Text:     q.Text,
+			Data:     q.Data,
+			Type:     q.Type,
+			ImageURL: q.ImageURL,
 		}
 
 		for _, a := range q.Answers {

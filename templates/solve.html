@@ -36,11 +36,22 @@
             <div id="timer" class="timer">00:00:00</div>
         </div>
         <template x-for="(question, index) in $store.data.questions">
-            <div class="solve answer" x-show="$store.data.currentQuestionIndex === index">
+            <div
+                    class="solve answer"
+                    x-show="$store.data.currentQuestionIndex === index"
+            >
                 <div class="solve__answer__number">
                     Вопрос <span x-text="index + 1"></span> / <span x-text="$store.data.questions.length"></span>
                 </div>
                 <div class="question__form__title last solve__char" x-text="question.text"></div>
+                <template x-if="question.image_url">
+                    <img
+                            id="output"
+                            :src="question.image_url"
+                            alt="Изображение к тесту"
+                            class="q_image"
+                    >
+                </template>
                 <template x-if="question.type === 'radio' || question.type === 'checkbox'">
                     <div class="answer__list">
                         <template x-for="(answer, aIndex) in question.answers">
